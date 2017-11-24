@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.8)
+project(libpng-external NONE)
+
+include(ExternalProject)
+ExternalProject_Add(
+    libpng
+    URL http://download.sourceforge.net/libpng/libpng-1.6.30.tar.xz
+    URL_MD5 88A729D47EAF880D61A0EF90F4BD5E8F
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PNG_ROOT} -DPNG_BUILD_ZLIB=ON -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} -DZLIB_LIBRARY=${ZLIB_LIBRARY} -DPNG_SHARED=OFF
+)

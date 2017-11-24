@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.8)
+project(boost-external NONE)
+
+include(ExternalProject)
+ExternalProject_Add(
+    boost
+    URL http://download.sourceforge.net/boost/boost/1.64.0/boost_1_64_0.zip
+    URL_MD5 36093e4018aecd5b0e31e80457ac5fc1
+    CONFIGURE_COMMAND ${BOOTSTRAP_BINARY}
+    BUILD_COMMAND ""
+    BUILD_IN_SOURCE TRUE
+    INSTALL_COMMAND ${B2_BINARY} address-model=${ADDRESS_MODEL} install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix=${BOOST_ROOT} -j8
+)

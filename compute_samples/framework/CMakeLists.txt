@@ -1,0 +1,7 @@
+add_subdirectory(align_utils)
+add_subdirectory(application)
+add_subdirectory(boost_intel)
+add_subdirectory(image)
+add_subdirectory(framework)
+add_subdirectory(timer)
+add_subdirectory(yuv_utils)

@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.8)
+project(zlib-external NONE)
+
+include(ExternalProject)
+ExternalProject_Add(
+    zlib
+    URL https://zlib.net/zlib1211.zip
+    URL_MD5 16b41357b2cd81bca5e1947238e64465
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${ZLIB_ROOT}
+)

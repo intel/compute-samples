@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.8)
+project(mediadata-external NONE)
+
+include(ExternalProject)
+ExternalProject_Add(
+    mediadata-intel
+    URL https://software.intel.com/file/604709/download
+    SOURCE_DIR "${MEDIADATA_ROOT}/yuv"
+    BINARY_DIR "${MEDIADATA_ROOT}/yuv"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+)
+
