@@ -132,7 +132,13 @@ void VmeHmeApplication::run(std::vector<std::string> &command_line,
   BOOST_LOG(logger) << "Kernel path: " << kernel_path;
   compute::program program =
       compute::program::create_with_source_file(kernel_path, context);
-  program.build();
+  try {
+    program.build();
+  } catch (compute::opencl_error &) {
+    BOOST_LOG(logger) << "OpenCL Program Build Error!";
+    BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
+                      << program.build_log();
+  }
   timer.print("Program created");
 
   compute::kernel ds_kernel = program.create_kernel("downsample_3_tier");

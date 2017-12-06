@@ -125,10 +125,9 @@ void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
     program.build("-cl-std=CL2.0");
   } catch (compute::opencl_error &) {
     BOOST_LOG(logger) << "OpenCL Program Build Error!";
+    BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
+                      << program.build_log();
   }
-  BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
-                    << program.build_log();
-
   compute::kernel kernel = program.create_kernel("ImageCopy");
 
   compute::image_format format(CL_R, CL_UNSIGNED_INT8);

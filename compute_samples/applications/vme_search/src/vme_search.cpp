@@ -142,7 +142,13 @@ void VmeSearchApplication::run(std::vector<std::string> &command_line,
 
   compute::program program =
       compute::program::create_with_source_file(kernel_path, context);
-  program.build();
+  try {
+    program.build();
+  } catch (compute::opencl_error &) {
+    BOOST_LOG(logger) << "OpenCL Program Build Error!";
+    BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
+                      << program.build_log();
+  }
   timer.print("Program created");
 
   std::string kernel_name = "vme_";
