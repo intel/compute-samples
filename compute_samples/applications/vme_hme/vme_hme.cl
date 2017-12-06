@@ -21,6 +21,6 @@
  */
 
 #include "downsample_3_tier.cl"
-#include "vme_hme_0_tier.cl"
-#include "vme_hme_n_tier.cl"
 #include "vme_streaminout.cl"
+#include "vme_hme_n_tier.cl"
+#include "vme_hme_0_tier.cl"
