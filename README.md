@@ -17,7 +17,7 @@ Compute samples are currently limited to the OpenCL™ compute API.
   * [Microsoft Visual Studio 2015](https://www.visualstudio.com/) or newer
   * [Clang 3.5](https://clang.llvm.org/) or newer
 * [CMake 3.8](https://cmake.org/) or newer
-* Linux specific
+* VAAPI Interoperability
   * [libva, libva-drm, libva-x11 (VAAPI runtime libraries for Linux)](https://01.org/linuxgraphics/community/vaapi)
   * [libX11 (X Windows client library)](https://www.x.org)
 
@@ -205,7 +205,7 @@ To show help message run `launcher vme_interlaced -- -h`.
 
 A sample application demonstrating the processing of VAAPI created surfaces  using the Intel® OpenCL [`cl_intel_device_side_avc_motion_estimation` extension](https://www.khronos.org/registry/OpenCL/extensions/intel/cl_intel_device_side_avc_motion_estimation.txt).
 
-This is only supported for Linux platforms for which VAAPI implementations exist. 
+This is only supported for Linux platforms for which VAAPI implementations exist. The sample is currently supported on 16.5 (Media Server Studio 2017) driver.
 
 #### Help
 To show help message run `launcher vme_interop -- -h`.
