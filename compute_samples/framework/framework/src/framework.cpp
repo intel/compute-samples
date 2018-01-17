@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@ namespace compute = boost::compute;
 #include "median_filter/median_filter.hpp"
 #include "subgroups_imagecopy/subgroups_imagecopy.hpp"
 #include "subgroups_visualization/subgroups_visualization.hpp"
+#include "version/version.hpp"
 #include "vme_hme/vme_hme.hpp"
 #include "vme_interlaced/vme_interlaced.hpp"
 #include "vme_interop/vme_interop.hpp"
@@ -136,6 +137,8 @@ int Framework::run(int argc, const char **argv) {
   src::logger logger;
 
   try {
+    BOOST_LOG(logger) << "Version: " << get_version_string();
+
     Arguments args;
     std::vector<std::string> rest;
     const ApplicationFactory application_factory;
