@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2018 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -56,10 +56,10 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/vme_cost_heuristics_search.cl" ${CMAKE_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/vme_larger_search.cl" ${CMAKE_BINARY_DIR})
 
-install(FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/vme_basic_search.cl" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/vme_cost_heuristics_search.cl" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/vme_larger_search.cl" DESTINATION ${BIN_DIRECTORY})
+install(FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/vme_basic_search.cl" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/vme_cost_heuristics_search.cl" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/vme_larger_search.cl" DESTINATION ".")
 
 source_group("Kernel Files" FILES vme_basic_search.cl vme_cost_heuristics_search.cl vme_larger_search.cl)
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
@@ -89,10 +89,10 @@ file(COPY "${MEDIA_DIRECTORY}/yuv/basic_search_foreman_176x144.yuv" DESTINATION 
 file(COPY "${MEDIA_DIRECTORY}/yuv/cost_heuristics_search_foreman_176x144.yuv" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY "${MEDIA_DIRECTORY}/yuv/larger_search_foreman_176x144.yuv" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-install(TARGETS ${PROJECT_NAME}_tests DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/yuv/basic_search_foreman_176x144.yuv" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/yuv/cost_heuristics_search_foreman_176x144.yuv" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/yuv/larger_search_foreman_176x144.yuv" DESTINATION ${BIN_DIRECTORY})
+install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv" DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/yuv/basic_search_foreman_176x144.yuv" DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/yuv/cost_heuristics_search_foreman_176x144.yuv" DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/yuv/larger_search_foreman_176x144.yuv" DESTINATION ".")
 
 add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)

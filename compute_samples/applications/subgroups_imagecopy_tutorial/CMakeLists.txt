@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2018 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -53,9 +53,9 @@ file(COPY "${MEDIA_DIRECTORY}/bmp/input.bmp" DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_solution.cl" DESTINATION ${CMAKE_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_kernel.cl" ${CMAKE_BINARY_DIR})
 
-install(FILES "${MEDIA_DIRECTORY}/bmp/input.bmp" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_kernel.cl" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_solution.cl" DESTINATION ${BIN_DIRECTORY})
+install(FILES "${MEDIA_DIRECTORY}/bmp/input.bmp" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_kernel.cl" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_solution.cl" DESTINATION ".")
 
 source_group("Kernel Files" FILES subgroups_imagecopy_kernel.cl subgroups_imagecopy_solution.cl)
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
@@ -81,9 +81,9 @@ file(COPY "${MEDIA_DIRECTORY}/bmp/input.bmp" DESTINATION ${CMAKE_CURRENT_BINARY_
 file(COPY "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_kernel.cl" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME}_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_solution.cl" ${CMAKE_CURRENT_BINARY_DIR})
 
-install(TARGETS ${PROJECT_NAME}_tests DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/bmp/input.bmp" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_kernel.cl" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_solution.cl" DESTINATION ${BIN_DIRECTORY})
+install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/bmp/input.bmp" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_kernel.cl" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/subgroups_imagecopy_solution.cl" DESTINATION ".")
 
 add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)

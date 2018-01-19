@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2018 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -70,9 +70,9 @@ file(COPY "${MEDIA_DIRECTORY}/png/rgb_3x1.png" DESTINATION ${CMAKE_CURRENT_BINAR
 file(COPY "${MEDIA_DIRECTORY}/bmp/kwkw_4x1_mono.bmp" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY "${MEDIA_DIRECTORY}/bmp/rgb_3x1_argb.bmp" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-install(TARGETS ${PROJECT_NAME}_tests DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/png/rgb_3x1.png" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/bmp/kwkw_4x1_mono.bmp" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/bmp/rgb_3x1_argb.bmp" DESTINATION ${BIN_DIRECTORY})
+install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/png/rgb_3x1.png" DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/bmp/kwkw_4x1_mono.bmp" DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/bmp/rgb_3x1_argb.bmp" DESTINATION ".")
 
 add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)

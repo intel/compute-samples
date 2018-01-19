@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2018 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -75,4 +75,4 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/vme_interop.cl" ${CMAKE_CURRENT_BINARY_DIR})
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${BIN_DIRECTORY})
+install(TARGETS ${PROJECT_NAME} DESTINATION ".")

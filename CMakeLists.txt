@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2018 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,16 @@ option(BUILD_BOOST "Download and build Boost" ON)
 option(BUILD_PNG "Download and build libpng" ON)
 option(DOWNLOAD_MEDIA "Download media files" ON)
 
+set(COMPUTE_SAMPLES_MAJOR_VERSION 0)
+set(COMPUTE_SAMPLES_MINOR_VERSION 1)
+set(COMPUTE_SAMPLES_PATCH_VERSION 0)
+execute_process(COMMAND git rev-parse --short HEAD WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE COMPUTE_SAMPLES_BUILD OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(THIRD_PARTY_DIRECTORY ${CMAKE_SOURCE_DIR}/third_party)
 set(MEDIA_ROOT_DIRECTORY ${CMAKE_SOURCE_DIR}/mediadata)
 set(MEDIA_DIRECTORY ${MEDIA_ROOT_DIRECTORY}/merged)
-set(BIN_DIRECTORY bin)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR} CACHE PATH "Default installation directory" FORCE)
@@ -123,3 +127,13 @@ enable_testing()
 
 # Prepare project
 add_subdirectory(compute_samples)
+
+if(WIN32)
+    set(CPACK_GENERATOR "ZIP")
+else()
+    set(CPACK_GENERATOR "TGZ")
+endif()
+
+set(CPACK_PACKAGE_NAME "compute-samples")
+set(CPACK_PACKAGE_VERSION "${COMPUTE_SAMPLES_MAJOR_VERSION}.${COMPUTE_SAMPLES_MINOR_VERSION}.${COMPUTE_SAMPLES_PATCH_VERSION}+${COMPUTE_SAMPLES_BUILD}")
+include(CPack)

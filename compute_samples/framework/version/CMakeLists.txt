@@ -23,10 +23,6 @@
 cmake_minimum_required(VERSION 3.8)
 project(version)
 
-set(COMPUTE_SAMPLES_MAJOR_VERSION 0)
-set(COMPUTE_SAMPLES_MINOR_VERSION 1)
-set(COMPUTE_SAMPLES_PATCH_VERSION 0)
-execute_process(COMMAND git rev-parse --short HEAD WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE COMPUTE_SAMPLES_BUILD OUTPUT_STRIP_TRAILING_WHITESPACE)
 configure_file("${PROJECT_SOURCE_DIR}/src/version_config.cpp.in" "${PROJECT_BINARY_DIR}/generated/version_config.cpp")
 
 set(SOURCES

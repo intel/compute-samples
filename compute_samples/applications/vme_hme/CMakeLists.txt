@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2018 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -60,12 +60,12 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/vme_hme_0_tier.cl" ${CMAKE_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/vme_hme.cl" ${CMAKE_BINARY_DIR})
 
-install(FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/downsample_3_tier.cl" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/vme_streaminout.cl" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/vme_hme_n_tier.cl" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/vme_hme_0_tier.cl" DESTINATION ${BIN_DIRECTORY})
-install(FILES "${PROJECT_SOURCE_DIR}/vme_hme.cl" DESTINATION ${BIN_DIRECTORY})
+install(FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/downsample_3_tier.cl" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/vme_streaminout.cl" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/vme_hme_n_tier.cl" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/vme_hme_0_tier.cl" DESTINATION ".")
+install(FILES "${PROJECT_SOURCE_DIR}/vme_hme.cl" DESTINATION ".")
 
 source_group("Kernel Files" FILES downsample_3_tier.cl vme_streaminout.cl vme_hme_n_tier.cl vme_hme_0_tier.cl vme_hme.cl)
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
@@ -96,7 +96,7 @@ add_custom_command(TARGET ${PROJECT_NAME}_tests POST_BUILD COMMAND ${CMAKE_COMMA
 file(COPY "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY "${MEDIA_DIRECTORY}/yuv/hme_foreman_176x144.yuv" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-install(TARGETS ${PROJECT_NAME}_tests DESTINATION ${BIN_DIRECTORY})
-install(FILES "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv" DESTINATION ${BIN_DIRECTORY})
+install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv" DESTINATION ".")
 
 add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)

@@ -58,13 +58,13 @@ Testing instructions can be found in the [README](README.md).
         1. Create `your_app_tester` binary.
         1. Add custom post build command to copy files to the binary directory. This technique should be used only for files which may be modified between the builds.
         1. Copy static files to the binary directory. This technique should be used only for files which won't be modified between the builds. Path to the common media directory is available in `MEDIA_DIRECTORY`.
-        1. Install all required files in `BIN_DIRECTORY`.
+        1. Install all required files in the root directory (`.`).
         1. Add test command lines.
 
         Example `CMakeLists.txt`
         ```CMake
         #
-        # Copyright(c) 2017 Intel Corporation
+        # Copyright(c) 2018 Intel Corporation
         #
         # Permission is hereby granted, free of charge, to any person obtaining a copy
         # of this software and associated documentation files (the "Software"), to deal
@@ -113,7 +113,7 @@ Testing instructions can be found in the [README](README.md).
         file(COPY "${MEDIA_DIRECTORY}/png/your_app_media.png" DESTINATION ${CMAKE_BINARY_DIR})
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/your_app_kernel.cl" ${CMAKE_BINARY_DIR})
 
-        install(FILES "${PROJECT_SOURCE_DIR}/your_app_kernel.cl" DESTINATION ${BIN_DIRECTORY})
+        install(FILES "${PROJECT_SOURCE_DIR}/your_app_kernel.cl" DESTINATION ".")
 
         source_group("Kernel Files" FILES your_app_kernel.cl)
         set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
@@ -137,7 +137,7 @@ Testing instructions can be found in the [README](README.md).
 
         add_custom_command(TARGET ${PROJECT_NAME}_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/your_app_kernel.cl" ${CMAKE_CURRENT_BINARY_DIR})
 
-        install(TARGETS ${PROJECT_NAME}_tests DESTINATION ${BIN_DIRECTORY})
+        install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
 
         add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)
         ```
