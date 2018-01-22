@@ -33,9 +33,9 @@ First build can take few minutes because all dependencies are set.
     cmake .. -G "Visual Studio 14 2015"
     Open compute_samples.sln
     Build projects
-    
+
 If you have issues with building Boost with Visual Studio 2017 then please execute above commands using `Developer Command Prompt For VS 2017`.
-    
+
 #### Linux
     git clone https://github.com/intel/compute-samples
     cd compute-samples
@@ -43,17 +43,27 @@ If you have issues with building Boost with Visual Studio 2017 then please execu
     cd build
     cmake ..
     make
-    
+
 ### Installation
 The following commands install project's binaries.
-By default they are installed in `build/bin` directory, but it can be customized by adding `CMAKE_INSTALL_PREFIX=your/path` during CMake configuration.
+By default they are installed in `build` directory, but it can be customized by adding `CMAKE_INSTALL_PREFIX=your/path` during CMake configuration.
 
 #### Windows
     Open compute_samples.sln
     Build INSTALL project
-    
+
 #### Linux
     make install
+
+### Package
+In order to create redistributable package please use the following commands:
+
+#### Windows
+    Open compute_samples.sln
+    Build PACKAGE project
+
+#### Linux
+    make package
 
 ### Test
 There are 3 ways to run tests depending on the use case:
@@ -75,7 +85,7 @@ CMake can be configured using the following parameters:
 * `DOWNLOAD_MEDIA` - If set to `OFF` media files to use as inputs for sample application won't be downloaded. Default in `ON`.
 
 Example command line: `cmake .. -DBUILD_BOOST=OFF -DBOOST_ROOT=/home/boost_1_64_0 -DBUILD_PNG=OFF -DDOWNLOAD_MEDIA=OFF`
-    
+
 ## Versioning
 We use [Semantic Versioning](http://semver.org/). Current version is `0.y.z` which means that API may change without maintaining backward compatibility.
 
