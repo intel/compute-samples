@@ -29,7 +29,7 @@ namespace compute_samples {
 std::string get_version_string() {
   std::stringstream ss;
   ss << major_version << "." << minor_version << "." << patch_version << "+"
-     << build_id;
+     << build_number << "." << git_commit;
   return ss.str();
 }
 } // namespace compute_samples
