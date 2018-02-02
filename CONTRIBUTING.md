@@ -8,7 +8,7 @@ We are open for all kind of contributions including bug fixes, enhancements and 
 * Source code is formatted using [clang-format](https://clang.llvm.org/docs/ClangFormat.html) with the [defined style](.clang-format).
 
 ## Issues and enhancements
-All bug reports and feature requests are welcomed and should be reported to the [issue tracker](https://github.intel.com/intel/compute-samples/issues). Even more welcomed are pull requests fixing these issues.
+All bug reports and feature requests are welcomed and should be reported to the [issue tracker](https://github.com/intel/compute-samples/issues). Even more welcomed are pull requests fixing these issues.
 
 ## Testing
 Testing instructions can be found in the [README](README.md).
