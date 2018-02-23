@@ -593,7 +593,7 @@ void YuvWriter::append_frame(const PlanarImage &im) {
   size_t p_dst_size = width_ * height_ * 3 / 2;
   for (size_t y = 0; y < im.get_height(); ++y) {
     if (im.get_width() <= p_dst_size) {
-      memcpy(p_dst, p_src, im.get_width());
+      std::copy(p_src, p_src + im.get_width(), p_dst);
     } else {
       throw std::runtime_error("Failed to append frame.");
     }
@@ -605,7 +605,7 @@ void YuvWriter::append_frame(const PlanarImage &im) {
   p_src = (uint8_t *)im.get_u();
   for (size_t y = 0; y < im.get_height() / 2; ++y) {
     if (im.get_width() / 2 <= p_dst_size) {
-      memcpy(p_dst, p_src, im.get_width() / 2);
+      std::copy(p_src, p_src + im.get_width() / 2, p_dst);
     } else {
       throw std::runtime_error("Failed to append frame.");
     }
@@ -617,7 +617,7 @@ void YuvWriter::append_frame(const PlanarImage &im) {
   p_src = (uint8_t *)im.get_v();
   for (size_t y = 0; y < im.get_height() / 2; ++y) {
     if (im.get_width() / 2 <= p_dst_size) {
-      memcpy(p_dst, p_src, im.get_width() / 2);
+      std::copy(p_src, p_src + im.get_width() / 2, p_dst);
     } else {
       throw std::runtime_error("Failed to append frame.");
     }

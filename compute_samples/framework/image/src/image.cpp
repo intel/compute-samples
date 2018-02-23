@@ -107,7 +107,7 @@ std::vector<T> compute_samples::ImagePNG<T>::get_pixels() const {
 }
 
 template <typename T> void ImagePNG<T>::copy_raw_data(const T *data) {
-  std::memcpy(raw_data(), data, size_in_bytes());
+  std::copy(data, data + size(), std::begin(pixels_));
 }
 
 template <typename T> T *ImagePNG<T>::raw_data() { return pixels_.data(); }
@@ -202,7 +202,7 @@ template <typename T> std::vector<T> ImageBMP<T>::get_pixels() const {
 }
 
 template <typename T> void ImageBMP<T>::copy_raw_data(const T *data) {
-  std::memcpy(pixels_.data(), data, size_in_bytes());
+  std::copy(data, data + size(), std::begin(pixels_));
 }
 
 template <typename T> T *ImageBMP<T>::raw_data() { return pixels_.data(); }

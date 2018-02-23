@@ -139,7 +139,7 @@ void MedianFilterApplication::write_image_to_buffer(
     compute::command_queue &queue) const {
   uint32_t *mapped_buffer = static_cast<uint32_t *>(queue.enqueue_map_buffer(
       buffer, compute::command_queue::map_write, 0, image.size_in_bytes()));
-  std::memcpy(mapped_buffer, image.raw_data(), image.size_in_bytes());
+  std::copy(image.raw_data(), image.raw_data() + image.size(), mapped_buffer);
   queue.enqueue_unmap_buffer(buffer, mapped_buffer);
 }
 
@@ -148,7 +148,7 @@ void MedianFilterApplication::read_buffer_to_image(
     compute::command_queue &queue) const {
   uint32_t *mapped_buffer = static_cast<uint32_t *>(queue.enqueue_map_buffer(
       buffer, compute::command_queue::map_read, 0, image.size_in_bytes()));
-  std::memcpy(image.raw_data(), mapped_buffer, image.size_in_bytes());
+  image.copy_raw_data(mapped_buffer);
   queue.enqueue_unmap_buffer(buffer, mapped_buffer);
 }
 } // namespace compute_samples

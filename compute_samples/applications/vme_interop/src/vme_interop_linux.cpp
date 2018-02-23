@@ -190,8 +190,8 @@ static void write_va_surface(const VADisplay va_display,
   const uint8_t *y_plane = planar_image.get_y();
 
   for (size_t i = 0; i < height; ++i) {
-    memcpy(ptr + va_image.offsets[0] + i * va_image.pitches[0],
-           y_plane + (i * pitch_y), width);
+    std::copy(y_plane + (i * pitch_y), y_plane + (i * pitch_y) + width,
+              ptr + va_image.offsets[0] + i * va_image.pitches[0]);
   }
 
   // Replicate the trailing row of pixels to fill-in any remaining rows
@@ -200,8 +200,9 @@ static void write_va_surface(const VADisplay va_display,
   // we need to replicate the image pixel rows to match the VME unit's
   // behavior to handle out-of-bound references.
   for (size_t i = height; i < va_image.height; ++i) {
-    memcpy(ptr + va_image.offsets[0] + i * va_image.pitches[0],
-           y_plane + ((height - 1) * pitch_y), width);
+    std::copy(y_plane + ((height - 1) * pitch_y),
+              y_plane + ((height - 1) * pitch_y) + width,
+              ptr + va_image.offsets[0] + i * va_image.pitches[0]);
   }
 
   // Write chroma.
