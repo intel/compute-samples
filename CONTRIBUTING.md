@@ -54,8 +54,7 @@ Testing instructions can be found in the [README](README.md).
     1. Add subdirectory with `your_app` to the `compute_samples/applications/CMakeLists.txt`.
     1. Create a `CMakeLists.txt` file in `compute_samples/applications/your_app`.
         1. Create `your_app` library.
-        1. Create `your_app_tests` library.
-        1. Create `your_app_tester` binary.
+        1. Create `your_app_tests` binary.
         1. Add custom post build command to copy files to the binary directory. This technique should be used only for files which may be modified between the builds.
         1. Copy static files to the binary directory. This technique should be used only for files which won't be modified between the builds. Path to the common media directory is available in `MEDIA_DIRECTORY`.
         1. Install all required files in the root directory (`.`).
