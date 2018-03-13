@@ -62,8 +62,9 @@ MedianFilterApplication::Arguments MedianFilterApplication::parse_command_line(
   options("output-image",
           po::value<std::string>(&args.output_image_path)->required(),
           "path to output image");
-  options("kernel", po::value<std::string>(&args.kernel_path)
-                        ->default_value("median_filter.cl"),
+  options("kernel",
+          po::value<std::string>(&args.kernel_path)
+              ->default_value("median_filter.cl"),
           "path to kernel");
 
   po::positional_options_description p;
@@ -106,7 +107,13 @@ void MedianFilterApplication::run_median_filter(
   const std::string kernel_name = "median_filter";
   compute::program program =
       compute::program::create_with_source_file(args.kernel_path, context);
-  program.build();
+  try {
+    program.build();
+  } catch (compute::opencl_error &) {
+    BOOST_LOG(logger) << "OpenCL Program Build Error!";
+    BOOST_LOG(logger) << "OpenCL Program Build Log is:\n"
+                      << program.build_log();
+  }
   compute::kernel kernel = program.create_kernel(kernel_name);
   kernel.set_args(input_buffer, output_buffer);
   BOOST_LOG(logger) << "Kernel path: " << args.kernel_path;
