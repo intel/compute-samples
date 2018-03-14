@@ -98,5 +98,6 @@ file(COPY "${MEDIA_DIRECTORY}/yuv/hme_foreman_176x144.yuv" DESTINATION ${CMAKE_C
 
 install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
 install(FILES "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv" DESTINATION ".")
+install(FILES "${MEDIA_DIRECTORY}/yuv/hme_foreman_176x144.yuv" DESTINATION ".")
 
 add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)
