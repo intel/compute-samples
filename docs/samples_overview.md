@@ -23,7 +23,7 @@ These samples demonstrate subgroups. Subgroups are a core feature in OpenCL 2.1,
 
 ### Overview
 
-In this tutorial you will visualize how an NDRange is partitioned into subgroups. For more information, see the [sample README](compute_samples/applications/subgroups_visualization_tutorial/README.md).
+In this tutorial you will visualize how an NDRange is partitioned into subgroups. For more information, see the [sample README](../compute_samples/applications/subgroups_visualization_tutorial/README.md).
 
 ### Help
 To show help message run `launcher subgroups_visualization -- -h`.
@@ -35,7 +35,7 @@ To show help message run `launcher subgroups_visualization -- -h`.
 
 ### Overview
 
-In this tutorial you will use subgroup block reads and writes to optimize an image copy operation. For more information, see the [sample README](compute_samples/applications/subgroups_imagecopy_tutorial/README.md).
+In this tutorial you will use subgroup block reads and writes to optimize an image copy operation. For more information, see the [sample README](../compute_samples/applications/subgroups_imagecopy_tutorial/README.md).
 
 ### Help
 To show help message run `launcher subgroups_imagecopy -- -h`.
@@ -46,7 +46,7 @@ To show help message run `launcher subgroups_imagecopy -- -h`.
 ## III. VME Samples
 _________________
 
-The presentation [vme_samples_overview](docs/presentations/vme_samples_overview.pdf) provides an overview of the architecture, programming model and interface for the OpenCL VME interfaces used in the VME samples. The programming guide [cl_intel_device_side_avc_vme_programmers_manual](docs/programmer_guides/cl_intel_device_side_avc_vme_programmers_manual.pdf) expounds on the background for VME. 
+The presentation [vme_samples_overview](../docs/presentations/vme_samples_overview.pdf) provides an overview of the architecture, programming model and interface for the OpenCL VME interfaces used in the VME samples. The programming guide [cl_intel_device_side_avc_vme_programmers_manual](../docs/programmer_guides/cl_intel_device_side_avc_vme_programmers_manual.pdf) expounds on the background for VME. 
 
 ## 1. VME Search
 
