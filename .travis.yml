@@ -1,0 +1,24 @@
+language: cpp
+sudo: false
+os: linux
+dist: trusty
+compiler: gcc
+addons:
+  apt:
+    packages:
+      - mesa-common-dev
+      - libx11-dev
+      - libva-dev
+install:
+  - wget https://cmake.org/files/v3.8/cmake-3.8.2-Linux-x86_64.tar.gz
+  - tar xvf cmake-3.8.2-Linux-x86_64.tar.gz
+  - export PATH=${PWD}/cmake-3.8.2-Linux-x86_64/bin:${PATH}
+  - cmake --version
+  - g++ --version
+  - JOBS=2
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+script:
+  - cmake --build . -- -j${JOBS}
