@@ -6,7 +6,6 @@ compiler: gcc
 addons:
   apt:
     packages:
-      - mesa-common-dev
       - libx11-dev
       - libva-dev
 install:

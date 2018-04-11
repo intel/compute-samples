@@ -25,15 +25,6 @@ project(opencl-external NONE)
 
 include(ExternalProject)
 ExternalProject_Add(
-    egl-headers
-	URL https://github.com/KhronosGroup/EGL-Registry/archive/master.zip
-    CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E copy_directory api/EGL ${OPENCL_ROOT}/include/EGL
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE TRUE
-)
-
-ExternalProject_Add(
     opencl-headers
     URL https://github.com/KhronosGroup/OpenCL-Headers/archive/master.zip
     CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E copy_directory opencl22 ${OPENCL_ROOT}/include
@@ -44,7 +35,7 @@ ExternalProject_Add(
 
 ExternalProject_Add(
     opencl-icd
-    DEPENDS opencl-headers egl-headers
+    DEPENDS opencl-headers
     URL https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/master.zip
     PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_directory ${OPENCL_ROOT}/include inc
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E copy_directory lib ${OPENCL_ROOT}/lib
