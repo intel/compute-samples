@@ -1,4 +1,7 @@
 # Intel® GPU Compute Samples
+[![Build Status](https://travis-ci.org/intel/compute-samples.svg?branch=master)](https://travis-ci.org/intel/compute-samples)
+[![Build status](https://ci.appveyor.com/api/projects/status/f3c7oe4i0eg1kjx7?svg=true)](https://ci.appveyor.com/project/intel/compute-samples)
+
 Sample GPU Compute applications for Intel® Processor Graphics that demonstrate: 
 
 - notable new features in Compute APIs in released Graphics drivers
