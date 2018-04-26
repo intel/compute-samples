@@ -126,4 +126,20 @@ To show help message run `launcher vme_interop -- -h`.
 ### Example
     launcher vme_interop
 
+## IV. Commands Aggregation Sample
+____________
+
+## 1. Commands Aggregation
+
+### Overview
+
+In this sample you will see how to achieve concurrent kernel execution submitted to multiple independent command queues. For more information, see the [sample README](../compute_samples/applications/commands_aggregation/README.md).
+
+### Help
+To show help message run `launcher commands_aggregation -- -h`.
+
+### Example
+    launcher commands_aggregation
+    launcher commands_aggregation --in-order
+
 _______

@@ -43,6 +43,8 @@ target_link_libraries(${PROJECT_NAME}
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/commands_aggregation.cl" ${CMAKE_CURRENT_BINARY_DIR})
+
 file(COPY "${CMAKE_BINARY_DIR}/balloons_news.png" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/median_filter.cl" ${CMAKE_CURRENT_BINARY_DIR})
 

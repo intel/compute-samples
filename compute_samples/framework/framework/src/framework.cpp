@@ -40,6 +40,7 @@ namespace src = boost::log::sources;
 namespace compute = boost::compute;
 
 #include "application/application.hpp"
+#include "commands_aggregation/commands_aggregation.hpp"
 #include "median_filter/median_filter.hpp"
 #include "subgroups_imagecopy/subgroups_imagecopy.hpp"
 #include "subgroups_visualization/subgroups_visualization.hpp"
@@ -75,6 +76,11 @@ public:
 private:
   const std::map<std::string, std::function<std::unique_ptr<Application>()>>
       applications{
+          {"commands_aggregation",
+           []() {
+             return std::unique_ptr<Application>{
+                 new CommandsAggregationApplication};
+           }},
           {"median_filter",
            []() {
              return std::unique_ptr<Application>{new MedianFilterApplication};

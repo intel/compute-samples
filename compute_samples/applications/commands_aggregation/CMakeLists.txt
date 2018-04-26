@@ -21,11 +21,12 @@
 #
 
 cmake_minimum_required(VERSION 3.8)
-project(framework)
+project(commands_aggregation)
 
 set(SOURCES
-    include/framework/framework.hpp
-    src/framework.cpp
+    include/commands_aggregation/commands_aggregation.hpp
+    src/commands_aggregation.cpp
+    commands_aggregation.cl
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})
@@ -38,22 +39,40 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-    compute_samples::commands_aggregation
-    compute_samples::median_filter
-    compute_samples::subgroups_imagecopy
-    compute_samples::subgroups_visualization
-    compute_samples::vme_search
-    compute_samples::vme_hme
-    compute_samples::vme_intra
-    compute_samples::vme_wpp
-    compute_samples::vme_interlaced
-    compute_samples::vme_interop
-    compute_samples::application
-    compute_samples::version
+    compute_samples::timer
     Boost::log
+    compute_samples::application
     Boost::program_options
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER framework/${PROJECT_NAME})
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/commands_aggregation.cl" ${CMAKE_BINARY_DIR})
+
+install(FILES "${PROJECT_SOURCE_DIR}/commands_aggregation.cl" DESTINATION ".")
+
+source_group("Kernel Files" FILES commands_aggregation.cl)
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
+
+set(TEST_SOURCES
+    test/commands_aggregation_system_tests.cpp
+)
+
+add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
+add_executable(compute_samples::${PROJECT_NAME}_tests ALIAS ${PROJECT_NAME}_tests)
+
+target_link_libraries(${PROJECT_NAME}_tests
+    PUBLIC
+    ${PROJECT_NAME}
+    compute_samples::framework
+    GTest::GTest
+    GTest::Main
+)
+
+set_target_properties(${PROJECT_NAME}_tests PROPERTIES FOLDER applications/${PROJECT_NAME})
+
+add_custom_command(TARGET ${PROJECT_NAME}_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/commands_aggregation.cl" ${CMAKE_CURRENT_BINARY_DIR})
+
+install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
+
+add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)

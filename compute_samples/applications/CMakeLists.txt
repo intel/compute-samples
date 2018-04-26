@@ -1,3 +1,4 @@
+add_subdirectory(commands_aggregation)
 add_subdirectory(median_filter)
 add_subdirectory(subgroups_imagecopy_tutorial)
 add_subdirectory(subgroups_visualization_tutorial)
