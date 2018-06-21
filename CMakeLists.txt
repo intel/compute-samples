@@ -23,9 +23,11 @@
 cmake_minimum_required(VERSION 3.8)
 project(compute_samples)
 
-option(BUILD_BOOST "Download and build Boost" ON)
-option(BUILD_PNG "Download and build libpng" ON)
+option(DOWNLOAD_BOOST "Download and build Boost" ON)
+option(DOWNLOAD_PNG "Download and build libpng" ON)
 option(DOWNLOAD_MEDIA "Download media files" ON)
+option(DOWNLOAD_GTEST "Download Google Test source code" ON)
+option(DOWNLOAD_OCL_ICD "Download and build OpenCL ICD" ON)
 
 set(COMPUTE_SAMPLES_MAJOR_VERSION 0)
 set(COMPUTE_SAMPLES_MINOR_VERSION 1)
@@ -52,13 +54,13 @@ if(DOWNLOAD_MEDIA)
     execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${MEDIA_ROOT_DIRECTORY}/downloads/mediadata-external)
     execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${MEDIA_ROOT_DIRECTORY}/downloads/mediadata-external)
 endif()
-file(COPY ${MEDIA_ROOT_DIRECTORY}/external/yuv DESTINATION ${MEDIA_DIRECTORY})
+file(COPY ${MEDIADATA_ROOT}/yuv DESTINATION ${MEDIA_DIRECTORY})
 file(COPY ${MEDIA_ROOT_DIRECTORY}/internal/yuv DESTINATION ${MEDIA_DIRECTORY})
 file(COPY ${MEDIA_ROOT_DIRECTORY}/internal/bmp DESTINATION ${MEDIA_DIRECTORY})
 file(COPY ${MEDIA_ROOT_DIRECTORY}/internal/png DESTINATION ${MEDIA_DIRECTORY})
 
 # Prepare Boost
-if(BUILD_BOOST)
+if(DOWNLOAD_BOOST)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(ADDRESS_MODEL 64)
     elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -89,32 +91,38 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.64 REQUIRED COMPONENTS log program_options timer chrono system)
 
-# Prepare libpng
-if(BUILD_PNG)
+# Prepare zlib
+if(DOWNLOAD_PNG)
     set(ZLIB_ROOT ${THIRD_PARTY_DIRECTORY}/zlib)
     configure_file(cmake/ZLIB.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external)
     execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external)
+endif()
+if(ZLIB_ROOT)
     find_library(ZLIB_LIBRARY NAMES libz.a zlibstatic zlibstaticd PATHS ${ZLIB_ROOT} PATH_SUFFIXES lib NO_DEFAULT_PATH)
-    find_path(ZLIB_INCLUDE_DIR NAMES zlib.h PATHS ${ZLIB_ROOT} PATH_SUFFIXES include)
-
+    find_path(ZLIB_INCLUDE_DIR NAMES zlib.h PATHS ${ZLIB_ROOT} PATH_SUFFIXES include NO_DEFAULT_PATH)
+endif()
+# Prepare libpng
+if(DOWNLOAD_PNG)
     set(PNG_ROOT ${THIRD_PARTY_DIRECTORY}/libpng)
     configure_file(cmake/PNG.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/libpng-external/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/libpng-external)
     execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/libpng-external)
+endif()
+if(PNG_ROOT)
     find_library(PNG_LIBRARY NAMES libpng.a libpng16_static libpng16_staticd PATHS ${PNG_ROOT} PATH_SUFFIXES lib NO_DEFAULT_PATH)
-    find_path(PNG_INCLUDE_DIR NAMES png.h PATHS ${PNG_ROOT} PATH_SUFFIXES include)
-
+    find_path(PNG_INCLUDE_DIR NAMES png.h PATHS ${PNG_ROOT} PATH_SUFFIXES include NO_DEFAULT_PATH)
     set(CMAKE_PREFIX_PATH ${PNG_ROOT})
 endif()
-
 find_package(PNG REQUIRED)
 
 # Prepare googletest
-set(GTEST_ROOT ${THIRD_PARTY_DIRECTORY}/googletest)
-configure_file(cmake/GTEST.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/googletest-external/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/googletest-external)
-execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/googletest-external)
+if(DOWNLOAD_GTEST)
+    set(GTEST_ROOT ${THIRD_PARTY_DIRECTORY}/googletest)
+    configure_file(cmake/GTEST.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/googletest-external/CMakeLists.txt)
+    execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/googletest-external)
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/googletest-external)
+endif()
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory("${GTEST_ROOT}/googletest-src"
@@ -125,12 +133,15 @@ set_target_properties(gtest PROPERTIES FOLDER third_party/gtest)
 set_target_properties(gtest_main PROPERTIES FOLDER third_party/gtest)
 
 # Prepare OpenCL
-set(OPENCL_ROOT ${THIRD_PARTY_DIRECTORY}/opencl)
-configure_file(cmake/OPENCL.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/opencl-external/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/opencl-external)
-execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/opencl-external)
-
-set(CMAKE_PREFIX_PATH ${OPENCL_ROOT})
+if(DOWNLOAD_OCL_ICD)
+    set(OPENCL_ROOT ${THIRD_PARTY_DIRECTORY}/opencl)
+    configure_file(cmake/OPENCL.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/opencl-external/CMakeLists.txt)
+    execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/opencl-external)
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/opencl-external)
+endif()
+if(OPENCL_ROOT)
+    set(CMAKE_PREFIX_PATH ${OPENCL_ROOT})
+endif()
 find_package(OpenCL REQUIRED)
 
 enable_testing()
