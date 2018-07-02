@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@
 
 #include <fstream>
 
-#include "framework/framework.hpp"
 #include "image/image.hpp"
 #include "subgroups_imagecopy/subgroups_imagecopy.hpp"
 
@@ -37,13 +36,13 @@ protected:
 };
 
 TEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
-  compute_samples::Framework framework;
-  const char *argv[] = {"compute_samples", "subgroups_imagecopy", "-k",
+  compute_samples::SubgroupsImageCopyApplication application;
+  const char *argv[] = {"subgroups_imagecopy", "-k",
                         "subgroups_imagecopy_kernel.cl", nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   testing::internal::CaptureStdout();
-  framework.run(argc, argv);
+  application.run(argc, argv);
   testing::internal::GetCapturedStdout();
 
   compute_samples::ImageBMP8Bit output_image(output_file_);
@@ -55,13 +54,13 @@ TEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
 }
 
 TEST_F(SubgroupsImageCopySystemTests, OptimizedCopy) {
-  compute_samples::Framework framework;
-  const char *argv[] = {"compute_samples", "subgroups_imagecopy", "-k",
+  compute_samples::SubgroupsImageCopyApplication application;
+  const char *argv[] = {"subgroups_imagecopy", "-k",
                         "subgroups_imagecopy_solution.cl", nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   testing::internal::CaptureStdout();
-  framework.run(argc, argv);
+  application.run(argc, argv);
   testing::internal::GetCapturedStdout();
 
   compute_samples::ImageBMP8Bit output_image(output_file_);

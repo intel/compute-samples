@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +35,8 @@ namespace po = boost::program_options;
 #include "timer/timer.hpp"
 
 namespace compute_samples {
-void MedianFilterApplication::run(std::vector<std::string> &command_line,
-                                  src::logger &logger) {
+void MedianFilterApplication::run_implementation(
+    std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return;

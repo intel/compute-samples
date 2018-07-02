@@ -23,22 +23,22 @@
 cmake_minimum_required(VERSION 3.8)
 project(subgroups_visualization)
 
-set(SOURCES
+set(LIB_SOURCES
     include/subgroups_visualization/subgroups_visualization.hpp
     src/subgroups_visualization.cpp
     subgroups_visualization_kernel.cl
     subgroups_visualization_solution.cl
 )
 
-add_library(${PROJECT_NAME} ${SOURCES})
-add_library(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library(${PROJECT_NAME}_lib ${LIB_SOURCES})
+add_library(compute_samples::${PROJECT_NAME}_lib ALIAS ${PROJECT_NAME}_lib)
 
-target_include_directories(${PROJECT_NAME}
+target_include_directories(${PROJECT_NAME}_lib
     PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
     compute_samples::timer
     Boost::log
@@ -47,15 +47,31 @@ target_link_libraries(${PROJECT_NAME}
     compute_samples::image
 )
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+target_compile_features(${PROJECT_NAME}_lib PUBLIC cxx_std_11)
 
 file(COPY "${PROJECT_SOURCE_DIR}/subgroups_visualization_solution.cl" DESTINATION ${CMAKE_BINARY_DIR})
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/subgroups_visualization_kernel.cl" ${CMAKE_BINARY_DIR})
+add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/subgroups_visualization_kernel.cl" ${CMAKE_BINARY_DIR})
 
 install(FILES "${PROJECT_SOURCE_DIR}/subgroups_visualization_kernel.cl" DESTINATION ".")
 install(FILES "${PROJECT_SOURCE_DIR}/subgroups_visualization_solution.cl" DESTINATION ".")
 
 source_group("Kernel Files" FILES subgroups_visualization_kernel.cl subgroups_visualization_solution.cl)
+set_target_properties(${PROJECT_NAME}_lib PROPERTIES FOLDER applications/${PROJECT_NAME})
+
+set(APP_SOURCES
+    src/main.cpp
+)
+
+add_executable(${PROJECT_NAME} ${APP_SOURCES})
+add_executable(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    ${PROJECT_NAME}_lib
+)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION ".")
+
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
 
 set(TEST_SOURCES
@@ -67,8 +83,7 @@ add_executable(compute_samples::${PROJECT_NAME}_tests ALIAS ${PROJECT_NAME}_test
 
 target_link_libraries(${PROJECT_NAME}_tests
     PUBLIC
-    ${PROJECT_NAME}
-    compute_samples::framework
+    ${PROJECT_NAME}_lib
     GTest::GTest
     GTest::Main
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,11 +36,9 @@ namespace compute = boost::compute;
 namespace compute_samples {
 
 class SubgroupsVisualizationApplication : public Application {
-public:
-  void run(std::vector<std::string> &command_line,
-           src::logger &logger) override;
-
 private:
+  void run_implementation(std::vector<std::string> &command_line,
+                          src::logger &logger) override;
   struct Arguments {
     std::string kernel_path = "";
     std::string output = "";

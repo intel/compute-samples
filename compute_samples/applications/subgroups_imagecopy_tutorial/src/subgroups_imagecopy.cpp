@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,8 +45,8 @@ namespace po = boost::program_options;
 
 namespace compute_samples {
 
-void SubgroupsImageCopyApplication::run(std::vector<std::string> &command_line,
-                                        src::logger &logger) {
+void SubgroupsImageCopyApplication::run_implementation(
+    std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return;
@@ -79,8 +79,9 @@ SubgroupsImageCopyApplication::parse_command_line(
   po::options_description desc("Allowed options");
   auto options = desc.add_options();
   options("help,h", "Show this help text.");
-  options("kernel,k", po::value<std::string>(&args.kernel_path)
-                          ->default_value("subgroups_imagecopy_kernel.cl"),
+  options("kernel,k",
+          po::value<std::string>(&args.kernel_path)
+              ->default_value("subgroups_imagecopy_kernel.cl"),
           "Kernel Filename.");
   options("input,i",
           po::value<std::string>(&args.input)->default_value("input.bmp"),

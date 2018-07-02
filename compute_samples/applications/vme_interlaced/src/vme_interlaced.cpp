@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,12 +53,14 @@ VmeInterlacedApplication::parse_command_line(
   options("sub_test,s",
           po::value<std::string>(&args.sub_test)->default_value("native"),
           "subtest to run - native, split");
-  options("output-bmp,b", po::value<bool>(&args.output_bmp)
-                              ->default_value(false)
-                              ->implicit_value(true),
+  options("output-bmp,b",
+          po::value<bool>(&args.output_bmp)
+              ->default_value(false)
+              ->implicit_value(true),
           "output to bmp images for each frame");
-  options("input-yuv,i", po::value<std::string>(&args.input_yuv_path)
-                             ->default_value("football_interlaced_720x480.yuv"),
+  options("input-yuv,i",
+          po::value<std::string>(&args.input_yuv_path)
+              ->default_value("football_interlaced_720x480.yuv"),
           "path to input yuv file");
   options("output-top-yuv,t",
           po::value<std::string>(&args.output_top_yuv_path)
@@ -105,8 +107,8 @@ VmeInterlacedApplication::parse_command_line(
   return args;
 }
 
-void VmeInterlacedApplication::run(std::vector<std::string> &command_line,
-                                   src::logger &logger) {
+void VmeInterlacedApplication::run_implementation(
+    std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return;

@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,15 +51,18 @@ VmeInteropApplication::Arguments VmeInteropApplication::parse_command_line(
   po::options_description desc("Allowed options");
   auto options = desc.add_options();
   options("help,h", "show help message");
-  options("output-bmp,b", po::value<bool>(&args.output_bmp)
-                              ->default_value(false)
-                              ->implicit_value(true),
+  options("output-bmp,b",
+          po::value<bool>(&args.output_bmp)
+              ->default_value(false)
+              ->implicit_value(true),
           "output to bmp images for each frame");
-  options("input-yuv,i", po::value<std::string>(&args.input_yuv_path)
-                             ->default_value("goal_1280x720.yuv"),
+  options("input-yuv,i",
+          po::value<std::string>(&args.input_yuv_path)
+              ->default_value("goal_1280x720.yuv"),
           "path to input yuv file");
-  options("output-yuv,o", po::value<std::string>(&args.output_yuv_path)
-                              ->default_value("output_goal_1280x720.yuv"),
+  options("output-yuv,o",
+          po::value<std::string>(&args.output_yuv_path)
+              ->default_value("output_goal_1280x720.yuv"),
           "path to output yuv with motion vectors");
   options("width,w", po::value<size_t>(&args.width)->default_value(1280),
           "width of input yuv");
@@ -88,8 +91,8 @@ VmeInteropApplication::Arguments VmeInteropApplication::parse_command_line(
   return args;
 }
 
-void VmeInteropApplication::run(std::vector<std::string> &command_line,
-                                src::logger &logger) {
+void VmeInteropApplication::run_implementation(
+    std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return;
@@ -112,7 +115,7 @@ void VmeInteropApplication::run(std::vector<std::string> &command_line,
   BOOST_LOG(logger) << "Frame size: " << args.width << "x" << args.height
                     << " pixels";
 
-  run(command_line, args, device, logger);
+  run_os_specific_implementation(command_line, args, device, logger);
 
   timer_total.print("Total");
 }

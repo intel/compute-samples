@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 #include <istream>
 #include <iterator>
 
-#include "framework/framework.hpp"
+#include "vme_interlaced/vme_interlaced.hpp"
 
 class VmeInterlacedSystemTests : public testing::Test {
 protected:
@@ -39,8 +39,7 @@ protected:
   }
 
   bool VerifySubtest() {
-    const char *argv[] = {"compute_samples",
-                          "vme_interlaced",
+    const char *argv[] = {"vme_interlaced",
                           const_cast<char *>(input_file_.c_str()),
                           const_cast<char *>(output_top_file_.c_str()),
                           const_cast<char *>(output_bot_file_.c_str()),
@@ -55,13 +54,13 @@ protected:
                           nullptr};
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
-    compute_samples::Framework framework;
+    compute_samples::VmeInterlacedApplication application;
 
     testing::internal::CaptureStdout();
-    framework.run(argc, argv);
+    application.run(argc, argv);
     testing::internal::GetCapturedStdout();
 
-    static const size_t reference_top_file_pos = 3;
+    static const size_t reference_top_file_pos = 2;
     static const size_t reference_bot_file_pos = reference_top_file_pos + 1;
     static const size_t sub_test_pos = reference_top_file_pos + 7;
 
@@ -70,7 +69,7 @@ protected:
     argv[sub_test_pos] = "split";
 
     testing::internal::CaptureStdout();
-    framework.run(argc, argv);
+    application.run(argc, argv);
     testing::internal::GetCapturedStdout();
 
     std::ifstream out_top(output_top_file_, std::ios::binary);

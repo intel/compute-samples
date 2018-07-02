@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,9 +27,9 @@
 
 namespace compute_samples {
 
-void VmeInteropApplication::run(std::vector<std::string> &, const Arguments &,
-                                const compute::device &,
-                                src::logger &logger) const {
+void VmeInteropApplication::run_os_specific_implementation(
+    std::vector<std::string> &, const Arguments &, const compute::device &,
+    src::logger &logger) const {
   BOOST_LOG(logger) << "VA API interoperability not supported on platform.";
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,16 +28,17 @@
 #include <boost/log/sources/logger.hpp>
 namespace src = boost::log::sources;
 
+#include <boost/compute/core.hpp>
+namespace compute = boost::compute;
+
 #include "application/application.hpp"
 #include "yuv_utils/yuv_utils.hpp"
 
 namespace compute_samples {
 class VmeHmeApplication : public Application {
-public:
-  void run(std::vector<std::string> &command_line,
-           src::logger &logger) override;
-
 private:
+  void run_implementation(std::vector<std::string> &command_line,
+                          src::logger &logger) override;
   struct Arguments {
     bool output_bmp = false;
     std::string input_yuv_path = "";

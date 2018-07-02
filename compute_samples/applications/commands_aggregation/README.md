@@ -71,24 +71,4 @@ There are 3 cases of updating the task level in command queue:
 
 The sample allows to enqueue kernels as described above or enqueue all commands to one IOQ to present serialized version.
 
-Results from Skylake i7-6500U:
-
-* Parallel execution
-```
-commands_aggregation
-[2018-04-30 02:08:31.757047] [0x0000053c] [info]    Version: 0.1.0+dev.8502bc4
-[2018-04-30 02:08:31.757047] [0x0000053c] [info]    Work size: 512
-[2018-04-30 02:08:31.978869] [0x0000053c] [info]    OpenCL device: Intel(R) HD Graphics 520
-[2018-04-30 02:08:35.484792] [0x0000053c] [info]    Kernels execution: 3.249367s
-[2018-04-30 02:08:35.484792] [0x0000053c] [info]    Total: 3.725744s
-```
-
-* Serialized execution
-```
-commands_aggregation --in-order
-[2018-04-30 02:08:38.281968] [0x00001a24] [info]    Version: 0.1.0+dev.8502bc4
-[2018-04-30 02:08:38.281968] [0x00001a24] [info]    Work size: 512
-[2018-04-30 02:08:38.485114] [0x00001a24] [info]    OpenCL device: Intel(R) HD Graphics 520
-[2018-04-30 02:08:46.079676] [0x00001a24] [info]    Kernels execution: 7.372259s
-[2018-04-30 02:08:46.079676] [0x00001a24] [info]    Total: 7.809311s
-```
+Run `commands_aggregation` and `commands_aggregation --in-order` to check the performance boost.

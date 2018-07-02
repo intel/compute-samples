@@ -36,8 +36,6 @@ namespace compute = boost::compute;
 namespace compute_samples {
 class CommandsAggregationApplication : public Application {
 public:
-  void run(std::vector<std::string> &command_line,
-           src::logger &logger) override;
   std::vector<uint32_t>
   run_workloads_out_of_order(const size_t global_work_size,
                              src::logger &logger) const;
@@ -45,6 +43,8 @@ public:
                                                src::logger &logger) const;
 
 private:
+  void run_implementation(std::vector<std::string> &command_line,
+                          src::logger &logger) override;
   struct Arguments {
     bool help = false;
     bool in_order = false;

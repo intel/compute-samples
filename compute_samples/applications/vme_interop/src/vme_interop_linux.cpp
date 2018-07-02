@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -336,10 +336,9 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
   }
 }
 
-void VmeInteropApplication::run(std::vector<std::string> &command_line,
-                                const Arguments &args,
-                                const compute::device &device,
-                                src::logger &logger) const {
+void VmeInteropApplication::run_os_specific_implementation(
+    std::vector<std::string> &command_line, const Arguments &args,
+    const compute::device &device, src::logger &logger) const {
   VADisplay va_display = get_va_display(logger);
 
   if (get_va_device(device.platform(), va_display) != device) {

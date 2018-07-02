@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,15 +53,18 @@ VmeWppApplication::Arguments VmeWppApplication::parse_command_line(
   po::options_description desc("Allowed options");
   auto options = desc.add_options();
   options("help,h", "show help message");
-  options("output-bmp,b", po::value<bool>(&args.output_bmp)
-                              ->default_value(false)
-                              ->implicit_value(true),
+  options("output-bmp,b",
+          po::value<bool>(&args.output_bmp)
+              ->default_value(false)
+              ->implicit_value(true),
           "output to bmp images for each frame");
-  options("input-yuv,i", po::value<std::string>(&args.input_yuv_path)
-                             ->default_value("goal_1280x720.yuv"),
+  options("input-yuv,i",
+          po::value<std::string>(&args.input_yuv_path)
+              ->default_value("goal_1280x720.yuv"),
           "path to input yuv file");
-  options("output-yuv,o", po::value<std::string>(&args.output_yuv_path)
-                              ->default_value("output_goal_1280x720.yuv"),
+  options("output-yuv,o",
+          po::value<std::string>(&args.output_yuv_path)
+              ->default_value("output_goal_1280x720.yuv"),
           "path to output yuv with motion vectors");
   options("qp,q", po::value<size_t>(&args.qp)->default_value(49),
           "quantization parameter value to use for estimation heuristics"
@@ -102,8 +105,8 @@ VmeWppApplication::Arguments VmeWppApplication::parse_command_line(
 #define DIM_TO_MB_SZ(X, Y) (au::align_units(au::align_units(X, Y), 16))
 #define DIM_TO_MV_SZ(X, Y) (DIM_TO_MB_SZ(X, Y) * MV_PER_DIM)
 
-void VmeWppApplication::run(std::vector<std::string> &command_line,
-                            src::logger &logger) {
+void VmeWppApplication::run_implementation(
+    std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return;

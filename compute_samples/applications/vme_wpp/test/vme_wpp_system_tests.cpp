@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,15 +27,14 @@
 #include <istream>
 #include <iterator>
 
-#include "framework/framework.hpp"
+#include "vme_wpp/vme_wpp.hpp"
 
 class VmeWppSystemTests : public testing::Test {
 protected:
   virtual void TearDown() { std::remove(output_file_.c_str()); }
 
   bool VerifyTest() {
-    const char *argv[] = {"compute_samples",
-                          "vme_wpp",
+    const char *argv[] = {"vme_wpp",
                           const_cast<char *>(input_file_.c_str()),
                           const_cast<char *>(output_file_.c_str()),
                           "--width",
@@ -49,9 +48,9 @@ protected:
                           nullptr};
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
-    compute_samples::Framework framework;
+    compute_samples::VmeWppApplication application;
     testing::internal::CaptureStdout();
-    framework.run(argc, argv);
+    application.run(argc, argv);
     testing::internal::GetCapturedStdout();
 
     std::ifstream out(output_file_, std::ios::binary);

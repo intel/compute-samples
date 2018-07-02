@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@
 
 #include <fstream>
 
-#include "framework/framework.hpp"
 #include "image/image.hpp"
 #include "median_filter/median_filter.hpp"
 
@@ -38,14 +37,14 @@ protected:
 };
 
 TEST_F(MedianFilterSystemTests, ReturnsReferenceImage) {
-  compute_samples::Framework framework;
-  const char *argv[] = {"compute_samples", "median_filter",
+  compute_samples::MedianFilterApplication application;
+  const char *argv[] = {"median_filter",
                         const_cast<char *>(input_file_.c_str()),
                         const_cast<char *>(output_file_.c_str()), nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   testing::internal::CaptureStdout();
-  framework.run(argc, argv);
+  application.run(argc, argv);
   testing::internal::GetCapturedStdout();
 
   compute_samples::ImagePNG32Bit output_image(output_file_);

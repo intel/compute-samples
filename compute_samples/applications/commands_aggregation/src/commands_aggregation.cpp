@@ -65,8 +65,8 @@ compute::buffer create_buffer(const compute::context &context,
       compute::buffer::read_write | compute::buffer::use_host_ptr, data.data());
 }
 
-void CommandsAggregationApplication::run(std::vector<std::string> &command_line,
-                                         src::logger &logger) {
+void CommandsAggregationApplication::run_implementation(
+    std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return;
@@ -130,7 +130,8 @@ CommandsAggregationApplication::run_workloads_out_of_order(
   compute::command_queue ioq1(context, device);
   compute::command_queue ioq2(context, device);
 
-  // OOQ is needed to trigger aggregation logic as we get some events from enqueue calls
+  // OOQ is needed to trigger aggregation logic as we get some events from
+  // enqueue calls
   compute::command_queue ooq3(
       context, device,
       compute::command_queue::properties::enable_out_of_order_execution);

@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@
 
 #include <fstream>
 
-#include "framework/framework.hpp"
 #include "image/image.hpp"
 #include "subgroups_visualization/subgroups_visualization.hpp"
 
@@ -38,13 +37,13 @@ protected:
 };
 
 TEST_F(SubgroupsVisualizationSystemTests, GeneratesOutputImage) {
-  compute_samples::Framework framework;
-  const char *argv[] = {"compute_samples", "subgroups_visualization", "-k",
+  compute_samples::SubgroupsVisualizationApplication application;
+  const char *argv[] = {"subgroups_visualization", "-k",
                         const_cast<char *>(solution_cl_file.c_str()), nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   testing::internal::CaptureStdout();
-  framework.run(argc, argv);
+  application.run(argc, argv);
   testing::internal::GetCapturedStdout();
 
   compute_samples::ImageBMP8Bit output_image(output_file_);

@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
+#include "vme_interop/vme_interop.hpp"
 #include "vme_interop_system_tests_common.hpp"
 
 bool VmeInteropSystemTests::VerifySubtest() {
-  const char *argv[] = {"compute_samples",
-                        "vme_interop",
+  const char *argv[] = {"vme_interop",
                         const_cast<char *>(input_file_.c_str()),
                         const_cast<char *>(output_file_.c_str()),
                         "--width",
@@ -36,10 +36,9 @@ bool VmeInteropSystemTests::VerifySubtest() {
                         nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
-  compute_samples::Framework framework;
+  compute_samples::VmeInteropApplication application;
   testing::internal::CaptureStdout();
-  int status = framework.run(argc, argv);
+  application.run(argc, argv);
   testing::internal::GetCapturedStdout();
-
-  return status == 1;
+  return true; // Replace with proper exit code
 }

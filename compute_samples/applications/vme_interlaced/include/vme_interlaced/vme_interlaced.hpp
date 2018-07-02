@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,9 @@ namespace src = boost::log::sources;
 
 #include <boost/thread.hpp>
 
+#include <boost/compute/core.hpp>
+namespace compute = boost::compute;
+
 #include "align_utils/align_utils.hpp"
 namespace au = compute_samples::align_utils;
 
@@ -39,11 +42,9 @@ namespace au = compute_samples::align_utils;
 
 namespace compute_samples {
 class VmeInterlacedApplication : public Application {
-public:
-  void run(std::vector<std::string> &command_line,
-           src::logger &logger) override;
-
 private:
+  void run_implementation(std::vector<std::string> &command_line,
+                          src::logger &logger) override;
   struct Arguments {
     bool output_bmp = false;
     std::string sub_test = "";

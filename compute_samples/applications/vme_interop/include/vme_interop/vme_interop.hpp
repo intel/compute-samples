@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2017 Intel Corporation
+ * Copyright(c) 2018 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,13 +29,16 @@
 #include <boost/log/sources/logger.hpp>
 namespace src = boost::log::sources;
 
+#include <boost/compute/core.hpp>
+namespace compute = boost::compute;
+
 #include "application/application.hpp"
 
 namespace compute_samples {
 class VmeInteropApplication : public Application {
 public:
-  void run(std::vector<std::string> &command_line,
-           src::logger &logger) override;
+  static const char *vme_extension_msg;
+  static const char *vaapi_extension_msg;
 
   struct Arguments {
     bool output_bmp = false;
@@ -47,14 +50,15 @@ public:
     bool help = false;
   };
 
-  static const char *vme_extension_msg;
-  static const char *vaapi_extension_msg;
-
 private:
-  Arguments parse_command_line(const std::vector<std::string> &command_line);
+  void run_implementation(std::vector<std::string> &command_line,
+                          src::logger &logger) override;
 
-  void run(std::vector<std::string> &command_line, const Arguments &args,
-           const compute::device &device, src::logger &logger) const;
+  Arguments parse_command_line(const std::vector<std::string> &command_line);
+  void run_os_specific_implementation(std::vector<std::string> &,
+                                      const Arguments &,
+                                      const compute::device &,
+                                      src::logger &logger) const;
 };
 } // namespace compute_samples
 
