@@ -47,8 +47,6 @@ target_link_libraries(${PROJECT_NAME}_lib
     compute_samples::image
 )
 
-target_compile_features(${PROJECT_NAME}_lib PUBLIC cxx_std_11)
-
 file(COPY "${PROJECT_SOURCE_DIR}/subgroups_visualization_solution.cl" DESTINATION ${CMAKE_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/subgroups_visualization_kernel.cl" ${CMAKE_BINARY_DIR})
 

@@ -45,8 +45,6 @@ target_link_libraries(${PROJECT_NAME}_lib
     Boost::program_options
 )
 
-target_compile_features(${PROJECT_NAME}_lib PUBLIC cxx_std_11)
-
 add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/commands_aggregation.cl" ${CMAKE_BINARY_DIR})
 
 install(FILES "${PROJECT_SOURCE_DIR}/commands_aggregation.cl" DESTINATION ".")

@@ -69,8 +69,6 @@ target_link_libraries(${PROJECT_NAME}_lib
 )
 endif()
 
-target_compile_features(${PROJECT_NAME}_lib PUBLIC cxx_std_11)
-
 file(COPY "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv" DESTINATION ${CMAKE_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/vme_interop.cl" ${CMAKE_BINARY_DIR})
 

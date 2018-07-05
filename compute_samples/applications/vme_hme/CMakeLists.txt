@@ -51,8 +51,6 @@ target_link_libraries(${PROJECT_NAME}_lib
     compute_samples::align_utils
 )
 
-target_compile_features(${PROJECT_NAME}_lib PUBLIC cxx_std_11)
-
 file(COPY "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv" DESTINATION ${CMAKE_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/downsample_3_tier.cl" ${CMAKE_BINARY_DIR})
 add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/vme_streaminout.cl" ${CMAKE_BINARY_DIR})

@@ -47,6 +47,9 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR} CACHE PATH "Default installation directory" FORCE)
 endif()
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Prepare mediadata
 if(DOWNLOAD_MEDIA)
     set(MEDIADATA_ROOT ${MEDIA_ROOT_DIRECTORY}/external)
@@ -144,9 +147,8 @@ if(OPENCL_ROOT)
 endif()
 find_package(OpenCL REQUIRED)
 
-enable_testing()
-
 # Prepare project
+enable_testing()
 add_subdirectory(compute_samples)
 
 if(WIN32)
