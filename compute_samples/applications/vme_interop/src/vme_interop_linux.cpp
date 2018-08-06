@@ -304,8 +304,6 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
 
     timer.print("Created opencl mem objects.");
 
-    cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
-    cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
     cl_int iterations = static_cast<cl_int>(mb_image_height);
     kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer,
                     residual_buffer, shape_buffer, iterations);
