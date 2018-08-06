@@ -73,17 +73,17 @@ private:
                                 compute::image2d &src_image,
                                 compute::image2d &ref_image, int polarity,
                                 int frame_idx, src::logger &logger) const;
-  void run_vme_interlaced(
-      const VmeInterlacedApplication::Arguments &args,
-      compute::context &context, compute::command_queue &queue,
-      compute::kernel &kernel, Capture &capture, PlanarImage &planar_image,
-      compute::image2d &src_image, compute::image2d &ref_image,
-      au::PageAlignedVector<cl_short2> &field_mvs,
-      au::PageAlignedVector<cl_uchar2> &field_shapes,
-      au::PageAlignedVector<cl_ushort> &residuals,
-      au::PageAlignedVector<cl_short2> &predictors, int width, int mb_count,
-      int mv_count, uint32_t iterations, uint8_t interlaced, int polarity,
-      int frame_idx, Timer &timer, src::logger &logger) const;
+  void run_vme_interlaced(compute::context &context,
+                          compute::command_queue &queue,
+                          compute::kernel &kernel, compute::image2d &src_image,
+                          compute::image2d &ref_image,
+                          au::PageAlignedVector<cl_short2> &field_mvs,
+                          au::PageAlignedVector<cl_uchar2> &field_shapes,
+                          au::PageAlignedVector<cl_ushort> &residuals,
+                          au::PageAlignedVector<cl_short2> &predictors,
+                          int width, int mb_count, int mv_count,
+                          uint32_t iterations, uint8_t interlaced, int polarity,
+                          Timer &timer, src::logger &logger) const;
   void get_field_capture_samples(Capture *capture,
                                  PlanarImage *top_planar_image,
                                  PlanarImage *bot_planar_image, int frame_idx,

@@ -300,16 +300,14 @@ void VmeInterlacedApplication::run_vme_interlaced_native(
                      &capture, &top_planar_image, &bot_planar_image, frame_idx,
                      &logger);
 
-  run_vme_interlaced(args, context, queue, kernel, capture, planar_image,
-                     src_image, ref_image, top_mvs, top_shapes, residuals,
-                     predictors, width, mb_count, mv_count, mb_image_height, 1,
-                     0, frame_idx, timer, logger);
+  run_vme_interlaced(context, queue, kernel, src_image, ref_image, top_mvs,
+                     top_shapes, residuals, predictors, width, mb_count,
+                     mv_count, mb_image_height, 1, 0, timer, logger);
   timer.print("Completed VME for next top field lines");
 
-  run_vme_interlaced(args, context, queue, kernel, capture, planar_image,
-                     src_image, ref_image, bot_mvs, bot_shapes, residuals,
-                     predictors, width, mb_count, mv_count, mb_image_height, 1,
-                     1, frame_idx, timer, logger);
+  run_vme_interlaced(context, queue, kernel, src_image, ref_image, bot_mvs,
+                     bot_shapes, residuals, predictors, width, mb_count,
+                     mv_count, mb_image_height, 1, 1, timer, logger);
   timer.print("Completed VME for next bottom field lines");
 
   thread.join();
@@ -362,10 +360,9 @@ void VmeInterlacedApplication::run_vme_interlaced_split(
   au::PageAlignedVector<cl_short2> predictors(au::align64(mb_count),
                                               default_predictor);
 
-  run_vme_interlaced(args, context, queue, kernel, capture, field_planar_image,
-                     src_image, ref_image, field_mvs, field_shapes, residuals,
-                     predictors, width, mb_count, mv_count, mb_image_height, 0,
-                     polarity, frame_idx, timer, logger);
+  run_vme_interlaced(context, queue, kernel, src_image, ref_image, field_mvs,
+                     field_shapes, residuals, predictors, width, mb_count,
+                     mv_count, mb_image_height, 0, polarity, timer, logger);
   queue.finish();
   timer.print("Kernel finished.");
 
@@ -376,15 +373,14 @@ void VmeInterlacedApplication::run_vme_interlaced_split(
 }
 
 void VmeInterlacedApplication::run_vme_interlaced(
-    const VmeInterlacedApplication::Arguments &args, compute::context &context,
-    compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
-    PlanarImage &planar_image, compute::image2d &src_image,
+    compute::context &context, compute::command_queue &queue,
+    compute::kernel &kernel, compute::image2d &src_image,
     compute::image2d &ref_image, au::PageAlignedVector<cl_short2> &mvs,
     au::PageAlignedVector<cl_uchar2> &shapes,
     au::PageAlignedVector<cl_ushort> &residuals,
     au::PageAlignedVector<cl_short2> &predictors, int width, int mb_count,
     int mv_count, uint32_t iterations, uint8_t interlaced, int polarity,
-    int frame_idx, Timer &timer, src::logger &logger) const {
+    Timer &timer, src::logger &logger) const {
   try {
     BOOST_LOG(logger) << "Creating opencl mem objects...";
     compute::buffer mv_buffer(
