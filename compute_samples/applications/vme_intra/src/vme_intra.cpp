@@ -393,8 +393,6 @@ void VmeIntraApplication::run_vme_intra(
     size_t global_size = au::align16(width);
     compute::event event = queue.enqueue_nd_range_kernel(
         intra_kernel, 1, nullptr, &global_size, &local_size);
-    cl_int status = event.get_info<cl_int>(CL_EVENT_COMMAND_EXECUTION_STATUS);
-    assert(status);
     timer.print("Enquequed tier 0 vme_intra kernel");
 
     event.wait();
