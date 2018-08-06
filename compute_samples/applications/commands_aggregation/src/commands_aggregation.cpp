@@ -51,15 +51,16 @@ compute::kernel create_kernel(const compute::context &context,
   return program.create_kernel(kernel_name);
 }
 
-std::vector<uint32_t> create_input_data(const size_t global_work_size) {
+std::vector<uint32_t> create_input_data(const int global_work_size) {
   const uint32_t number_of_kernels = 10;
-  const size_t number_of_elements = number_of_kernels * global_work_size;
+  const int number_of_elements = number_of_kernels * global_work_size;
   return std::vector<uint32_t>(number_of_elements, 0);
 }
 
 compute::buffer create_buffer(const compute::context &context,
                               std::vector<uint32_t> &data) {
-  const size_t data_size_in_bytes = data.size() * sizeof(uint32_t);
+  const int data_size_in_bytes =
+      static_cast<int>(data.size() * sizeof(uint32_t));
   return compute::buffer(
       context, data_size_in_bytes,
       compute::buffer::read_write | compute::buffer::use_host_ptr, data.data());
@@ -90,7 +91,7 @@ CommandsAggregationApplication::parse_command_line(
   options("help,h", "show help message");
   options("in-order", "enable in-order execution in a single command queue");
   options("work-size",
-          po::value<size_t>(&args.global_work_size)->default_value(512),
+          po::value<int>(&args.global_work_size)->default_value(512),
           "size of a global work group");
 
   po::positional_options_description p;
@@ -116,7 +117,7 @@ CommandsAggregationApplication::parse_command_line(
 
 std::vector<uint32_t>
 CommandsAggregationApplication::run_workloads_out_of_order(
-    const size_t global_work_size, src::logger &logger) const {
+    const int global_work_size, src::logger &logger) const {
   BOOST_LOG(logger) << "Work size: " << global_work_size;
 
   const compute::device device = compute::system::default_device();
@@ -201,7 +202,7 @@ CommandsAggregationApplication::run_workloads_out_of_order(
 }
 
 std::vector<uint32_t> CommandsAggregationApplication::run_workloads_in_order(
-    const size_t global_work_size, src::logger &logger) const {
+    const int global_work_size, src::logger &logger) const {
   BOOST_LOG(logger) << "Work size: " << global_work_size;
 
   const compute::device device = compute::system::default_device();

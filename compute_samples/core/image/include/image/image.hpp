@@ -34,13 +34,13 @@ public:
   virtual bool read(const std::string &image_path) = 0;
   virtual bool write(const std::string &image_path) = 0;
   virtual bool write(const std::string &image_path, const T *data) = 0;
-  virtual size_t width() const = 0;
-  virtual size_t height() const = 0;
-  virtual size_t number_of_channels() const = 0;
-  virtual size_t bits_per_channel() const = 0;
-  virtual size_t bits_per_pixel() const = 0;
-  virtual size_t size() const = 0;
-  virtual size_t size_in_bytes() const = 0;
+  virtual int width() const = 0;
+  virtual int height() const = 0;
+  virtual int number_of_channels() const = 0;
+  virtual int bits_per_channel() const = 0;
+  virtual int bits_per_pixel() const = 0;
+  virtual int size() const = 0;
+  virtual int size_in_bytes() const = 0;
   virtual std::vector<T> get_pixels() const = 0;
   virtual void copy_raw_data(const T *data) = 0;
   virtual T *raw_data() = 0;
@@ -51,17 +51,17 @@ template <typename T> class ImagePNG : public Image<T> {
 public:
   ImagePNG();
   ImagePNG(const std::string &image_path);
-  ImagePNG(const unsigned width, const unsigned height);
+  ImagePNG(const int width, const int height);
   bool read(const std::string &image_path) override;
   bool write(const std::string &image_path) override;
   bool write(const std::string &image_path, const T *data) override;
-  size_t width() const override;
-  size_t height() const override;
-  size_t number_of_channels() const override;
-  size_t bits_per_channel() const;
-  size_t bits_per_pixel() const;
-  size_t size() const override;
-  size_t size_in_bytes() const override;
+  int width() const override;
+  int height() const override;
+  int number_of_channels() const override;
+  int bits_per_channel() const;
+  int bits_per_pixel() const;
+  int size() const override;
+  int size_in_bytes() const override;
   std::vector<T> get_pixels() const override;
   void copy_raw_data(const T *data) override;
   T *raw_data() override;
@@ -71,8 +71,8 @@ public:
 
 private:
   std::vector<T> pixels_;
-  size_t width_;
-  size_t height_;
+  int width_;
+  int height_;
 };
 
 typedef ImagePNG<uint32_t> ImagePNG32Bit;
@@ -81,17 +81,17 @@ template <typename T> class ImageBMP : public Image<T> {
 public:
   ImageBMP();
   ImageBMP(const std::string &image_path);
-  ImageBMP(const unsigned width, const unsigned height);
+  ImageBMP(const int width, const int height);
   bool read(const std::string &image_path) override;
   bool write(const std::string &image_path) override;
   bool write(const std::string &image_path, const T *data) override;
-  size_t width() const override;
-  size_t height() const override;
-  size_t number_of_channels() const override;
-  size_t bits_per_channel() const;
-  size_t bits_per_pixel() const;
-  size_t size() const override;
-  size_t size_in_bytes() const override;
+  int width() const override;
+  int height() const override;
+  int number_of_channels() const override;
+  int bits_per_channel() const;
+  int bits_per_pixel() const;
+  int size() const override;
+  int size_in_bytes() const override;
   std::vector<T> get_pixels() const override;
   void copy_raw_data(const T *data) override;
   T *raw_data() override;
@@ -101,8 +101,8 @@ public:
 
 private:
   std::vector<T> pixels_;
-  size_t width_;
-  size_t height_;
+  int width_;
+  int height_;
 };
 
 typedef ImageBMP<uint8_t> ImageBMP8Bit;

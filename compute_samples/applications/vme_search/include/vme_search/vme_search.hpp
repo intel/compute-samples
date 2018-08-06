@@ -44,10 +44,10 @@ private:
     std::string sub_test = "";
     std::string input_yuv_path = "";
     std::string output_yuv_path = "";
-    size_t qp = 0;
-    size_t width = 0;
-    size_t height = 0;
-    size_t frames = 0;
+    int qp = 0;
+    int width = 0;
+    int height = 0;
+    int frames = 0;
     bool help = false;
   };
 
@@ -56,7 +56,7 @@ private:
                       compute::kernel &kernel, Capture &capture,
                       PlanarImage &src_planar_image,
                       compute::image2d &src_image, compute::image2d &ref_image,
-                      size_t frame_idx, src::logger &logger) const;
+                      int frame_idx, src::logger &logger) const;
   Arguments parse_command_line(const std::vector<std::string> &command_line);
 };
 } // namespace compute_samples

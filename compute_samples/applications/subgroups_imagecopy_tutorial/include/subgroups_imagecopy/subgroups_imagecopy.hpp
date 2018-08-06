@@ -43,7 +43,7 @@ private:
     std::string kernel_path = "";
     std::string input = "";
     std::string output = "";
-    unsigned iterations = 1000;
+    int iterations = 1000;
     bool help = false;
   };
   Arguments

@@ -89,8 +89,7 @@ SubgroupsImageCopyApplication::parse_command_line(
   options("output,o",
           po::value<std::string>(&args.output)->default_value("output.bmp"),
           "Output Bitmap.");
-  options("iterations,n",
-          po::value<unsigned>(&args.iterations)->default_value(1000),
+  options("iterations,n", po::value<int>(&args.iterations)->default_value(1000),
           "Number of iterations to run.");
 
   po::positional_options_description p;
@@ -140,7 +139,8 @@ void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
 
   kernel.set_args(outputImage, inputImage);
 
-  compute::extents<2> globalSize{image.width() / 4, image.height()};
+  compute::extents<2> globalSize{static_cast<size_t>(image.width() / 4),
+                                 static_cast<size_t>(image.height())};
   compute::extents<2> localSize{32, 1};
 
   BOOST_LOG(logger) << "Executing " << args.iterations << " iterations.";
@@ -154,7 +154,7 @@ void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
 
   Timer timer_execution(logger);
 
-  for (unsigned i = 0; i < args.iterations; i++) {
+  for (int i = 0; i < args.iterations; i++) {
     // By default, the global work size is setup so there is one work item
     // for every four image elements, and the local work size is fixed to
     // describe a one-dimensional 32x1 work group.  It may be possible to
@@ -170,7 +170,7 @@ void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
 
   size_t row_pitch = 0;
   size_t slice_pitch = 0;
-  unsigned char *data = static_cast<unsigned char *>(queue.enqueue_map_image(
+  uint8_t *data = static_cast<uint8_t *>(queue.enqueue_map_image(
       outputImage, CL_MAP_READ, compute::dim(0, 0),
       compute::dim(outputImage.width(), outputImage.height()), row_pitch,
       slice_pitch));

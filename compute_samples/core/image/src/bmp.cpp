@@ -65,13 +65,13 @@ struct BMPRGBQUAD_t {
 
 const uint32_t BI_RGB = 0;
 
-bool BmpUtils::save_image_as_bmp(uint32_t *ptr, size_t width, size_t height,
+bool BmpUtils::save_image_as_bmp(uint32_t *ptr, int width, int height,
                                  const char *file_name) {
-  FILE *stream = NULL;
+  FILE *stream = nullptr;
   uint32_t *ppix = ptr;
   stream = fopen(file_name, "wb");
 
-  if (NULL == stream)
+  if (nullptr == stream)
     return false;
 
   BMPFileHeader file_header;
@@ -113,10 +113,10 @@ bool BmpUtils::save_image_as_bmp(uint32_t *ptr, size_t width, size_t height,
     goto error_exit;
   }
 
-  unsigned char buffer[4];
+  uint8_t buffer[4];
   memset(buffer, 0, sizeof(buffer));
-  for (unsigned y = 0; y < height; y++) {
-    for (unsigned x = 0; x < width; x++, ppix++) {
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++, ppix++) {
       if (4 != fwrite(ppix, 1, 4, stream)) {
         goto error_exit;
       }
@@ -132,8 +132,8 @@ error_exit:
   return false;
 }
 
-bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, size_t width,
-                                       size_t height, const char *file_name) {
+bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, int width,
+                                       int height, const char *file_name) {
   // save results in bitmap files
   float tmp_f_val = 0.0f;
   uint32_t *out_u_int_buf =
@@ -143,8 +143,8 @@ bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, size_t width,
     return false;
   }
 
-  for (size_t y = 0; y < height; y++) {
-    for (size_t x = 0; x < width; x++) {
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
       // Ensure that no value is greater than 255.0
       uint32_t ui_tmp[4];
       tmp_f_val = (scale * ptr[(y * width + x) * 4 + 0]);
@@ -182,8 +182,8 @@ bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, size_t width,
   return res;
 }
 
-bool BmpUtils::save_image_as_bmp_8u(unsigned char *ptr, size_t width,
-                                    size_t height, const char *file_name) {
+bool BmpUtils::save_image_as_bmp_8u(uint8_t *ptr, int width, int height,
+                                    const char *file_name) {
   uint32_t *out_u_int_buf =
       (uint32_t *)malloc(width * height * sizeof(uint32_t));
   if (!out_u_int_buf) {
@@ -191,9 +191,9 @@ bool BmpUtils::save_image_as_bmp_8u(unsigned char *ptr, size_t width,
     return false;
   }
 
-  for (size_t y = 0; y < height; y++) {
-    for (size_t x = 0; x < width; x++) {
-      unsigned char uc_data = ptr[y * width + x];
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      uint8_t uc_data = ptr[y * width + x];
 
       uint32_t ui_data =
           0xFF000000 + (uc_data << 16) + (uc_data << 8) + (uc_data);
@@ -207,14 +207,14 @@ bool BmpUtils::save_image_as_bmp_8u(unsigned char *ptr, size_t width,
   return res;
 }
 
-bool BmpUtils::load_bmp_image(unsigned char *&data, size_t &width,
-                              size_t &height, size_t &pitch,
-                              uint16_t &bits_per_pixel, const char *file_name) {
-  FILE *stream = NULL;
+bool BmpUtils::load_bmp_image(uint8_t *&data, int &width, int &height,
+                              int &pitch, uint16_t &bits_per_pixel,
+                              const char *file_name) {
+  FILE *stream = nullptr;
 
   stream = fopen(file_name, "rb");
 
-  if (NULL == stream)
+  if (nullptr == stream)
     return false;
 
   BMPFileHeader file_header;
@@ -246,19 +246,20 @@ bool BmpUtils::load_bmp_image(unsigned char *&data, size_t &width,
   if ((height > (1 << 16)) || (pitch > (1 << 16)))
     goto error_exit;
 
-  data = new unsigned char[height * pitch];
-  if (NULL == data)
+  data = new uint8_t[height * pitch];
+  if (nullptr == data)
     goto error_exit;
 
   if (info_header.bi_height_ > 0) {
-    for (size_t h = 0; h < height; h++) {
-      unsigned char *dst = data + (height - h - 1) * pitch;
-      if (pitch != fread(dst, 1, pitch, stream)) {
+    for (int h = 0; h < height; h++) {
+      uint8_t *dst = data + (height - h - 1) * pitch;
+      if (pitch != static_cast<int>(fread(dst, 1, pitch, stream))) {
         goto error_exit;
       }
     }
   } else {
-    if (height * pitch != fread(data, 1, height * pitch, stream)) {
+    if (height * pitch !=
+        static_cast<int>(fread(data, 1, height * pitch, stream))) {
       goto error_exit;
     }
   }
@@ -271,10 +272,10 @@ error_exit:
   return false;
 }
 
-bool BmpUtils::load_bmp_image_8u(unsigned char *&data, size_t &width,
-                                 size_t &height, const char *file_name) {
+bool BmpUtils::load_bmp_image_8u(uint8_t *&data, int &width, int &height,
+                                 const char *file_name) {
   // First, load the BMP image generally:
-  size_t src_pitch = 0;
+  int src_pitch = 0;
   uint16_t src_bits_per_pixel = 0;
 
   bool success = load_bmp_image(data, width, height, src_pitch,
@@ -289,12 +290,12 @@ bool BmpUtils::load_bmp_image_8u(unsigned char *&data, size_t &width,
     success = false;
   }
 
-  size_t dst_pitch = width;
-  unsigned char *data8u = NULL;
+  int dst_pitch = width;
+  uint8_t *data8u = nullptr;
 
   if (success) {
-    data8u = new unsigned char[height * dst_pitch];
-    if (NULL == data8u) {
+    data8u = new uint8_t[height * dst_pitch];
+    if (nullptr == data8u) {
       success = false;
     }
     if ((width > (1 << 16)) || (height > (1 << 16))) {
@@ -303,18 +304,18 @@ bool BmpUtils::load_bmp_image_8u(unsigned char *&data, size_t &width,
   }
 
   if (success) {
-    unsigned char *src_start = data;
-    unsigned char *dst_start = data8u;
+    uint8_t *src_start = data;
+    uint8_t *dst_start = data8u;
     uint16_t src_bytes_per_pixel = (src_bits_per_pixel + 7) / 8;
     uint16_t dst_bytes_per_pixel = 1;
 
-    for (size_t h = 0; h < height;
+    for (int h = 0; h < height;
          h++, src_start += src_pitch, dst_start += dst_pitch) {
-      unsigned char *src_pixel = src_start;
-      unsigned char *dst_pixel = dst_start;
+      uint8_t *src_pixel = src_start;
+      uint8_t *dst_pixel = dst_start;
 
-      for (size_t w = 0; w < width; w++, src_pixel += src_bytes_per_pixel,
-                  dst_pixel += dst_bytes_per_pixel) {
+      for (int w = 0; w < width; w++, src_pixel += src_bytes_per_pixel,
+               dst_pixel += dst_bytes_per_pixel) {
         switch (src_bits_per_pixel) {
         case 8:
           dst_pixel[0] = src_pixel[0];

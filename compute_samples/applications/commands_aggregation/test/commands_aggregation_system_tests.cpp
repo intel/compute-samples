@@ -35,14 +35,14 @@ TEST(CommandsAggregationApplication, RunsWithoutThrowingExceptions) {
 
 TEST(CommandsAggregationApplication, ComputesExpectedResultsUsingSingleQueue) {
   compute_samples::CommandsAggregationApplication app;
-  const size_t global_work_size = 128;
+  const int global_work_size = 128;
   src::logger logger;
 
   const std::vector<uint32_t> output =
       app.run_workloads_in_order(global_work_size, logger);
 
-  const size_t number_of_kernels = 10;
-  const size_t number_of_iterations = 1000000;
+  const int number_of_kernels = 10;
+  const int number_of_iterations = 1000000;
   const std::vector<uint32_t> reference(number_of_kernels * global_work_size,
                                         number_of_iterations);
   EXPECT_EQ(output, reference);
@@ -51,14 +51,14 @@ TEST(CommandsAggregationApplication, ComputesExpectedResultsUsingSingleQueue) {
 TEST(CommandsAggregationApplication,
      ComputesExpectedResultsUsingMultipleQueues) {
   compute_samples::CommandsAggregationApplication app;
-  const size_t global_work_size = 128;
+  const int global_work_size = 128;
   src::logger logger;
 
   const std::vector<uint32_t> output =
       app.run_workloads_out_of_order(global_work_size, logger);
 
-  const size_t number_of_kernels = 10;
-  const size_t number_of_iterations = 1000000;
+  const int number_of_kernels = 10;
+  const int number_of_iterations = 1000000;
   const std::vector<uint32_t> reference(number_of_kernels * global_work_size,
                                         number_of_iterations);
   EXPECT_EQ(output, reference);

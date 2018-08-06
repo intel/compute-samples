@@ -88,10 +88,9 @@ SubgroupsVisualizationApplication::parse_command_line(
           po::value<std::string>(&args.output)->default_value("output.bmp"),
           "Output Bitmap.");
   options("global_size,g",
-          po::value<size_t>(&args.global_size)->default_value(256),
+          po::value<int>(&args.global_size)->default_value(256),
           "Global Work Size.");
-  options("local_size,l",
-          po::value<size_t>(&args.local_size)->default_value(128),
+  options("local_size,l", po::value<int>(&args.local_size)->default_value(128),
           "Local Work Size");
 
   po::positional_options_description p;
@@ -144,7 +143,7 @@ void SubgroupsVisualizationApplication::run_subgroups_visualization(
   // non-uniform work groups, so the local work size need not evenly divide
   // the global work size.
   compute::extents<2> globalSize{image.width(), image.height()};
-  compute::extents<2> localSize{args.local_size, 1};
+  compute::extents<2> localSize{static_cast<size_t>(args.local_size), 1};
   queue.enqueue_nd_range_kernel(kernel, compute::dim(0, 0), globalSize,
                                 localSize);
 
@@ -158,7 +157,7 @@ void SubgroupsVisualizationApplication::run_subgroups_visualization(
 
   size_t row_pitch = 0;
   size_t slice_pitch = 0;
-  unsigned char *data = static_cast<unsigned char *>(queue.enqueue_map_image(
+  uint8_t *data = static_cast<uint8_t *>(queue.enqueue_map_image(
       image, CL_MAP_READ, compute::dim(0, 0),
       compute::dim(image.width(), image.height()), row_pitch, slice_pitch));
 

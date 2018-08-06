@@ -64,11 +64,11 @@ VmeInteropApplication::Arguments VmeInteropApplication::parse_command_line(
           po::value<std::string>(&args.output_yuv_path)
               ->default_value("output_goal_1280x720.yuv"),
           "path to output yuv with motion vectors");
-  options("width,w", po::value<size_t>(&args.width)->default_value(1280),
+  options("width,w", po::value<int>(&args.width)->default_value(1280),
           "width of input yuv");
-  options("height,h", po::value<size_t>(&args.height)->default_value(720),
+  options("height,h", po::value<int>(&args.height)->default_value(720),
           "height of input yuv");
-  options("frames,f", po::value<size_t>(&args.frames)->default_value(0),
+  options("frames,f", po::value<int>(&args.frames)->default_value(0),
           "number of frame to use for motion estimation (0 represents entire "
           "yuv sequence)");
 

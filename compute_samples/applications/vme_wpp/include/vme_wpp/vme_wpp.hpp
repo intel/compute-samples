@@ -43,10 +43,10 @@ private:
     bool output_bmp = false;
     std::string input_yuv_path = "";
     std::string output_yuv_path = "";
-    size_t qp = 0;
-    size_t width = 0;
-    size_t height = 0;
-    size_t frames = 0;
+    int qp = 0;
+    int width = 0;
+    int height = 0;
+    int frames = 0;
     bool help = false;
   };
 
@@ -59,7 +59,7 @@ private:
               compute::image2d &ref_image, compute::image2d &src_2x_image,
               compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
               compute::image2d &ref_4x_image, compute::image2d &src_8x_image,
-              compute::image2d &ref_8x_image, size_t frame_idx,
+              compute::image2d &ref_8x_image, int frame_idx,
               src::logger &logger) const;
   Arguments parse_command_line(const std::vector<std::string> &command_line);
 };

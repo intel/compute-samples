@@ -70,11 +70,11 @@ VmeInterlacedApplication::parse_command_line(
           po::value<std::string>(&args.output_bot_yuv_path)
               ->default_value("output_bot_football_interlaced_720x480.yuv"),
           "path to output bot field frame yuv with motion vectors");
-  options("width,w", po::value<size_t>(&args.width)->default_value(720),
+  options("width,w", po::value<int>(&args.width)->default_value(720),
           "width of input yuv");
-  options("height,h", po::value<size_t>(&args.height)->default_value(480),
+  options("height,h", po::value<int>(&args.height)->default_value(480),
           "height of input yuv");
-  options("frames,f", po::value<size_t>(&args.frames)->default_value(0),
+  options("frames,f", po::value<int>(&args.frames)->default_value(0),
           "number of frame to use for motion estimation (0 represents entire "
           "yuv sequence)");
 
@@ -158,9 +158,9 @@ void VmeInterlacedApplication::run_implementation(
 
   Capture *capture = Capture::create_file_capture(
       args.input_yuv_path, args.width, args.height, args.frames);
-  const size_t frame_count =
+  const int frame_count =
       (args.frames) ? args.frames : capture->get_num_frames();
-  const size_t field_height = args.height / 2;
+  const int field_height = args.height / 2;
 
   FrameWriter *top_writer = FrameWriter::create_frame_writer(
       args.width, field_height, frame_count, args.output_bmp);
@@ -183,7 +183,8 @@ void VmeInterlacedApplication::run_implementation(
     timer.print("Read YUV frame 0 from disk to CPU linear memory.");
 
     size_t origin[] = {0, 0, 0};
-    size_t region[] = {args.width, args.height, 1};
+    size_t region[] = {static_cast<size_t>(args.width),
+                       static_cast<size_t>(args.height), 1};
     queue.enqueue_write_image(src_image, origin, region, planar_image->get_y(),
                               planar_image->get_pitch_y());
     timer.print("Copied interlaced frame 0 to tiled memory.");
@@ -195,7 +196,7 @@ void VmeInterlacedApplication::run_implementation(
     top_writer->append_frame(*top_planar_image);
     bot_writer->append_frame(*bot_planar_image);
 
-    for (size_t k = 1; k < frame_count; k++) {
+    for (int k = 1; k < frame_count; k++) {
       BOOST_LOG(logger) << "Processing frame " << k << "...\n";
       run_vme_interlaced_native(args, context, queue, kernel, *capture,
                                 *planar_image, *top_planar_image,
@@ -222,13 +223,14 @@ void VmeInterlacedApplication::run_implementation(
       field_writer[j]->append_frame(*field_planar_image[j]);
 
       size_t origin[] = {0, 0, 0};
-      size_t region[] = {args.width, field_height, 1};
+      size_t region[] = {static_cast<size_t>(args.width),
+                         static_cast<size_t>(field_height), 1};
       queue.enqueue_write_image(src_image, origin, region,
                                 field_planar_image[j]->get_y(),
                                 field_planar_image[j]->get_pitch_y());
       timer.print("Copied field frame 0 to tiled memory.");
 
-      for (size_t k = 1; k < frame_count; k++) {
+      for (int k = 1; k < frame_count; k++) {
         BOOST_LOG(logger) << "Processing field frame " << k << "...\n";
         run_vme_interlaced_split(args, context, queue, kernel, *capture,
                                  *field_planar_image[j], src_image, ref_image,
@@ -262,17 +264,17 @@ void VmeInterlacedApplication::run_vme_interlaced_native(
     compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
     PlanarImage &planar_image, PlanarImage &top_planar_image,
     PlanarImage &bot_planar_image, compute::image2d &src_image,
-    compute::image2d &ref_image, size_t frame_idx, src::logger &logger) const {
+    compute::image2d &ref_image, int frame_idx, src::logger &logger) const {
   Timer timer(logger);
 
-  size_t width = args.width;
-  size_t height = args.height;
-  size_t mb_image_width = au::align_units(width, 16);
-  size_t mb_image_height = au::align_units(height, 16) / 2;
-  size_t mv_image_width = mb_image_width * 4;
-  size_t mv_image_height = mb_image_height * 4;
-  size_t mv_count = mv_image_width * mv_image_height;
-  size_t mb_count = mb_image_width * mb_image_height;
+  int width = args.width;
+  int height = args.height;
+  int mb_image_width = au::align_units(width, 16);
+  int mb_image_height = au::align_units(height, 16) / 2;
+  int mv_image_width = mb_image_width * 4;
+  int mv_image_height = mb_image_height * 4;
+  int mv_count = mv_image_width * mv_image_height;
+  int mb_count = mb_image_width * mb_image_height;
 
   capture.get_sample(frame_idx, planar_image);
   timer.print("Read next YUV frame from disk to CPU linear memory.");
@@ -280,7 +282,8 @@ void VmeInterlacedApplication::run_vme_interlaced_native(
   std::swap(ref_image, src_image);
 
   size_t origin[] = {0, 0, 0};
-  size_t region[] = {width, height, 1};
+  size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
+                     1};
   queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
                             planar_image.get_pitch_y());
   timer.print("Copied next frame to GPU tiled memory.");
@@ -326,18 +329,18 @@ void VmeInterlacedApplication::run_vme_interlaced_split(
     const VmeInterlacedApplication::Arguments &args, compute::context &context,
     compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
     PlanarImage &field_planar_image, compute::image2d &src_image,
-    compute::image2d &ref_image, uint8_t polarity, size_t frame_idx,
+    compute::image2d &ref_image, int polarity, int frame_idx,
     src::logger &logger) const {
   Timer timer(logger);
 
-  size_t width = args.width;
-  size_t height = args.height / 2;
-  size_t mb_image_width = au::align_units(width, 16);
-  size_t mb_image_height = au::align_units(height, 16);
-  size_t mv_image_width = mb_image_width * 4;
-  size_t mv_image_height = mb_image_height * 4;
-  size_t mv_count = mv_image_width * mv_image_height;
-  size_t mb_count = mb_image_width * mb_image_height;
+  int width = args.width;
+  int height = args.height / 2;
+  int mb_image_width = au::align_units(width, 16);
+  int mb_image_height = au::align_units(height, 16);
+  int mv_image_width = mb_image_width * 4;
+  int mv_image_height = mb_image_height * 4;
+  int mv_count = mv_image_width * mv_image_height;
+  int mb_count = mb_image_width * mb_image_height;
 
   capture.get_sample(frame_idx, field_planar_image, true, polarity);
   timer.print("Read next YUV frame from disk to CPU linear memory.");
@@ -345,7 +348,8 @@ void VmeInterlacedApplication::run_vme_interlaced_split(
   std::swap(ref_image, src_image);
 
   size_t origin[] = {0, 0, 0};
-  size_t region[] = {width, height, 1};
+  size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
+                     1};
   queue.enqueue_write_image(src_image, origin, region,
                             field_planar_image.get_y(),
                             field_planar_image.get_pitch_y());
@@ -378,9 +382,9 @@ void VmeInterlacedApplication::run_vme_interlaced(
     compute::image2d &ref_image, au::PageAlignedVector<cl_short2> &mvs,
     au::PageAlignedVector<cl_uchar2> &shapes,
     au::PageAlignedVector<cl_ushort> &residuals,
-    au::PageAlignedVector<cl_short2> &predictors, size_t width, size_t mb_count,
-    size_t mv_count, uint32_t iterations, uint8_t interlaced, uint8_t polarity,
-    size_t frame_idx, Timer &timer, src::logger &logger) const {
+    au::PageAlignedVector<cl_short2> &predictors, int width, int mb_count,
+    int mv_count, uint32_t iterations, uint8_t interlaced, int polarity,
+    int frame_idx, Timer &timer, src::logger &logger) const {
   try {
     BOOST_LOG(logger) << "Creating opencl mem objects...";
     compute::buffer mv_buffer(
@@ -397,8 +401,9 @@ void VmeInterlacedApplication::run_vme_interlaced(
         CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, predictors.data());
     timer.print("Created opencl mem objects.");
 
-    kernel.set_args(src_image, ref_image, interlaced, polarity, pred_buffer,
-                    mv_buffer, residual_buffer, shape_buffer, iterations);
+    kernel.set_args(src_image, ref_image, interlaced,
+                    static_cast<uint8_t>(polarity), pred_buffer, mv_buffer,
+                    residual_buffer, shape_buffer, iterations);
     size_t local_size = 16;
     size_t global_size = au::align16(width);
     queue.enqueue_nd_range_kernel(kernel, 1, nullptr, &global_size,
@@ -413,8 +418,7 @@ void VmeInterlacedApplication::run_vme_interlaced(
 
 void VmeInterlacedApplication::get_field_capture_samples(
     Capture *capture, PlanarImage *top_planar_image,
-    PlanarImage *bot_planar_image, size_t frame_idx,
-    src::logger *logger) const {
+    PlanarImage *bot_planar_image, int frame_idx, src::logger *logger) const {
   Timer timer(*logger);
   capture->get_sample(frame_idx, *top_planar_image, true, 0);
   timer.print("Read YUV next top frame from disk to CPU linear memory");

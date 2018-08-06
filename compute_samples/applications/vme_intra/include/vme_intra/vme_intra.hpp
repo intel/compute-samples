@@ -43,24 +43,22 @@ private:
     bool output_bmp = false;
     std::string input_yuv_path = "";
     std::string output_yuv_path = "";
-    size_t qp = 0;
-    size_t width = 0;
-    size_t height = 0;
-    size_t frames = 0;
+    int qp = 0;
+    int width = 0;
+    int height = 0;
+    int frames = 0;
     bool help = false;
   };
 
-  void
-  run_vme_intra(const VmeIntraApplication::Arguments &args,
-                compute::context &context, compute::command_queue &queue,
-                compute::kernel &ds_kernel, compute::kernel &hme_n_kernel,
-                compute::kernel &intra_kernel, Capture &capture,
-                PlanarImage &planar_image, compute::image2d &src_image,
-                compute::image2d &ref_image, compute::image2d &src_2x_image,
-                compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
-                compute::image2d &ref_4x_image, compute::image2d &src_8x_image,
-                compute::image2d &ref_8x_image, size_t frame_idx,
-                src::logger &logger) const;
+  void run_vme_intra(
+      const VmeIntraApplication::Arguments &args, compute::context &context,
+      compute::command_queue &queue, compute::kernel &ds_kernel,
+      compute::kernel &hme_n_kernel, compute::kernel &intra_kernel,
+      Capture &capture, PlanarImage &planar_image, compute::image2d &src_image,
+      compute::image2d &ref_image, compute::image2d &src_2x_image,
+      compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
+      compute::image2d &ref_4x_image, compute::image2d &src_8x_image,
+      compute::image2d &ref_8x_image, int frame_idx, src::logger &logger) const;
   void write_results_to_file(const cl_ulong *intra_modes,
                              const cl_uchar *intra_shapes,
                              const cl_ushort *intra_residuals,

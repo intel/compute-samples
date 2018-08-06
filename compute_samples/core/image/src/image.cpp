@@ -37,7 +37,7 @@ template <typename T> ImagePNG<T>::ImagePNG(const std::string &image_path) {
 }
 
 template <typename T>
-ImagePNG<T>::ImagePNG(const unsigned width, const unsigned height)
+ImagePNG<T>::ImagePNG(const int width, const int height)
     : width_(width), height_(height) {
   pixels_.resize(size());
 }
@@ -51,8 +51,8 @@ template <> bool ImagePNG<uint32_t>::read(const std::string &image_path) {
         (pixel[0] << 24) + (pixel[1] << 16) + (pixel[2] << 8) + pixel[3];
     pixels_.push_back(raw_pixel);
   }
-  width_ = view.width();
-  height_ = view.height();
+  width_ = static_cast<int>(view.width());
+  height_ = static_cast<int>(view.height());
   return false;
 }
 
@@ -60,7 +60,7 @@ template <> bool ImagePNG<uint32_t>::write(const std::string &image_path) {
   gil::rgba8_image_t image(width(), height());
   std::vector<gil::rgba8_pixel_t> channels;
   gil::rgba8_view_t view = gil::view(image);
-  for (size_t id = 0; id < pixels_.size(); ++id) {
+  for (int id = 0; id < static_cast<int>(pixels_.size()); ++id) {
     uint32_t raw_pixel = pixels_[id];
     gil::rgba8_pixel_t pixel;
     pixel[3] = raw_pixel & 0xFF;
@@ -79,26 +79,26 @@ bool ImagePNG<T>::write(const std::string &image_path, const T *data) {
   return write(image_path);
 }
 
-template <typename T> size_t ImagePNG<T>::width() const { return width_; }
+template <typename T> int ImagePNG<T>::width() const { return width_; }
 
-template <typename T> size_t ImagePNG<T>::height() const { return height_; }
+template <typename T> int ImagePNG<T>::height() const { return height_; }
 
-template <typename T> size_t ImagePNG<T>::number_of_channels() const {
+template <typename T> int ImagePNG<T>::number_of_channels() const {
   return bits_per_pixel() / bits_per_channel();
 }
 
-template <typename T> size_t ImagePNG<T>::bits_per_channel() const { return 8; }
+template <typename T> int ImagePNG<T>::bits_per_channel() const { return 8; }
 
-template <typename T> size_t ImagePNG<T>::bits_per_pixel() const {
+template <typename T> int ImagePNG<T>::bits_per_pixel() const {
   return std::numeric_limits<T>::digits;
 }
 
-template <typename T> size_t ImagePNG<T>::size() const {
+template <typename T> int ImagePNG<T>::size() const {
   return width() * height();
 }
 
-template <typename T> size_t ImagePNG<T>::size_in_bytes() const {
-  return pixels_.size() * sizeof(T);
+template <typename T> int ImagePNG<T>::size_in_bytes() const {
+  return static_cast<int>(pixels_.size() * sizeof(T));
 }
 
 template <typename T>
@@ -130,7 +130,7 @@ template <typename T> ImageBMP<T>::ImageBMP(const std::string &image_path) {
 }
 
 template <typename T>
-ImageBMP<T>::ImageBMP(const unsigned width, const unsigned height)
+ImageBMP<T>::ImageBMP(const int width, const int height)
     : width_(width), height_(height) {
   pixels_.resize(size());
 }
@@ -138,7 +138,7 @@ ImageBMP<T>::ImageBMP(const unsigned width, const unsigned height)
 template <typename T> bool ImageBMP<T>::read(const std::string &image_path) {
   std::unique_ptr<uint8_t> data = nullptr;
   uint8_t *tmp = nullptr;
-  size_t pitch = 0;
+  int pitch = 0;
   uint16_t bits_per_pixel = 0;
   bool error = !BmpUtils::load_bmp_image(tmp, width_, height_, pitch,
                                          bits_per_pixel, image_path.c_str());
@@ -175,26 +175,26 @@ bool ImageBMP<T>::write(const std::string &image_path, const T *data) {
   return write(image_path);
 }
 
-template <typename T> size_t ImageBMP<T>::width() const { return width_; }
+template <typename T> int ImageBMP<T>::width() const { return width_; }
 
-template <typename T> size_t ImageBMP<T>::height() const { return height_; }
+template <typename T> int ImageBMP<T>::height() const { return height_; }
 
-template <typename T> size_t ImageBMP<T>::number_of_channels() const {
+template <typename T> int ImageBMP<T>::number_of_channels() const {
   return bits_per_pixel() / bits_per_channel();
 }
 
-template <typename T> size_t ImageBMP<T>::bits_per_channel() const { return 8; }
+template <typename T> int ImageBMP<T>::bits_per_channel() const { return 8; }
 
-template <typename T> size_t ImageBMP<T>::bits_per_pixel() const {
+template <typename T> int ImageBMP<T>::bits_per_pixel() const {
   return std::numeric_limits<T>::digits;
 }
 
-template <typename T> size_t ImageBMP<T>::size() const {
+template <typename T> int ImageBMP<T>::size() const {
   return width() * height();
 }
 
-template <typename T> size_t ImageBMP<T>::size_in_bytes() const {
-  return pixels_.size() * sizeof(T);
+template <typename T> int ImageBMP<T>::size_in_bytes() const {
+  return static_cast<int>(pixels_.size() * sizeof(T));
 }
 
 template <typename T> std::vector<T> ImageBMP<T>::get_pixels() const {

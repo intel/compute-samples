@@ -60,9 +60,9 @@ protected:
     application.run(argc, argv);
     testing::internal::GetCapturedStdout();
 
-    static const size_t reference_top_file_pos = 2;
-    static const size_t reference_bot_file_pos = reference_top_file_pos + 1;
-    static const size_t sub_test_pos = reference_top_file_pos + 7;
+    static const int reference_top_file_pos = 2;
+    static const int reference_bot_file_pos = reference_top_file_pos + 1;
+    static const int sub_test_pos = reference_top_file_pos + 7;
 
     argv[reference_top_file_pos] = reference_top_file_.c_str();
     argv[reference_bot_file_pos] = reference_bot_file_.c_str();

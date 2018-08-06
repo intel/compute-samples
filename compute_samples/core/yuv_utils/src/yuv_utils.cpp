@@ -34,15 +34,15 @@
 #include "image/image.hpp"
 
 namespace compute_samples {
-PlanarImage *PlanarImage::create_planar_image(size_t width, size_t height,
-                                              size_t pitch_y) {
+PlanarImage *PlanarImage::create_planar_image(int width, int height,
+                                              int pitch_y) {
   PlanarImage *im = new PlanarImage;
 
   if (pitch_y == 0) {
     pitch_y = width;
   }
 
-  const size_t num_pixels = pitch_y * height + width * height / 2;
+  const int num_pixels = pitch_y * height + width * height / 2;
 #ifdef __linux__
   int ret = 0;
   ret = posix_memalign((void **)(&(im->y_)), 0x1000, num_pixels);
@@ -79,9 +79,8 @@ void PlanarImage::release_image(PlanarImage *im) {
   delete im;
 }
 
-void PlanarImage::draw_pixel(int32_t x, int32_t y, uint8_t *pic,
-                             size_t pic_width, size_t pic_height,
-                             uint8_t u8_pixel) {
+void PlanarImage::draw_pixel(int32_t x, int32_t y, uint8_t *pic, int pic_width,
+                             int pic_height, uint8_t u8_pixel) {
   int32_t pix_pos;
 
   // Don't draw out of bound pixels
@@ -95,7 +94,7 @@ void PlanarImage::draw_pixel(int32_t x, int32_t y, uint8_t *pic,
 
 // Bresenham's line algorithm
 void PlanarImage::draw_line(int32_t x0, int32_t y0, int32_t dx, int32_t dy,
-                            uint8_t *pic, size_t pic_width, size_t pic_height,
+                            uint8_t *pic, int pic_width, int pic_height,
                             uint8_t u8_pixel) {
   using std::swap;
 
@@ -137,13 +136,12 @@ typedef struct {
   uint8_t s[4];
 } uchar4_t;
 
-void PlanarImage::compute_num_mvs(size_t pic_width, size_t pic_height,
-                                  size_t &mv_image_width,
-                                  size_t &mv_image_height,
-                                  size_t &mb_image_width,
-                                  size_t &mb_image_height) const {
-  size_t pic_width_in_blk = (pic_width + 16 - 1) / 16;
-  size_t pic_height_in_blk = (pic_height + 16 - 1) / 16;
+void PlanarImage::compute_num_mvs(int pic_width, int pic_height,
+                                  int &mv_image_width, int &mv_image_height,
+                                  int &mb_image_width,
+                                  int &mb_image_height) const {
+  int pic_width_in_blk = (pic_width + 16 - 1) / 16;
+  int pic_height_in_blk = (pic_height + 16 - 1) / 16;
 
   mb_image_width = pic_width_in_blk;
   mb_image_height = pic_height_in_blk;
@@ -153,20 +151,20 @@ void PlanarImage::compute_num_mvs(size_t pic_width, size_t pic_height,
 
 void PlanarImage::overlay_vectors(const motion_vector *mvs,
                                   const inter_shape *shapes) {
-  size_t mv_image_width, mv_image_height;
-  size_t mb_image_width, mb_image_height;
+  int mv_image_width, mv_image_height;
+  int mb_image_width, mb_image_height;
   compute_num_mvs(width_, height_, mv_image_width, mv_image_height,
                   mb_image_width, mb_image_height);
 
 #define OFF(P) (P + 2) >> 2
 
-  for (size_t i = 0; i < mb_image_height; i++) {
-    for (size_t j = 0; j < mb_image_width; j++) {
-      size_t mb_index = j + i * mb_image_width;
+  for (int i = 0; i < mb_image_height; i++) {
+    for (int j = 0; j < mb_image_width; j++) {
+      int mb_index = j + i * mb_image_width;
       // Selectively Draw motion vectors for different sub block sizes
-      size_t j0 = j * 16;
-      size_t i0 = i * 16;
-      size_t m0 = mb_index * 16;
+      int j0 = j * 16;
+      int i0 = i * 16;
+      int m0 = mb_index * 16;
       switch (shapes[mb_index].x) {
       case 0:
         draw_line(j0 + 8, i0 + 8, OFF(mvs[m0].x), OFF(mvs[m0].y), y_, width_,
@@ -190,9 +188,9 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
         minor_shapes.s[1] = (shapes[mb_index].y >> 2) & 0x03;
         minor_shapes.s[2] = (shapes[mb_index].y >> 4) & 0x03;
         minor_shapes.s[3] = (shapes[mb_index].y >> 6) & 0x03;
-        for (size_t m = 0; m < 4; ++m) {
-          size_t mdiv = m / 2;
-          size_t mmod = m % 2;
+        for (int m = 0; m < 4; ++m) {
+          int mdiv = m / 2;
+          int mmod = m % 2;
           switch (minor_shapes.s[m]) {
           case 0: // 8 x 8
             draw_line(j0 + mmod * 8 + 4, i0 + mdiv * 8 + 4,
@@ -200,7 +198,7 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
                       width_, height_, 180);
             break;
           case 1: // 8 x 4
-            for (size_t n = 0; n < 2; ++n) {
+            for (int n = 0; n < 2; ++n) {
               draw_line(j0 + mmod * 8 + 4, i0 + (mdiv * 8 + n * 4 + 2),
                         OFF(mvs[m0 + m * 4 + n * 2].x),
                         OFF(mvs[m0 + m * 4 + n * 2].y), y_, width_, height_,
@@ -208,7 +206,7 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
             }
             break;
           case 2: // 4 x 8
-            for (size_t n = 0; n < 2; ++n) {
+            for (int n = 0; n < 2; ++n) {
               draw_line(j0 + (mmod * 8 + n * 4 + 2), i0 + mdiv * 8 + 4,
                         OFF(mvs[m0 + m * 4 + n * 2].x),
                         OFF(mvs[m0 + m * 4 + n * 2].y), y_, width_, height_,
@@ -216,7 +214,7 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
             }
             break;
           case 3: // 4 x 4
-            for (size_t n = 0; n < 4; ++n) {
+            for (int n = 0; n < 4; ++n) {
               draw_line(j0 + n * 4 + 2, i0 + m * 4 + 2,
                         OFF(mvs[m0 + m * 4 + n].x), OFF(mvs[m0 + m * 4 + n].y),
                         y_, width_, height_, 180);
@@ -235,20 +233,20 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
                                   const intra_shape *intra_shapes,
                                   const residual *inter_residuals,
                                   const residual *intra_residuals) {
-  size_t mv_image_width, mv_image_height;
-  size_t mb_image_width, mb_image_height;
+  int mv_image_width, mv_image_height;
+  int mb_image_width, mb_image_height;
   compute_num_mvs(width_, height_, mv_image_width, mv_image_height,
                   mb_image_width, mb_image_height);
 
 #define OFF(P) (P + 2) >> 2
 
-  for (size_t i = 0; i < mb_image_height; i++) {
-    for (size_t j = 0; j < mb_image_width; j++) {
-      size_t mb_index = j + i * mb_image_width;
+  for (int i = 0; i < mb_image_height; i++) {
+    for (int j = 0; j < mb_image_width; j++) {
+      int mb_index = j + i * mb_image_width;
       // Selectively Draw motion vectors for different sub block sizes
-      size_t j0 = j * 16;
-      size_t i0 = i * 16;
-      size_t m0 = mb_index * 16;
+      int j0 = j * 16;
+      int i0 = i * 16;
+      int m0 = mb_index * 16;
 
       if (inter_residuals[mb_index] < intra_residuals[mb_index]) {
         switch (inter_shapes[mb_index].x) {
@@ -277,15 +275,15 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
           minor_shapes.s[1] = (inter_shapes[mb_index].y >> 2) & 0x03;
           minor_shapes.s[2] = (inter_shapes[mb_index].y >> 4) & 0x03;
           minor_shapes.s[3] = (inter_shapes[mb_index].y >> 6) & 0x03;
-          for (size_t m = 0; m < 4; ++m) {
-            size_t mdiv = m / 2;
-            size_t mmod = m % 2;
+          for (int m = 0; m < 4; ++m) {
+            int mdiv = m / 2;
+            int mmod = m % 2;
             switch (minor_shapes.s[m]) {
             case 0: {
               break;
             }
             case 1: {
-              for (size_t n = 0; n < 2; ++n) {
+              for (int n = 0; n < 2; ++n) {
                 draw_line(j0 + mmod * 8 + 4, i0 + (mdiv * 8 + n * 4 + 2),
                           OFF(mvs[m0 + m * 4 + n * 2].x),
                           OFF(mvs[m0 + m * 4 + n * 2].y), y_, width_, height_,
@@ -294,7 +292,7 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
               break;
             }
             case 2: {
-              for (size_t n = 0; n < 2; ++n) {
+              for (int n = 0; n < 2; ++n) {
                 draw_line(j0 + (mmod * 8 + n * 4 + 2), i0 + mdiv * 8 + 4,
                           OFF(mvs[m0 + m * 4 + n * 2].x),
                           OFF(mvs[m0 + m * 4 + n * 2].y), y_, width_, height_,
@@ -303,7 +301,7 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
               break;
             }
             case 3: {
-              for (size_t n = 0; n < 4; ++n) {
+              for (int n = 0; n < 4; ++n) {
                 draw_line(j0 + n * 4 + 2, i0 + m * 4 + 2,
                           OFF(mvs[m0 + m * 4 + n].x),
                           OFF(mvs[m0 + m * 4 + n].y), y_, width_, height_, 180);
@@ -363,18 +361,16 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
 
 class YuvCapture : public Capture {
 public:
-  YuvCapture(const std::string &fn, size_t width, size_t height,
-             size_t frames = 0);
-  virtual void get_sample(size_t frame_num, PlanarImage &im);
-  virtual void get_sample(size_t frame_num, PlanarImage &im, bool interlaced,
-                          unsigned char polarity);
+  YuvCapture(const std::string &fn, int width, int height, int frames = 0);
+  virtual void get_sample(int frame_num, PlanarImage &im);
+  virtual void get_sample(int frame_num, PlanarImage &im, bool interlaced,
+                          int polarity);
 
 protected:
   std::ifstream file_;
 };
 
-YuvCapture::YuvCapture(const std::string &fn, size_t width, size_t height,
-                       size_t frames)
+YuvCapture::YuvCapture(const std::string &fn, int width, int height, int frames)
     : file_(fn.c_str(), std::ios::binary | std::ios::ate) {
 
   if (!file_.good()) {
@@ -383,8 +379,8 @@ YuvCapture::YuvCapture(const std::string &fn, size_t width, size_t height,
     throw std::invalid_argument(ss.str().c_str());
   }
 
-  const size_t file_size = static_cast<size_t>(file_.tellg());
-  const size_t frame_size = width * height * 3 / 2 * sizeof(uint8_t);
+  const int file_size = static_cast<int>(file_.tellg());
+  const int frame_size = width * height * 3 / 2 * sizeof(uint8_t);
 
   if (file_size % frame_size) {
     throw std::invalid_argument("YUV file file size error. Wrong dimensions?");
@@ -397,19 +393,19 @@ YuvCapture::YuvCapture(const std::string &fn, size_t width, size_t height,
   height_ = height;
 }
 
-void YuvCapture::get_sample(size_t frame_num, PlanarImage &im) {
-  if (im.get_width() != (size_t)width_ || im.get_height() != (size_t)height_) {
+void YuvCapture::get_sample(int frame_num, PlanarImage &im) {
+  if (im.get_width() != width_ || im.get_height() != height_) {
     throw std::runtime_error("Capture::get_frame: output image size mismatch.");
   }
 
-  const size_t frame_size = width_ * height_ * 3 / 2 * sizeof(uint8_t);
+  const int frame_size = width_ * height_ * 3 / 2 * sizeof(uint8_t);
   file_.clear();
   file_.seekg(frame_num * frame_size);
 
-  size_t in_row_size = width_ * sizeof(uint8_t);
-  size_t out_row_size = im.get_pitch_y() * sizeof(uint8_t);
+  int in_row_size = width_ * sizeof(uint8_t);
+  int out_row_size = im.get_pitch_y() * sizeof(uint8_t);
   uint8_t *out_ptr = im.get_y();
-  for (size_t i = 0; i < height_; ++i) {
+  for (int i = 0; i < height_; ++i) {
     file_.read(reinterpret_cast<char *>(out_ptr), in_row_size);
     out_ptr += out_row_size;
   }
@@ -417,7 +413,7 @@ void YuvCapture::get_sample(size_t frame_num, PlanarImage &im) {
   out_ptr = im.get_u();
   in_row_size = (width_ / 2) * sizeof(uint8_t);
   out_row_size = im.get_pitch_u() * sizeof(uint8_t);
-  for (size_t i = 0; i < height_ / 2; ++i) {
+  for (int i = 0; i < height_ / 2; ++i) {
     file_.read(reinterpret_cast<char *>(out_ptr), in_row_size);
     out_ptr += out_row_size;
   }
@@ -425,28 +421,27 @@ void YuvCapture::get_sample(size_t frame_num, PlanarImage &im) {
   out_ptr = im.get_v();
   in_row_size = (width_ / 2) * sizeof(uint8_t);
   out_row_size = im.get_pitch_v() * sizeof(uint8_t);
-  for (size_t i = 0; i < height_ / 2; ++i) {
+  for (int i = 0; i < height_ / 2; ++i) {
     file_.read(reinterpret_cast<char *>(out_ptr), in_row_size);
     out_ptr += out_row_size;
   }
 }
 
-void YuvCapture::get_sample(size_t frame_num, PlanarImage &im, bool interlaced,
-                            unsigned char polarity) {
-  size_t divisor = interlaced ? 2 : 1;
-  if (im.get_width() != (size_t)width_ ||
-      im.get_height() != (size_t)height_ / divisor) {
+void YuvCapture::get_sample(int frame_num, PlanarImage &im, bool interlaced,
+                            int polarity) {
+  int divisor = interlaced ? 2 : 1;
+  if (im.get_width() != width_ || im.get_height() != height_ / divisor) {
     throw std::runtime_error("Capture::get_frame: output image size mismatch.");
   }
 
-  const size_t frame_size = width_ * height_ * 3 / 2 * sizeof(uint8_t);
+  const int frame_size = width_ * height_ * 3 / 2 * sizeof(uint8_t);
   file_.clear();
   file_.seekg(frame_num * frame_size);
 
-  size_t in_row_size = width_ * sizeof(uint8_t);
-  size_t out_row_size = im.get_pitch_y() * sizeof(uint8_t);
+  int in_row_size = width_ * sizeof(uint8_t);
+  int out_row_size = im.get_pitch_y() * sizeof(uint8_t);
   uint8_t *out_ptr = im.get_y();
-  for (size_t i = 0; i < im.get_height(); ++i) {
+  for (int i = 0; i < im.get_height(); ++i) {
     if (interlaced && (polarity == 1)) {
       file_.ignore(in_row_size);
     }
@@ -460,7 +455,7 @@ void YuvCapture::get_sample(size_t frame_num, PlanarImage &im, bool interlaced,
   out_ptr = im.get_u();
   in_row_size = (width_ / 2) * sizeof(uint8_t);
   out_row_size = im.get_pitch_u() * sizeof(uint8_t);
-  for (size_t i = 0; i < im.get_height() / 2; ++i) {
+  for (int i = 0; i < im.get_height() / 2; ++i) {
     if (interlaced && (polarity == 1)) {
       file_.ignore(in_row_size);
     }
@@ -474,7 +469,7 @@ void YuvCapture::get_sample(size_t frame_num, PlanarImage &im, bool interlaced,
   out_ptr = im.get_v();
   in_row_size = (width_ / 2) * sizeof(uint8_t);
   out_row_size = im.get_pitch_v() * sizeof(uint8_t);
-  for (size_t i = 0; i < im.get_height() / 2; ++i) {
+  for (int i = 0; i < im.get_height() / 2; ++i) {
     if (interlaced && (polarity == 1)) {
       file_.ignore(in_row_size);
     }
@@ -486,8 +481,8 @@ void YuvCapture::get_sample(size_t frame_num, PlanarImage &im, bool interlaced,
   }
 }
 
-Capture *Capture::create_file_capture(const std::string &fn, size_t width,
-                                      size_t height, size_t frames) {
+Capture *Capture::create_file_capture(const std::string &fn, int width,
+                                      int height, int frames) {
   Capture *cap = NULL;
 
   if ((strstr(fn.c_str(), ".yuv") != NULL) ||
@@ -504,8 +499,7 @@ void Capture::release(Capture *cap) { delete cap; }
 
 class YuvWriter : public FrameWriter {
 public:
-  YuvWriter(size_t width, size_t height, size_t frame_num_hint,
-            bool b_to_bmps = false);
+  YuvWriter(int width, int height, int frame_num_hint, bool b_to_bmps = false);
   virtual ~YuvWriter() {}
 
   void append_frame(const PlanarImage &im);
@@ -519,16 +513,16 @@ private:
 void YuvWriter::write_to_file(const char *fn) {
   if (b_to_bmps_) {
     std::string out_file(fn);
-    std::size_t found = out_file.find('.');
+    int found = static_cast<int>(out_file.find('.'));
     // crop the name
     out_file = out_file.substr(0, found);
     uchar4_t *frame = (uchar4_t *)malloc(width_ * height_ * sizeof(uchar4_t));
     if (!frame) {
       throw std::runtime_error("Failed to allocate a buffer for the bitmap.");
     }
-    const size_t uv_width = width_ / 2;
-    const size_t uv_height = height_ / 2;
-    for (size_t y = 0; y < curr_frame_; ++y) {
+    const int uv_width = width_ / 2;
+    const int uv_height = height_ / 2;
+    for (int y = 0; y < curr_frame_; ++y) {
       // Y (a value per pixel)
       const uint8_t *p_img_y = &data_[y * width_ * height_ * 3 / 2];
       // U (a value per 4 pixels) and V (a value per 4 pixels)
@@ -541,8 +535,8 @@ void YuvWriter::write_to_file(const char *fn) {
                                           // uv_width * uv_height)
 
       memset(frame, 0, width_ * height_ * sizeof(uchar4_t));
-      for (size_t i = 0; i < height_; ++i) {
-        for (size_t j = 0; j < width_; ++j) {
+      for (int i = 0; i < height_; ++i) {
+        for (int j = 0; j < width_; ++j) {
           // Y value
           uint8_t Y = p_img_y[j + width_ * (height_ - 1 - i)];
           // the same U value 4 times, thus both i and j are divided by 2
@@ -554,16 +548,19 @@ void YuvWriter::write_to_file(const char *fn) {
           // BGRA)
           const int32_t R =
               (int32_t)(1.164f * (float(Y) - 16) + 1.596f * (float(V) - 128));
-          frame[j + width_ * i].s[2] = std::min(255, std::max(R, 0));
+          frame[j + width_ * i].s[2] =
+              static_cast<uint8_t>(std::min(255, std::max(R, 0)));
           // G
           const int32_t G =
               (int32_t)(1.164f * (float(Y) - 16) - 0.813f * (float(V) - 128) -
                         0.391f * (float(U) - 128));
-          frame[j + width_ * i].s[1] = std::min(255, std::max(G, 0));
+          frame[j + width_ * i].s[1] =
+              static_cast<uint8_t>(std::min(255, std::max(G, 0)));
           // B
           const int32_t B =
               (int32_t)(1.164f * (float(Y) - 16) + 2.018f * (float(U) - 128));
-          frame[j + width_ * i].s[0] = std::min(255, std::max(B, 0));
+          frame[j + width_ * i].s[0] =
+              static_cast<uint8_t>(std::min(255, std::max(B, 0)));
         }
       }
       std::stringstream number;
@@ -592,8 +589,8 @@ void YuvWriter::append_frame(const PlanarImage &im) {
 
   uint8_t *p_src = (uint8_t *)im.get_y();
   uint8_t *p_dst = &data_[curr_frame_ * width_ * height_ * 3 / 2];
-  size_t p_dst_size = width_ * height_ * 3 / 2;
-  for (size_t y = 0; y < im.get_height(); ++y) {
+  int p_dst_size = width_ * height_ * 3 / 2;
+  for (int y = 0; y < im.get_height(); ++y) {
     if (im.get_width() <= p_dst_size) {
       std::copy(p_src, p_src + im.get_width(), p_dst);
     } else {
@@ -605,7 +602,7 @@ void YuvWriter::append_frame(const PlanarImage &im) {
   }
 
   p_src = (uint8_t *)im.get_u();
-  for (size_t y = 0; y < im.get_height() / 2; ++y) {
+  for (int y = 0; y < im.get_height() / 2; ++y) {
     if (im.get_width() / 2 <= p_dst_size) {
       std::copy(p_src, p_src + im.get_width() / 2, p_dst);
     } else {
@@ -617,7 +614,7 @@ void YuvWriter::append_frame(const PlanarImage &im) {
   }
 
   p_src = (uint8_t *)im.get_v();
-  for (size_t y = 0; y < im.get_height() / 2; ++y) {
+  for (int y = 0; y < im.get_height() / 2; ++y) {
     if (im.get_width() / 2 <= p_dst_size) {
       std::copy(p_src, p_src + im.get_width() / 2, p_dst);
     } else {
@@ -631,16 +628,15 @@ void YuvWriter::append_frame(const PlanarImage &im) {
   ++curr_frame_;
 }
 
-YuvWriter::YuvWriter(size_t width, size_t height, size_t frame_num_hint,
-                     bool b_to_bmps)
+YuvWriter::YuvWriter(int width, int height, int frame_num_hint, bool b_to_bmps)
     : FrameWriter(width, height), b_to_bmps_(b_to_bmps) {
   if (frame_num_hint > 0) {
     data_.reserve(frame_num_hint * width_ * height_ * 3 / 2);
   }
 }
 
-FrameWriter *FrameWriter::create_frame_writer(size_t width, size_t height,
-                                              size_t frame_num_hint,
+FrameWriter *FrameWriter::create_frame_writer(int width, int height,
+                                              int frame_num_hint,
                                               bool b_format_bmp_hint) {
   return new YuvWriter(width, height, frame_num_hint, b_format_bmp_hint);
 }

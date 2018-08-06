@@ -23,9 +23,9 @@
 #include "version_config.hpp"
 
 namespace compute_samples {
-const unsigned int major_version = @COMPUTE_SAMPLES_MAJOR_VERSION@;
-const unsigned int minor_version = @COMPUTE_SAMPLES_MINOR_VERSION@;
-const unsigned int patch_version = @COMPUTE_SAMPLES_PATCH_VERSION@;
+const int major_version = @COMPUTE_SAMPLES_MAJOR_VERSION@;
+const int minor_version = @COMPUTE_SAMPLES_MINOR_VERSION@;
+const int patch_version = @COMPUTE_SAMPLES_PATCH_VERSION@;
 const char git_commit[] = "@COMPUTE_SAMPLES_GIT_COMMIT@";
 const char build_number[] = "@COMPUTE_SAMPLES_BUILD_NUMBER@";
 } // namespace compute_samples

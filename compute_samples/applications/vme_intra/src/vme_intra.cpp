@@ -65,14 +65,14 @@ VmeIntraApplication::Arguments VmeIntraApplication::parse_command_line(
           po::value<std::string>(&args.output_yuv_path)
               ->default_value("output_goal_1280x720.yuv"),
           "path to output yuv with motion vectors");
-  options("qp,q", po::value<size_t>(&args.qp)->default_value(49),
+  options("qp,q", po::value<int>(&args.qp)->default_value(49),
           "quantization parameter value to use for estimation heuristics"
           "(higher for faster motion frames)");
-  options("width,w", po::value<size_t>(&args.width)->default_value(1280),
+  options("width,w", po::value<int>(&args.width)->default_value(1280),
           "width of input yuv");
-  options("height,h", po::value<size_t>(&args.height)->default_value(720),
+  options("height,h", po::value<int>(&args.height)->default_value(720),
           "height of input yuv");
-  options("frames,f", po::value<size_t>(&args.frames)->default_value(0),
+  options("frames,f", po::value<int>(&args.frames)->default_value(0),
           "number of frame to use for motion estimation (0 represents entire "
           "yuv sequence)");
 
@@ -117,7 +117,7 @@ void VmeIntraApplication::write_results_to_file(
         "VmeIntraApplication::write_intra_modes_to_file: File open failed.");
   }
 
-  unsigned mb_count = au::align_units(width, 16) * au::align_units(height, 16);
+  uint32_t mb_count = au::align_units(width, 16) * au::align_units(height, 16);
   for (uint32_t i = 0; i < mb_count; i++) {
     uint32_t mb_x = i % au::align_units(width, 16);
     uint32_t mb_y = i / au::align_units(width, 16);
@@ -197,7 +197,7 @@ void VmeIntraApplication::run_implementation(
 
   Capture *capture = Capture::create_file_capture(
       args.input_yuv_path, args.width, args.height, args.frames);
-  const size_t frame_count =
+  const int frame_count =
       (args.frames) ? args.frames : capture->get_num_frames();
   FrameWriter *writer = FrameWriter::create_frame_writer(
       args.width, args.height, frame_count, args.output_bmp);
@@ -224,7 +224,7 @@ void VmeIntraApplication::run_implementation(
                                 au::align_units(args.height, 2), format);
   timer.print("Created opencl mem objects for downsample_3_tier kernel");
 
-  for (size_t k = 0; k < frame_count; k++) {
+  for (int k = 0; k < frame_count; k++) {
     BOOST_LOG(logger) << "Processing frame " << k << "...\n";
     run_vme_intra(args, context, queue, ds_kernel, hme_n_kernel, intra_kernel,
                   *capture, *planar_image, src_image, ref_image, src_image_2x,
@@ -252,12 +252,11 @@ void VmeIntraApplication::run_vme_intra(
     compute::image2d &ref_image, compute::image2d &src_2x_image,
     compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
     compute::image2d &ref_4x_image, compute::image2d &src_8x_image,
-    compute::image2d &ref_8x_image, size_t frame_idx,
-    src::logger &logger) const {
+    compute::image2d &ref_8x_image, int frame_idx, src::logger &logger) const {
   Timer timer(logger);
 
-  size_t width = args.width;
-  size_t height = args.height;
+  int width = args.width;
+  int height = args.height;
 
   std::swap(ref_image, src_image);
   std::swap(ref_2x_image, src_2x_image);
@@ -269,7 +268,8 @@ void VmeIntraApplication::run_vme_intra(
 
   try {
     size_t origin[] = {0, 0, 0};
-    size_t region[] = {width, height, 1};
+    size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
+                       1};
     queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
                               planar_image.get_pitch_y());
     timer.print("Copied next frame to GPU tiled memory.");
@@ -337,12 +337,12 @@ void VmeIntraApplication::run_vme_intra(
       BOOST_LOG(logger) << "Skipping hme for frame 0";
     }
 
-    size_t mb_image_width = au::align_units(width, 16);
-    size_t mb_image_height = au::align_units(height, 16);
-    size_t mb_count = mb_image_width * mb_image_height;
-    size_t mv_image_width = mb_image_width * 4;
-    size_t mv_image_height = mb_image_height * 4;
-    size_t mv_count = mv_image_width * mv_image_height;
+    int mb_image_width = au::align_units(width, 16);
+    int mb_image_height = au::align_units(height, 16);
+    int mb_count = mb_image_width * mb_image_height;
+    int mv_image_width = mb_image_width * 4;
+    int mv_image_height = mb_image_height * 4;
+    int mv_count = mv_image_width * mv_image_height;
 
     au::PageAlignedVector<cl_short2> mvs(au::align64(mv_count));
     au::PageAlignedVector<cl_uchar2> inter_shapes(au::align64(mb_count));

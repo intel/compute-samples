@@ -51,9 +51,9 @@ private:
     std::string input_yuv_path = "";
     std::string output_top_yuv_path = "";
     std::string output_bot_yuv_path = "";
-    size_t width = 0;
-    size_t height = 0;
-    size_t frames = 0;
+    int width = 0;
+    int height = 0;
+    int frames = 0;
     char native = 1;
     bool help = false;
   };
@@ -63,33 +63,31 @@ private:
       compute::context &context, compute::command_queue &queue,
       compute::kernel &kernel, Capture &capture, PlanarImage &planar_image,
       PlanarImage &top_planar_image, PlanarImage &bot_planar_image,
-      compute::image2d &src_image, compute::image2d &ref_image,
-      size_t frame_idx, src::logger &logger) const;
+      compute::image2d &src_image, compute::image2d &ref_image, int frame_idx,
+      src::logger &logger) const;
   void run_vme_interlaced_split(const VmeInterlacedApplication::Arguments &args,
                                 compute::context &context,
                                 compute::command_queue &queue,
                                 compute::kernel &kernel, Capture &capture,
                                 PlanarImage &field_planar_image,
                                 compute::image2d &src_image,
-                                compute::image2d &ref_image, uint8_t polarity,
-                                size_t frame_idx, src::logger &logger) const;
-  void
-  run_vme_interlaced(const VmeInterlacedApplication::Arguments &args,
-                     compute::context &context, compute::command_queue &queue,
-                     compute::kernel &kernel, Capture &capture,
-                     PlanarImage &planar_image, compute::image2d &src_image,
-                     compute::image2d &ref_image,
-                     au::PageAlignedVector<cl_short2> &field_mvs,
-                     au::PageAlignedVector<cl_uchar2> &field_shapes,
-                     au::PageAlignedVector<cl_ushort> &residuals,
-                     au::PageAlignedVector<cl_short2> &predictors, size_t width,
-                     size_t mb_count, size_t mv_count, uint32_t iterations,
-                     uint8_t interlaced, uint8_t polarity, size_t frame_idx,
-                     Timer &timer, src::logger &logger) const;
+                                compute::image2d &ref_image, int polarity,
+                                int frame_idx, src::logger &logger) const;
+  void run_vme_interlaced(
+      const VmeInterlacedApplication::Arguments &args,
+      compute::context &context, compute::command_queue &queue,
+      compute::kernel &kernel, Capture &capture, PlanarImage &planar_image,
+      compute::image2d &src_image, compute::image2d &ref_image,
+      au::PageAlignedVector<cl_short2> &field_mvs,
+      au::PageAlignedVector<cl_uchar2> &field_shapes,
+      au::PageAlignedVector<cl_ushort> &residuals,
+      au::PageAlignedVector<cl_short2> &predictors, int width, int mb_count,
+      int mv_count, uint32_t iterations, uint8_t interlaced, int polarity,
+      int frame_idx, Timer &timer, src::logger &logger) const;
   void get_field_capture_samples(Capture *capture,
                                  PlanarImage *top_planar_image,
-                                 PlanarImage *bot_planar_image,
-                                 size_t frame_idx, src::logger *logger) const;
+                                 PlanarImage *bot_planar_image, int frame_idx,
+                                 src::logger *logger) const;
   Arguments parse_command_line(const std::vector<std::string> &command_line);
 };
 } // namespace compute_samples

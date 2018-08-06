@@ -20,7 +20,8 @@
  * SOFTWARE.
  */
 
-kernel void commands_aggregation(global uint *buffer, const uint kernel_offset) {
+kernel void commands_aggregation(global uint *buffer,
+                                 const uint kernel_offset) {
   const uint id = get_global_id(0);
   const uint size = get_global_size(0);
   const ulong number_of_iterations = 1000000;

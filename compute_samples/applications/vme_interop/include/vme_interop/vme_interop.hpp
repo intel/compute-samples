@@ -44,9 +44,9 @@ public:
     bool output_bmp = false;
     std::string input_yuv_path = "";
     std::string output_yuv_path = "";
-    size_t width = 0;
-    size_t height = 0;
-    size_t frames = 0;
+    int width = 0;
+    int height = 0;
+    int frames = 0;
     bool help = false;
   };
 

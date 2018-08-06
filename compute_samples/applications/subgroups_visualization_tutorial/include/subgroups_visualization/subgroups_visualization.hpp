@@ -42,8 +42,8 @@ private:
   struct Arguments {
     std::string kernel_path = "";
     std::string output = "";
-    size_t global_size = 0;
-    size_t local_size = 0;
+    int global_size = 0;
+    int local_size = 0;
     bool help = false;
   };
   Arguments
