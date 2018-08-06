@@ -47,8 +47,17 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR} CACHE PATH "Default installation directory" FORCE)
 endif()
 
+# Global compilation settings
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif()
+
 
 # Prepare mediadata
 if(DOWNLOAD_MEDIA)
