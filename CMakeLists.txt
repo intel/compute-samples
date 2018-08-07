@@ -155,6 +155,7 @@ if(OPENCL_ROOT)
     set(CMAKE_PREFIX_PATH ${OPENCL_ROOT})
 endif()
 find_package(OpenCL REQUIRED)
+add_definitions(-DCL_TARGET_OPENCL_VERSION=210)
 
 # Prepare project
 enable_testing()
