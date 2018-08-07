@@ -31,5 +31,5 @@ ExternalProject_Add(
     CONFIGURE_COMMAND ${BOOTSTRAP_BINARY}
     BUILD_COMMAND ""
     BUILD_IN_SOURCE TRUE
-    INSTALL_COMMAND ${B2_BINARY} address-model=${ADDRESS_MODEL} install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix=${BOOST_ROOT} ${TOOLSET} -j8
+    INSTALL_COMMAND ${B2_BINARY} address-model=${ADDRESS_MODEL} install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix=${BOOST_ROOT} ${TOOLSET}
 )
