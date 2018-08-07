@@ -58,8 +58,8 @@ public:
   int width() const override;
   int height() const override;
   int number_of_channels() const override;
-  int bits_per_channel() const;
-  int bits_per_pixel() const;
+  int bits_per_channel() const override;
+  int bits_per_pixel() const override;
   int size() const override;
   int size_in_bytes() const override;
   std::vector<T> get_pixels() const override;
@@ -88,8 +88,8 @@ public:
   int width() const override;
   int height() const override;
   int number_of_channels() const override;
-  int bits_per_channel() const;
-  int bits_per_pixel() const;
+  int bits_per_channel() const override;
+  int bits_per_pixel() const override;
   int size() const override;
   int size_in_bytes() const override;
   std::vector<T> get_pixels() const override;
