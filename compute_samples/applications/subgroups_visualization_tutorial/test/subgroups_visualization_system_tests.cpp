@@ -42,10 +42,8 @@ TEST_F(SubgroupsVisualizationSystemTests, GeneratesOutputImage) {
                         const_cast<char *>(solution_cl_file.c_str()), nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
-  testing::internal::CaptureStdout();
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(argc, argv));
-  testing::internal::GetCapturedStdout();
 
   compute_samples::ImageBMP8Bit output_image(output_file_);
   compute_samples::ImageBMP8Bit reference_image(reference_file_);

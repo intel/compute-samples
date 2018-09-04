@@ -51,9 +51,7 @@ protected:
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
     compute_samples::VmeSearchApplication application;
-    testing::internal::CaptureStdout();
     application.run(argc, argv);
-    testing::internal::GetCapturedStdout();
 
     std::ifstream out(output_file_, std::ios::binary);
     std::string reference_file = sub_test;

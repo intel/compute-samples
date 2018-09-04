@@ -37,8 +37,6 @@ TEST_F(VmeInteropSystemTests, ReturnsSkipStatusOnWindows) {
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   compute_samples::VmeInteropApplication application;
-  testing::internal::CaptureStdout();
   EXPECT_EQ(compute_samples::Application::Status::SKIP,
             application.run(argc, argv));
-  testing::internal::GetCapturedStdout();
 }

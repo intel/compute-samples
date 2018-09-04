@@ -65,10 +65,8 @@ TEST_F(VmeInterlacedSystemTests, ReturnsReferenceImage) {
 
   compute_samples::VmeInterlacedApplication application;
 
-  testing::internal::CaptureStdout();
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(argc, argv));
-  testing::internal::GetCapturedStdout();
 
   static const int reference_top_file_pos = 2;
   static const int reference_bot_file_pos = reference_top_file_pos + 1;
@@ -78,9 +76,8 @@ TEST_F(VmeInterlacedSystemTests, ReturnsReferenceImage) {
   argv[reference_bot_file_pos] = reference_bot_file_.c_str();
   argv[sub_test_pos] = "split";
 
-  testing::internal::CaptureStdout();
-  application.run(argc, argv);
-  testing::internal::GetCapturedStdout();
+  EXPECT_EQ(compute_samples::Application::Status::OK,
+            application.run(argc, argv));
 
   std::ifstream out_top(output_top_file_, std::ios::binary);
   std::ifstream ref_top(reference_top_file_, std::ios::binary);

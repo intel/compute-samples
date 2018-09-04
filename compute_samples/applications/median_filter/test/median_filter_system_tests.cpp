@@ -43,10 +43,8 @@ TEST_F(MedianFilterSystemTests, ReturnsReferenceImage) {
                         const_cast<char *>(output_file_.c_str()), nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
-  testing::internal::CaptureStdout();
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(argc, argv));
-  testing::internal::GetCapturedStdout();
 
   compute_samples::ImagePNG32Bit output_image(output_file_);
   compute_samples::ImagePNG32Bit reference_image(reference_file_);

@@ -41,10 +41,8 @@ TEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
                         "subgroups_imagecopy_kernel.cl", nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
-  testing::internal::CaptureStdout();
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(argc, argv));
-  testing::internal::GetCapturedStdout();
 
   compute_samples::ImageBMP8Bit output_image(output_file_);
   compute_samples::ImageBMP8Bit reference_image(reference_file_);
@@ -60,10 +58,8 @@ TEST_F(SubgroupsImageCopySystemTests, OptimizedCopy) {
                         "subgroups_imagecopy_solution.cl", nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
-  testing::internal::CaptureStdout();
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(argc, argv));
-  testing::internal::GetCapturedStdout();
 
   compute_samples::ImageBMP8Bit output_image(output_file_);
   compute_samples::ImageBMP8Bit reference_image(reference_file_);

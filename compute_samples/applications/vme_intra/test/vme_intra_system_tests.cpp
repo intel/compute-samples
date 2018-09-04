@@ -53,10 +53,8 @@ TEST_F(VmeIntraSystemTests, ReturnsReferenceImage) {
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   compute_samples::VmeIntraApplication application;
-  testing::internal::CaptureStdout();
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(argc, argv));
-  testing::internal::GetCapturedStdout();
 
   std::ifstream out(output_file_, std::ios::binary);
   std::string reference_file = "intra_";
