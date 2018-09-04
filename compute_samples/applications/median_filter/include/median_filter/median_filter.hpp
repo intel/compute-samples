@@ -37,8 +37,8 @@ namespace compute = boost::compute;
 namespace compute_samples {
 class MedianFilterApplication : public Application {
 private:
-  void run_implementation(std::vector<std::string> &command_line,
-                          src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line,
+                            src::logger &logger) override;
   struct Arguments {
     std::string input_image_path = "";
     std::string output_image_path = "";

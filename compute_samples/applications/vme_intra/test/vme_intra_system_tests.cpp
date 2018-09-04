@@ -33,48 +33,45 @@ class VmeIntraSystemTests : public testing::Test {
 protected:
   virtual void TearDown() { std::remove(output_file_.c_str()); }
 
-  bool VerifyTest() {
-    const char *argv[] = {"vme_intra",
-                          const_cast<char *>(input_file_.c_str()),
-                          const_cast<char *>(output_file_.c_str()),
-                          "--width",
-                          "176",
-                          "--height",
-                          "144",
-                          "--qp",
-                          "45",
-                          "-f",
-                          "50",
-                          nullptr};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-
-    compute_samples::VmeIntraApplication application;
-    testing::internal::CaptureStdout();
-    application.run(argc, argv);
-    testing::internal::GetCapturedStdout();
-
-    std::ifstream out(output_file_, std::ios::binary);
-    std::string reference_file = "intra_";
-    reference_file += input_file_;
-    std::ifstream ref(reference_file, std::ios::binary);
-    EXPECT_TRUE(out.good() && ref.good());
-    EXPECT_TRUE(!out.eof() && !ref.eof());
-
-    std::istreambuf_iterator<char> out_iter(out);
-    std::istreambuf_iterator<char> ref_iter(ref);
-    std::istreambuf_iterator<char> eos_iter;
-    while (ref_iter != eos_iter && out_iter != eos_iter) {
-      if (*ref_iter++ != *out_iter++)
-        return false;
-    }
-
-    return out_iter == eos_iter && ref_iter == eos_iter;
-  }
-
   const std::string input_file_ = "foreman_176x144.yuv";
   const std::string output_file_ = "output_foreman_176x144.yuv";
 };
 
 TEST_F(VmeIntraSystemTests, ReturnsReferenceImage) {
-  ASSERT_EQ(VerifyTest(), true);
+  const char *argv[] = {"vme_intra",
+                        const_cast<char *>(input_file_.c_str()),
+                        const_cast<char *>(output_file_.c_str()),
+                        "--width",
+                        "176",
+                        "--height",
+                        "144",
+                        "--qp",
+                        "45",
+                        "-f",
+                        "50",
+                        nullptr};
+  int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+  compute_samples::VmeIntraApplication application;
+  testing::internal::CaptureStdout();
+  EXPECT_EQ(compute_samples::Application::Status::OK,
+            application.run(argc, argv));
+  testing::internal::GetCapturedStdout();
+
+  std::ifstream out(output_file_, std::ios::binary);
+  std::string reference_file = "intra_";
+  reference_file += input_file_;
+  std::ifstream ref(reference_file, std::ios::binary);
+  EXPECT_TRUE(out.good() && ref.good());
+  EXPECT_TRUE(!out.eof() && !ref.eof());
+
+  std::istreambuf_iterator<char> out_iter(out);
+  std::istreambuf_iterator<char> ref_iter(ref);
+  std::istreambuf_iterator<char> eos_iter;
+  while (ref_iter != eos_iter && out_iter != eos_iter) {
+    EXPECT_EQ(*ref_iter++, *out_iter++);
+  }
+
+  EXPECT_EQ(out_iter, eos_iter);
+  EXPECT_EQ(ref_iter, eos_iter);
 }

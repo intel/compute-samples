@@ -91,11 +91,11 @@ VmeInteropApplication::Arguments VmeInteropApplication::parse_command_line(
   return args;
 }
 
-void VmeInteropApplication::run_implementation(
+Application::Status VmeInteropApplication::run_implementation(
     std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
-    return;
+    return Status::SKIP;
 
   Timer timer_total(logger);
 
@@ -104,11 +104,13 @@ void VmeInteropApplication::run_implementation(
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    throw std::domain_error(vme_extension_msg);
+    BOOST_LOG(logger) << vme_extension_msg;
+    return Status::SKIP;
   }
 
   if (!device.supports_extension("cl_intel_va_api_media_sharing")) {
-    throw std::domain_error(vaapi_extension_msg);
+    BOOST_LOG(logger) << vaapi_extension_msg;
+    return Status::SKIP;
   }
 
   BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
@@ -118,5 +120,6 @@ void VmeInteropApplication::run_implementation(
   run_os_specific_implementation(command_line, args, device, logger);
 
   timer_total.print("Total");
+  return Status::OK;
 }
 } // namespace compute_samples

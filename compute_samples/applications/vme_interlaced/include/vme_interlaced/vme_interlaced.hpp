@@ -43,8 +43,8 @@ namespace au = compute_samples::align_utils;
 namespace compute_samples {
 class VmeInterlacedApplication : public Application {
 private:
-  void run_implementation(std::vector<std::string> &command_line,
-                          src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line,
+                            src::logger &logger) override;
   struct Arguments {
     bool output_bmp = false;
     std::string sub_test = "";

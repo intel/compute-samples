@@ -33,7 +33,7 @@ class VmeSearchSystemTests : public testing::Test {
 protected:
   virtual void TearDown() { std::remove(output_file_.c_str()); }
 
-  bool VerifySubtest(std::string sub_test) {
+  void Verify(std::string sub_test) {
     const char *argv[] = {"vme_search",
                           const_cast<char *>(input_file_.c_str()),
                           const_cast<char *>(output_file_.c_str()),
@@ -67,19 +67,21 @@ protected:
     std::istreambuf_iterator<char> ref_iter(ref);
     std::istreambuf_iterator<char> eos_iter;
     while (ref_iter != eos_iter && out_iter != eos_iter) {
-      if (*ref_iter++ != *out_iter++)
-        return false;
+      EXPECT_EQ(*ref_iter++, *out_iter++);
     }
 
-    return out_iter == eos_iter && ref_iter == eos_iter;
+    EXPECT_EQ(out_iter, eos_iter);
+    EXPECT_EQ(ref_iter, eos_iter);
   }
 
   const std::string input_file_ = "foreman_176x144.yuv";
   const std::string output_file_ = "output_foreman_176x144.yuv";
 };
 
-TEST_F(VmeSearchSystemTests, ReturnsReferenceImage) {
-  ASSERT_EQ(VerifySubtest("basic_search"), true);
-  ASSERT_EQ(VerifySubtest("cost_heuristics_search"), true);
-  ASSERT_EQ(VerifySubtest("larger_search"), true);
+TEST_F(VmeSearchSystemTests, BasicSearch) { Verify("basic_search"); }
+
+TEST_F(VmeSearchSystemTests, CostHeuristicsSearch) {
+  Verify("cost_heuristics_search");
 }
+
+TEST_F(VmeSearchSystemTests, LargerSearch) { Verify("larger_search"); }

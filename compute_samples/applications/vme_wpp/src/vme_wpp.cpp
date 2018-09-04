@@ -105,23 +105,26 @@ VmeWppApplication::Arguments VmeWppApplication::parse_command_line(
 #define DIM_TO_MB_SZ(X, Y) (au::align_units(au::align_units(X, Y), 16))
 #define DIM_TO_MV_SZ(X, Y) (DIM_TO_MB_SZ(X, Y) * MV_PER_DIM)
 
-void VmeWppApplication::run_implementation(
-    std::vector<std::string> &command_line, src::logger &logger) {
+Application::Status
+VmeWppApplication::run_implementation(std::vector<std::string> &command_line,
+                                      src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
-    return;
+    return Status::SKIP;
 
   compute::device device = compute::system::default_device();
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    throw std::domain_error(
-        "The selected device doesn't support device-side motion estimation.");
+    BOOST_LOG(logger)
+        << "The selected device doesn't support device-side motion estimation.";
+    return Status::SKIP;
   }
 
   if (!device.check_version(2, 0)) {
-    throw std::domain_error("The selected device doesn't support OpenCL 2.0.");
+    BOOST_LOG(logger) << "The selected device doesn't support OpenCL 2.0.";
+    return Status::SKIP;
   }
 
   BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
@@ -145,6 +148,7 @@ void VmeWppApplication::run_implementation(
     BOOST_LOG(logger) << "OpenCL Program Build Error!";
     BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
                       << program.build_log();
+    throw;
   }
   timer.print("Program created");
 
@@ -218,6 +222,7 @@ void VmeWppApplication::run_implementation(
   PlanarImage::release_image(planar_image);
 
   timer_total.print("Total");
+  return Status::OK;
 }
 
 void VmeWppApplication::run_vme_wpp(
@@ -243,128 +248,121 @@ void VmeWppApplication::run_vme_wpp(
   capture.get_sample(frame_idx, planar_image);
   timer.print("Read next YUV frame from disk to CPU linear memory.");
 
-  try {
-    size_t origin[] = {0, 0, 0};
-    size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
-                       1};
-    queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
-                              planar_image.get_pitch_y());
-    timer.print("Copied next frame to GPU tiled memory.");
+  size_t origin[] = {0, 0, 0};
+  size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
+                     1};
+  queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
+                            planar_image.get_pitch_y());
+  timer.print("Copied next frame to GPU tiled memory.");
 
-    ds_kernel.set_args(src_image, src_2x_image, src_4x_image, src_8x_image);
-    queue.enqueue_nd_range_kernel(
-        ds_kernel, 2, nullptr,
-        compute::dim(au::align16(au::align_units(width, 4)),
-                     au::align_units(height, 16))
-            .data(),
-        compute::dim(16, 1).data());
-    timer.print("Enqueued downsample_3_tier kernel for next frame");
+  ds_kernel.set_args(src_image, src_2x_image, src_4x_image, src_8x_image);
+  queue.enqueue_nd_range_kernel(
+      ds_kernel, 2, nullptr,
+      compute::dim(au::align16(au::align_units(width, 4)),
+                   au::align_units(height, 16))
+          .data(),
+      compute::dim(16, 1).data());
+  timer.print("Enqueued downsample_3_tier kernel for next frame");
 
-    uint32_t mv_8x_count = DIM_TO_MV_SZ(width, 8) * DIM_TO_MV_SZ(height, 8);
-    au::PageAlignedVector<cl_short2> predictors_4x(au::align64(mv_8x_count));
-    uint32_t mv_4x_count = DIM_TO_MV_SZ(width, 4) * DIM_TO_MV_SZ(height, 4);
-    au::PageAlignedVector<cl_short2> predictors_2x(au::align64(mv_4x_count));
-    uint32_t mv_2x_count = DIM_TO_MV_SZ(width, 2) * DIM_TO_MV_SZ(height, 2);
-    au::PageAlignedVector<cl_short2> predictors(au::align64(mv_2x_count));
+  uint32_t mv_8x_count = DIM_TO_MV_SZ(width, 8) * DIM_TO_MV_SZ(height, 8);
+  au::PageAlignedVector<cl_short2> predictors_4x(au::align64(mv_8x_count));
+  uint32_t mv_4x_count = DIM_TO_MV_SZ(width, 4) * DIM_TO_MV_SZ(height, 4);
+  au::PageAlignedVector<cl_short2> predictors_2x(au::align64(mv_4x_count));
+  uint32_t mv_2x_count = DIM_TO_MV_SZ(width, 2) * DIM_TO_MV_SZ(height, 2);
+  au::PageAlignedVector<cl_short2> predictors(au::align64(mv_2x_count));
 
-    compute::buffer pred_4x_buffer(
-        context, au::align64(mv_8x_count * sizeof(cl_short2)),
-        CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors_4x.data());
-    compute::buffer pred_2x_buffer(
-        context, au::align64(mv_4x_count * sizeof(cl_short2)),
-        CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors_2x.data());
-    compute::buffer pred_buffer(
-        context, au::align64(mv_2x_count * sizeof(cl_short2)),
-        CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors.data());
-    timer.print("Created opencl mem objects for tier_n_hme kernel");
+  compute::buffer pred_4x_buffer(
+      context, au::align64(mv_8x_count * sizeof(cl_short2)),
+      CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors_4x.data());
+  compute::buffer pred_2x_buffer(
+      context, au::align64(mv_4x_count * sizeof(cl_short2)),
+      CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors_2x.data());
+  compute::buffer pred_buffer(
+      context, au::align64(mv_2x_count * sizeof(cl_short2)),
+      CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors.data());
+  timer.print("Created opencl mem objects for tier_n_hme kernel");
 
-    hme_n_kernel.set_arg(0, src_8x_image);
-    hme_n_kernel.set_arg(1, ref_8x_image);
-    hme_n_kernel.set_arg(2, sizeof(cl_mem), NULL);
-    hme_n_kernel.set_arg(3, pred_4x_buffer);
-    queue.enqueue_nd_range_kernel(
-        hme_n_kernel, 2, nullptr,
-        compute::dim(au::align16(au::align_units(width, 8)),
-                     DIM_TO_MB_SZ(height, 8))
-            .data(),
-        compute::dim(16, 1).data());
-    timer.print("Enqueued tier 3 hme kernel for next frame");
+  hme_n_kernel.set_arg(0, src_8x_image);
+  hme_n_kernel.set_arg(1, ref_8x_image);
+  hme_n_kernel.set_arg(2, sizeof(cl_mem), NULL);
+  hme_n_kernel.set_arg(3, pred_4x_buffer);
+  queue.enqueue_nd_range_kernel(
+      hme_n_kernel, 2, nullptr,
+      compute::dim(au::align16(au::align_units(width, 8)),
+                   DIM_TO_MB_SZ(height, 8))
+          .data(),
+      compute::dim(16, 1).data());
+  timer.print("Enqueued tier 3 hme kernel for next frame");
 
-    hme_n_kernel.set_args(src_4x_image, ref_4x_image, pred_4x_buffer,
-                          pred_2x_buffer);
-    queue.enqueue_nd_range_kernel(
-        hme_n_kernel, 2, nullptr,
-        compute::dim(au::align16(au::align_units(width, 4)),
-                     DIM_TO_MB_SZ(height, 4))
-            .data(),
-        compute::dim(16, 1).data());
-    timer.print("Enqueued tier 2 hme kernel for next frame");
+  hme_n_kernel.set_args(src_4x_image, ref_4x_image, pred_4x_buffer,
+                        pred_2x_buffer);
+  queue.enqueue_nd_range_kernel(
+      hme_n_kernel, 2, nullptr,
+      compute::dim(au::align16(au::align_units(width, 4)),
+                   DIM_TO_MB_SZ(height, 4))
+          .data(),
+      compute::dim(16, 1).data());
+  timer.print("Enqueued tier 2 hme kernel for next frame");
 
-    hme_n_kernel.set_args(src_2x_image, ref_2x_image, pred_2x_buffer,
-                          pred_buffer);
-    queue.enqueue_nd_range_kernel(
-        hme_n_kernel, 2, nullptr,
-        compute::dim(au::align16(au::align_units(width, 2)),
-                     DIM_TO_MB_SZ(height, 2))
-            .data(),
-        compute::dim(16, 1).data());
-    timer.print("Enqueued tier 1 hme kernel for next frame");
+  hme_n_kernel.set_args(src_2x_image, ref_2x_image, pred_2x_buffer,
+                        pred_buffer);
+  queue.enqueue_nd_range_kernel(
+      hme_n_kernel, 2, nullptr,
+      compute::dim(au::align16(au::align_units(width, 2)),
+                   DIM_TO_MB_SZ(height, 2))
+          .data(),
+      compute::dim(16, 1).data());
+  timer.print("Enqueued tier 1 hme kernel for next frame");
 
-    int mb_image_width = au::align_units(width, 16);
-    int mb_image_height = au::align_units(height, 16);
-    int mb_count = mb_image_width * mb_image_height;
-    int mv_image_width = mb_image_width * 4;
-    int mv_image_height = mb_image_height * 4;
-    int mv_count = mv_image_width * mv_image_height;
+  int mb_image_width = au::align_units(width, 16);
+  int mb_image_height = au::align_units(height, 16);
+  int mb_count = mb_image_width * mb_image_height;
+  int mv_image_width = mb_image_width * 4;
+  int mv_image_height = mb_image_height * 4;
+  int mv_count = mv_image_width * mv_image_height;
 
-    uint32_t num_eu = device.compute_units();
-    uint32_t num_threads_per_eu = 7;
-    uint32_t max_threads = num_eu * num_threads_per_eu;
-    uint32_t width_mb_sz = au::align_units(width, 16);
-    uint32_t num_blocks =
-        (width_mb_sz < max_threads) ? width_mb_sz : max_threads;
-    uint32_t simd_size = 16;
+  uint32_t num_eu = device.compute_units();
+  uint32_t num_threads_per_eu = 7;
+  uint32_t max_threads = num_eu * num_threads_per_eu;
+  uint32_t width_mb_sz = au::align_units(width, 16);
+  uint32_t num_blocks = (width_mb_sz < max_threads) ? width_mb_sz : max_threads;
+  uint32_t simd_size = 16;
 
-    au::PageAlignedVector<cl_short2> mvs(au::align64(mv_count));
-    au::PageAlignedVector<cl_ushort> residuals(au::align64(mv_count));
-    au::PageAlignedVector<cl_uchar2> shapes(au::align64(mb_count));
-    au::PageAlignedVector<cl_int> scoreboard(au::align64(width_mb_sz), 0);
+  au::PageAlignedVector<cl_short2> mvs(au::align64(mv_count));
+  au::PageAlignedVector<cl_ushort> residuals(au::align64(mv_count));
+  au::PageAlignedVector<cl_uchar2> shapes(au::align64(mb_count));
+  au::PageAlignedVector<cl_int> scoreboard(au::align64(width_mb_sz), 0);
 
-    compute::buffer scoreboard_buffer(
-        context, au::align64(width_mb_sz * sizeof(uint32_t)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, scoreboard.data());
-    compute::buffer mv_buffer(
-        context, au::align64(mv_count * sizeof(cl_short2)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, mvs.data());
-    compute::buffer residual_buffer(
-        context, au::align64(mv_count * sizeof(cl_ushort)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, residuals.data());
-    compute::buffer shape_buffer(
-        context, au::align64(mb_count * sizeof(cl_uchar2)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, shapes.data());
-    timer.print("Created opencl mem objects for tier 0 wpp kernel");
+  compute::buffer scoreboard_buffer(
+      context, au::align64(width_mb_sz * sizeof(uint32_t)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, scoreboard.data());
+  compute::buffer mv_buffer(context, au::align64(mv_count * sizeof(cl_short2)),
+                            CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                            mvs.data());
+  compute::buffer residual_buffer(
+      context, au::align64(mv_count * sizeof(cl_ushort)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, residuals.data());
+  compute::buffer shape_buffer(
+      context, au::align64(mb_count * sizeof(cl_uchar2)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, shapes.data());
+  timer.print("Created opencl mem objects for tier 0 wpp kernel");
 
-    cl_uchar qp = static_cast<cl_uchar>(args.qp);
-    cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
-    cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
-    wpp_kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer,
-                        residual_buffer, shape_buffer, scoreboard_buffer, qp,
-                        sad_adjustment, pixel_mode);
-    size_t local_size = 16;
-    size_t global_size = num_blocks * simd_size;
-    queue.enqueue_nd_range_kernel(wpp_kernel, 1, nullptr, &global_size,
-                                  &local_size);
-    timer.print("Enquequed tier 0 vme_wpp kernel");
+  cl_uchar qp = static_cast<cl_uchar>(args.qp);
+  cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
+  cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
+  wpp_kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer,
+                      residual_buffer, shape_buffer, scoreboard_buffer, qp,
+                      sad_adjustment, pixel_mode);
+  size_t local_size = 16;
+  size_t global_size = num_blocks * simd_size;
+  queue.enqueue_nd_range_kernel(wpp_kernel, 1, nullptr, &global_size,
+                                &local_size);
+  timer.print("Enquequed tier 0 vme_wpp kernel");
 
-    queue.finish();
-    timer.print("Kernel finished.");
+  queue.finish();
+  timer.print("Kernel finished.");
 
-    planar_image.overlay_vectors(
-        reinterpret_cast<motion_vector *>(mvs.data()),
-        reinterpret_cast<inter_shape *>(shapes.data()));
-  } catch (const std::exception &e) {
-    BOOST_LOG(logger) << "Exception enountered in OpenCL host for vme_wpp.";
-    throw e;
-  }
+  planar_image.overlay_vectors(reinterpret_cast<motion_vector *>(mvs.data()),
+                               reinterpret_cast<inter_shape *>(shapes.data()));
 }
 } // namespace compute_samples

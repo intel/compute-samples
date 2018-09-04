@@ -26,11 +26,12 @@ namespace src = boost::log::sources;
 
 #include "commands_aggregation/commands_aggregation.hpp"
 
-TEST(CommandsAggregationApplication, RunsWithoutThrowingExceptions) {
+TEST(CommandsAggregationApplication, ReturnsOkStatus) {
   compute_samples::CommandsAggregationApplication application;
   const char *argv[] = {"commands_aggregation", nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-  EXPECT_NO_THROW(application.run(argc, argv));
+  EXPECT_EQ(compute_samples::Application::Status::OK,
+            application.run(argc, argv));
 }
 
 TEST(CommandsAggregationApplication, ComputesExpectedResultsUsingSingleQueue) {

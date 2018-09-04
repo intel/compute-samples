@@ -51,8 +51,8 @@ public:
   };
 
 private:
-  void run_implementation(std::vector<std::string> &command_line,
-                          src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line,
+                            src::logger &logger) override;
 
   Arguments parse_command_line(const std::vector<std::string> &command_line);
   void run_os_specific_implementation(std::vector<std::string> &,

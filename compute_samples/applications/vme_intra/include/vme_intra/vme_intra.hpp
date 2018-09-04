@@ -37,8 +37,8 @@ namespace compute = boost::compute;
 namespace compute_samples {
 class VmeIntraApplication : public Application {
 private:
-  void run_implementation(std::vector<std::string> &command_line,
-                          src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line,
+                            src::logger &logger) override;
   struct Arguments {
     bool output_bmp = false;
     std::string input_yuv_path = "";

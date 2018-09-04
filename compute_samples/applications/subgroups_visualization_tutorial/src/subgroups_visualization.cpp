@@ -45,11 +45,11 @@ namespace po = boost::program_options;
 
 namespace compute_samples {
 
-void SubgroupsVisualizationApplication::run_implementation(
+Application::Status SubgroupsVisualizationApplication::run_implementation(
     std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
-    return;
+    return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
@@ -62,14 +62,16 @@ void SubgroupsVisualizationApplication::run_implementation(
   }
   if (!(device.supports_extension("cl_khr_subgroups") ||
         device.supports_extension("cl_intel_subgroups"))) {
-    throw std::domain_error("This tutorial requires the cl_khr_subgroups or "
-                            "cl_intel_subgroups extension.");
+    BOOST_LOG(logger) << "This tutorial requires the cl_khr_subgroups or "
+                         "cl_intel_subgroups extension.";
+    return Status::SKIP;
   }
 
   compute::context context(device);
   compute::command_queue queue(context, device);
 
   run_subgroups_visualization(args, context, queue, logger);
+  return Status::OK;
 }
 
 SubgroupsVisualizationApplication::Arguments

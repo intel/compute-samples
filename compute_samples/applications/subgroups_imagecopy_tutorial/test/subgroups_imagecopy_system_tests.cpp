@@ -42,7 +42,8 @@ TEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   testing::internal::CaptureStdout();
-  application.run(argc, argv);
+  EXPECT_EQ(compute_samples::Application::Status::OK,
+            application.run(argc, argv));
   testing::internal::GetCapturedStdout();
 
   compute_samples::ImageBMP8Bit output_image(output_file_);
@@ -60,7 +61,8 @@ TEST_F(SubgroupsImageCopySystemTests, OptimizedCopy) {
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   testing::internal::CaptureStdout();
-  application.run(argc, argv);
+  EXPECT_EQ(compute_samples::Application::Status::OK,
+            application.run(argc, argv));
   testing::internal::GetCapturedStdout();
 
   compute_samples::ImageBMP8Bit output_image(output_file_);

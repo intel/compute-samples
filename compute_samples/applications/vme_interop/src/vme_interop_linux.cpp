@@ -363,6 +363,7 @@ void VmeInteropApplication::run_os_specific_implementation(
     BOOST_LOG(logger) << "OpenCL Program Build Error!";
     BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
                       << program.build_log();
+    throw;
   }
   timer.print("Program created");
 

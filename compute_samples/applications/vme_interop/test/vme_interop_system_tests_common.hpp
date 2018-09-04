@@ -30,7 +30,6 @@
 class VmeInteropSystemTests : public testing::Test {
 protected:
   virtual void TearDown() { std::remove(output_file_.c_str()); }
-  bool VerifySubtest();
 
   const std::string input_file_ = "foreman_176x144.yuv";
   const std::string output_file_ = "output_foreman_176x144.yuv";

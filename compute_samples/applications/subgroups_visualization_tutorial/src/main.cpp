@@ -24,5 +24,5 @@
 
 int main(int argc, const char **argv) {
   compute_samples::SubgroupsVisualizationApplication application;
-  application.run(argc, argv);
+  return static_cast<int>(application.run(argc, argv));
 }

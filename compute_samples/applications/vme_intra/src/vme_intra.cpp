@@ -151,19 +151,21 @@ void VmeIntraApplication::write_results_to_file(
   file.close();
 }
 
-void VmeIntraApplication::run_implementation(
-    std::vector<std::string> &command_line, src::logger &logger) {
+Application::Status
+VmeIntraApplication::run_implementation(std::vector<std::string> &command_line,
+                                        src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
-    return;
+    return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    throw std::domain_error(
-        "The selected device doesn't support device-side motion estimation.");
+    BOOST_LOG(logger)
+        << "The selected device doesn't support device-side motion estimation.";
+    return Status::SKIP;
   }
 
   BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
@@ -187,6 +189,7 @@ void VmeIntraApplication::run_implementation(
     BOOST_LOG(logger) << "OpenCL Program Build Error!";
     BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
                       << program.build_log();
+    throw;
   }
   timer.print("Program created");
 
@@ -242,6 +245,7 @@ void VmeIntraApplication::run_implementation(
   PlanarImage::release_image(planar_image);
 
   timer_total.print("Total");
+  return Status::OK;
 }
 
 void VmeIntraApplication::run_vme_intra(
@@ -266,150 +270,145 @@ void VmeIntraApplication::run_vme_intra(
   capture.get_sample(frame_idx, planar_image);
   timer.print("Read next YUV frame from disk to CPU linear memory.");
 
-  try {
-    size_t origin[] = {0, 0, 0};
-    size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
-                       1};
-    queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
-                              planar_image.get_pitch_y());
-    timer.print("Copied next frame to GPU tiled memory.");
+  size_t origin[] = {0, 0, 0};
+  size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
+                     1};
+  queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
+                            planar_image.get_pitch_y());
+  timer.print("Copied next frame to GPU tiled memory.");
 
-    ds_kernel.set_args(src_image, src_2x_image, src_4x_image, src_8x_image);
+  ds_kernel.set_args(src_image, src_2x_image, src_4x_image, src_8x_image);
+  queue.enqueue_nd_range_kernel(
+      ds_kernel, 2, nullptr,
+      compute::dim(au::align16(au::align_units(width, 4)),
+                   au::align_units(height, 16))
+          .data(),
+      compute::dim(16, 1).data());
+  timer.print("Enqueued downsample_3_tier kernel for next frame");
+
+  uint32_t mv_8x_count = DIM_TO_MV_SZ(width, 8) * DIM_TO_MV_SZ(height, 8);
+  au::PageAlignedVector<cl_short2> predictors_4x(au::align64(mv_8x_count));
+  uint32_t mv_4x_count = DIM_TO_MV_SZ(width, 4) * DIM_TO_MV_SZ(height, 4);
+  au::PageAlignedVector<cl_short2> predictors_2x(au::align64(mv_4x_count));
+  uint32_t mv_2x_count = DIM_TO_MV_SZ(width, 2) * DIM_TO_MV_SZ(height, 2);
+  au::PageAlignedVector<cl_short2> predictors(au::align64(mv_2x_count));
+
+  compute::buffer pred_4x_buffer(
+      context, au::align64(mv_8x_count * sizeof(cl_short2)),
+      CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors_4x.data());
+  compute::buffer pred_2x_buffer(
+      context, au::align64(mv_4x_count * sizeof(cl_short2)),
+      CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors_2x.data());
+  compute::buffer pred_buffer(
+      context, au::align64(mv_2x_count * sizeof(cl_short2)),
+      CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors.data());
+  timer.print("Created opencl mem objects for tier_n_hme kernel");
+
+  if (frame_idx > 0) {
+    hme_n_kernel.set_arg(0, src_8x_image);
+    hme_n_kernel.set_arg(1, ref_8x_image);
+    hme_n_kernel.set_arg(2, sizeof(cl_mem), NULL);
+    hme_n_kernel.set_arg(3, pred_4x_buffer);
     queue.enqueue_nd_range_kernel(
-        ds_kernel, 2, nullptr,
-        compute::dim(au::align16(au::align_units(width, 4)),
-                     au::align_units(height, 16))
+        hme_n_kernel, 2, nullptr,
+        compute::dim(au::align16(au::align_units(width, 8)),
+                     DIM_TO_MB_SZ(height, 8))
             .data(),
         compute::dim(16, 1).data());
-    timer.print("Enqueued downsample_3_tier kernel for next frame");
+    timer.print("Enqueued tier 3 hme kernel for next frame");
 
-    uint32_t mv_8x_count = DIM_TO_MV_SZ(width, 8) * DIM_TO_MV_SZ(height, 8);
-    au::PageAlignedVector<cl_short2> predictors_4x(au::align64(mv_8x_count));
-    uint32_t mv_4x_count = DIM_TO_MV_SZ(width, 4) * DIM_TO_MV_SZ(height, 4);
-    au::PageAlignedVector<cl_short2> predictors_2x(au::align64(mv_4x_count));
-    uint32_t mv_2x_count = DIM_TO_MV_SZ(width, 2) * DIM_TO_MV_SZ(height, 2);
-    au::PageAlignedVector<cl_short2> predictors(au::align64(mv_2x_count));
+    hme_n_kernel.set_args(src_4x_image, ref_4x_image, pred_4x_buffer,
+                          pred_2x_buffer);
+    queue.enqueue_nd_range_kernel(
+        hme_n_kernel, 2, nullptr,
+        compute::dim(au::align16(au::align_units(width, 4)),
+                     DIM_TO_MB_SZ(height, 4))
+            .data(),
+        compute::dim(16, 1).data());
+    timer.print("Enqueued tier 2 hme kernel for next frame");
 
-    compute::buffer pred_4x_buffer(
-        context, au::align64(mv_8x_count * sizeof(cl_short2)),
-        CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors_4x.data());
-    compute::buffer pred_2x_buffer(
-        context, au::align64(mv_4x_count * sizeof(cl_short2)),
-        CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors_2x.data());
-    compute::buffer pred_buffer(
-        context, au::align64(mv_2x_count * sizeof(cl_short2)),
-        CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, predictors.data());
-    timer.print("Created opencl mem objects for tier_n_hme kernel");
-
-    if (frame_idx > 0) {
-      hme_n_kernel.set_arg(0, src_8x_image);
-      hme_n_kernel.set_arg(1, ref_8x_image);
-      hme_n_kernel.set_arg(2, sizeof(cl_mem), NULL);
-      hme_n_kernel.set_arg(3, pred_4x_buffer);
-      queue.enqueue_nd_range_kernel(
-          hme_n_kernel, 2, nullptr,
-          compute::dim(au::align16(au::align_units(width, 8)),
-                       DIM_TO_MB_SZ(height, 8))
-              .data(),
-          compute::dim(16, 1).data());
-      timer.print("Enqueued tier 3 hme kernel for next frame");
-
-      hme_n_kernel.set_args(src_4x_image, ref_4x_image, pred_4x_buffer,
-                            pred_2x_buffer);
-      queue.enqueue_nd_range_kernel(
-          hme_n_kernel, 2, nullptr,
-          compute::dim(au::align16(au::align_units(width, 4)),
-                       DIM_TO_MB_SZ(height, 4))
-              .data(),
-          compute::dim(16, 1).data());
-      timer.print("Enqueued tier 2 hme kernel for next frame");
-
-      hme_n_kernel.set_args(src_2x_image, ref_2x_image, pred_2x_buffer,
-                            pred_buffer);
-      queue.enqueue_nd_range_kernel(
-          hme_n_kernel, 2, nullptr,
-          compute::dim(au::align16(au::align_units(width, 2)),
-                       DIM_TO_MB_SZ(height, 2))
-              .data(),
-          compute::dim(16, 1).data());
-      timer.print("Enqueued tier 1 hme kernel for next frame");
-    } else {
-      BOOST_LOG(logger) << "Skipping hme for frame 0";
-    }
-
-    int mb_image_width = au::align_units(width, 16);
-    int mb_image_height = au::align_units(height, 16);
-    int mb_count = mb_image_width * mb_image_height;
-    int mv_image_width = mb_image_width * 4;
-    int mv_image_height = mb_image_height * 4;
-    int mv_count = mv_image_width * mv_image_height;
-
-    au::PageAlignedVector<cl_short2> mvs(au::align64(mv_count));
-    au::PageAlignedVector<cl_uchar2> inter_shapes(au::align64(mb_count));
-    au::PageAlignedVector<cl_ushort> inter_residuals(au::align64(mv_count),
-                                                     0xFFFF);
-    au::PageAlignedVector<cl_ushort> inter_best_residuals(au::align64(mb_count),
-                                                          0xFFFF);
-    au::PageAlignedVector<cl_uchar> intra_shapes(au::align64(mb_count), 0xFF);
-    au::PageAlignedVector<cl_ushort> intra_residuals(au::align64(mb_count),
-                                                     0xFFFF);
-    au::PageAlignedVector<cl_ulong> intra_modes(au::align64(mb_count),
-                                                0xFFFFFFFFFFFFFFFF);
-
-    compute::buffer mv_buffer(
-        context, au::align64(mv_count * sizeof(cl_short2)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, mvs.data());
-    compute::buffer inter_shape_buffer(
-        context, au::align64(mb_count * sizeof(cl_uchar2)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, inter_shapes.data());
-    compute::buffer inter_residual_buffer(
-        context, au::align64(mv_count * sizeof(cl_ushort)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, inter_residuals.data());
-    compute::buffer inter_best_residual_buffer(
-        context, au::align64(mb_count * sizeof(cl_ushort)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, inter_best_residuals.data());
-    compute::buffer intra_shape_buffer(
-        context, au::align64(mb_count * sizeof(cl_uchar)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, intra_shapes.data());
-    compute::buffer intra_residual_buffer(
-        context, au::align64(mb_count * sizeof(cl_ushort)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, intra_residuals.data());
-    compute::buffer intra_mode_buffer(
-        context, au::align64(mb_count * sizeof(cl_ulong)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, intra_modes.data());
-    timer.print("Created opencl mem objects for tier 0 intra kernel");
-
-    cl_uchar qp = static_cast<cl_uchar>(args.qp);
-    cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
-    cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
-    cl_int iterations = static_cast<cl_int>(mb_image_height);
-    cl_uchar intra_only = (frame_idx == 0);
-    intra_kernel.set_args(src_image, ref_image, src_image, pred_buffer,
-                          mv_buffer, inter_shape_buffer, inter_residual_buffer,
-                          inter_best_residual_buffer, intra_shape_buffer,
-                          intra_residual_buffer, intra_mode_buffer, qp,
-                          sad_adjustment, pixel_mode, intra_only, iterations);
-    size_t local_size = 16;
-    size_t global_size = au::align16(width);
-    compute::event event = queue.enqueue_nd_range_kernel(
-        intra_kernel, 1, nullptr, &global_size, &local_size);
-    timer.print("Enquequed tier 0 vme_intra kernel");
-
-    event.wait();
-    timer.print("Kernel finished.");
-
-    planar_image.overlay_vectors(
-        reinterpret_cast<motion_vector *>(mvs.data()),
-        reinterpret_cast<inter_shape *>(inter_shapes.data()),
-        reinterpret_cast<intra_shape *>(intra_shapes.data()),
-        reinterpret_cast<residual *>(inter_best_residuals.data()),
-        reinterpret_cast<residual *>(intra_residuals.data()));
-    write_results_to_file(intra_modes.data(), intra_shapes.data(),
-                          intra_residuals.data(), inter_best_residuals.data(),
-                          width, height, frame_idx);
-  } catch (const std::exception &e) {
-    BOOST_LOG(logger) << "Exception enountered in OpenCL host for vme_intra.";
-    throw e;
+    hme_n_kernel.set_args(src_2x_image, ref_2x_image, pred_2x_buffer,
+                          pred_buffer);
+    queue.enqueue_nd_range_kernel(
+        hme_n_kernel, 2, nullptr,
+        compute::dim(au::align16(au::align_units(width, 2)),
+                     DIM_TO_MB_SZ(height, 2))
+            .data(),
+        compute::dim(16, 1).data());
+    timer.print("Enqueued tier 1 hme kernel for next frame");
+  } else {
+    BOOST_LOG(logger) << "Skipping hme for frame 0";
   }
+
+  int mb_image_width = au::align_units(width, 16);
+  int mb_image_height = au::align_units(height, 16);
+  int mb_count = mb_image_width * mb_image_height;
+  int mv_image_width = mb_image_width * 4;
+  int mv_image_height = mb_image_height * 4;
+  int mv_count = mv_image_width * mv_image_height;
+
+  au::PageAlignedVector<cl_short2> mvs(au::align64(mv_count));
+  au::PageAlignedVector<cl_uchar2> inter_shapes(au::align64(mb_count));
+  au::PageAlignedVector<cl_ushort> inter_residuals(au::align64(mv_count),
+                                                   0xFFFF);
+  au::PageAlignedVector<cl_ushort> inter_best_residuals(au::align64(mb_count),
+                                                        0xFFFF);
+  au::PageAlignedVector<cl_uchar> intra_shapes(au::align64(mb_count), 0xFF);
+  au::PageAlignedVector<cl_ushort> intra_residuals(au::align64(mb_count),
+                                                   0xFFFF);
+  au::PageAlignedVector<cl_ulong> intra_modes(au::align64(mb_count),
+                                              0xFFFFFFFFFFFFFFFF);
+
+  compute::buffer mv_buffer(context, au::align64(mv_count * sizeof(cl_short2)),
+                            CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                            mvs.data());
+  compute::buffer inter_shape_buffer(
+      context, au::align64(mb_count * sizeof(cl_uchar2)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, inter_shapes.data());
+  compute::buffer inter_residual_buffer(
+      context, au::align64(mv_count * sizeof(cl_ushort)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, inter_residuals.data());
+  compute::buffer inter_best_residual_buffer(
+      context, au::align64(mb_count * sizeof(cl_ushort)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, inter_best_residuals.data());
+  compute::buffer intra_shape_buffer(
+      context, au::align64(mb_count * sizeof(cl_uchar)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, intra_shapes.data());
+  compute::buffer intra_residual_buffer(
+      context, au::align64(mb_count * sizeof(cl_ushort)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, intra_residuals.data());
+  compute::buffer intra_mode_buffer(
+      context, au::align64(mb_count * sizeof(cl_ulong)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, intra_modes.data());
+  timer.print("Created opencl mem objects for tier 0 intra kernel");
+
+  cl_uchar qp = static_cast<cl_uchar>(args.qp);
+  cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
+  cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
+  cl_int iterations = static_cast<cl_int>(mb_image_height);
+  cl_uchar intra_only = (frame_idx == 0);
+  intra_kernel.set_args(src_image, ref_image, src_image, pred_buffer, mv_buffer,
+                        inter_shape_buffer, inter_residual_buffer,
+                        inter_best_residual_buffer, intra_shape_buffer,
+                        intra_residual_buffer, intra_mode_buffer, qp,
+                        sad_adjustment, pixel_mode, intra_only, iterations);
+  size_t local_size = 16;
+  size_t global_size = au::align16(width);
+  compute::event event = queue.enqueue_nd_range_kernel(
+      intra_kernel, 1, nullptr, &global_size, &local_size);
+  timer.print("Enquequed tier 0 vme_intra kernel");
+
+  event.wait();
+  timer.print("Kernel finished.");
+
+  planar_image.overlay_vectors(
+      reinterpret_cast<motion_vector *>(mvs.data()),
+      reinterpret_cast<inter_shape *>(inter_shapes.data()),
+      reinterpret_cast<intra_shape *>(intra_shapes.data()),
+      reinterpret_cast<residual *>(inter_best_residuals.data()),
+      reinterpret_cast<residual *>(intra_residuals.data()));
+  write_results_to_file(intra_modes.data(), intra_shapes.data(),
+                        intra_residuals.data(), inter_best_residuals.data(),
+                        width, height, frame_idx);
 }
 } // namespace compute_samples

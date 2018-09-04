@@ -30,7 +30,7 @@ namespace src = boost::log::sources;
 
 namespace compute_samples {
 Application::~Application(){};
-void Application::run(int argc, const char **argv) {
+Application::Status Application::run(int argc, const char **argv) {
   src::logger logger;
 
   try {
@@ -47,9 +47,10 @@ void Application::run(int argc, const char **argv) {
     PUTENV(set_default_device);
 
     std::vector<std::string> command_line(argv + 1, argv + argc);
-    run_implementation(command_line, logger);
+    return run_implementation(command_line, logger);
   } catch (const std::exception &e) {
     BOOST_LOG(logger) << e.what();
+    return Status::ERROR;
   }
 }
 } // namespace compute_samples

@@ -47,6 +47,7 @@ compute::kernel create_kernel(const compute::context &context,
     BOOST_LOG(logger) << "OpenCL Program Build Error!";
     BOOST_LOG(logger) << "OpenCL Program Build Log is:\n"
                       << program.build_log();
+    throw;
   }
   return program.create_kernel(kernel_name);
 }
@@ -66,11 +67,11 @@ compute::buffer create_buffer(const compute::context &context,
       compute::buffer::read_write | compute::buffer::use_host_ptr, data.data());
 }
 
-void CommandsAggregationApplication::run_implementation(
+Application::Status CommandsAggregationApplication::run_implementation(
     std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
-    return;
+    return Status::SKIP;
 
   Timer timer(logger);
   if (args.in_order) {
@@ -79,6 +80,7 @@ void CommandsAggregationApplication::run_implementation(
     run_workloads_out_of_order(args.global_work_size, logger);
   }
   timer.print("Total");
+  return Status::OK;
 }
 
 CommandsAggregationApplication::Arguments

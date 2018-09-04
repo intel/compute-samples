@@ -101,30 +101,26 @@ VmeInterlacedApplication::parse_command_line(
   } else if (!args.sub_test.compare("split")) {
     args.native = 0;
   } else {
-    args.native = -1;
+    throw std::invalid_argument("Invalid sub-test");
   }
 
   return args;
 }
 
-void VmeInterlacedApplication::run_implementation(
+Application::Status VmeInterlacedApplication::run_implementation(
     std::vector<std::string> &command_line, src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
-    return;
-
-  if (args.native == -1) {
-    BOOST_LOG(logger) << "Invalid sub-test " << args.sub_test;
-    throw std::invalid_argument(args.sub_test);
-  }
+    return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    throw std::domain_error(
-        "The selected device doesn't support device-side motion estimation.");
+    BOOST_LOG(logger)
+        << "The selected device doesn't support device-side motion estimation.";
+    return Status::SKIP;
   }
 
   BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
@@ -149,6 +145,7 @@ void VmeInterlacedApplication::run_implementation(
     BOOST_LOG(logger) << "OpenCL Program Build Error!";
     BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
                       << program.build_log();
+    throw;
   }
   timer.print("Program created");
 
@@ -257,6 +254,7 @@ void VmeInterlacedApplication::run_implementation(
   Capture::release(capture);
 
   timer_total.print("Total");
+  return Status::OK;
 }
 
 void VmeInterlacedApplication::run_vme_interlaced_native(
@@ -381,35 +379,28 @@ void VmeInterlacedApplication::run_vme_interlaced(
     au::PageAlignedVector<cl_short2> &predictors, int width, int mb_count,
     int mv_count, uint32_t iterations, uint8_t interlaced, int polarity,
     Timer &timer, src::logger &logger) const {
-  try {
-    BOOST_LOG(logger) << "Creating opencl mem objects...";
-    compute::buffer mv_buffer(
-        context, au::align64(mv_count * sizeof(cl_short2)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, mvs.data());
-    compute::buffer residual_buffer(
-        context, au::align64(mv_count * sizeof(cl_ushort)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, residuals.data());
-    compute::buffer shape_buffer(
-        context, au::align64(mb_count * sizeof(cl_uchar2)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, shapes.data());
-    compute::buffer pred_buffer(
-        context, au::align64(mb_count * sizeof(cl_short2)),
-        CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, predictors.data());
-    timer.print("Created opencl mem objects.");
+  BOOST_LOG(logger) << "Creating opencl mem objects...";
+  compute::buffer mv_buffer(context, au::align64(mv_count * sizeof(cl_short2)),
+                            CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                            mvs.data());
+  compute::buffer residual_buffer(
+      context, au::align64(mv_count * sizeof(cl_ushort)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, residuals.data());
+  compute::buffer shape_buffer(
+      context, au::align64(mb_count * sizeof(cl_uchar2)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, shapes.data());
+  compute::buffer pred_buffer(
+      context, au::align64(mb_count * sizeof(cl_short2)),
+      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, predictors.data());
+  timer.print("Created opencl mem objects.");
 
-    kernel.set_args(src_image, ref_image, interlaced,
-                    static_cast<uint8_t>(polarity), pred_buffer, mv_buffer,
-                    residual_buffer, shape_buffer, iterations);
-    size_t local_size = 16;
-    size_t global_size = au::align16(width);
-    queue.enqueue_nd_range_kernel(kernel, 1, nullptr, &global_size,
-                                  &local_size);
-    timer.print("Kernel queued.");
-  } catch (const std::exception &e) {
-    BOOST_LOG(logger)
-        << "Exception enountered in OpenCL host for vme_interlaced.";
-    throw e;
-  }
+  kernel.set_args(src_image, ref_image, interlaced,
+                  static_cast<uint8_t>(polarity), pred_buffer, mv_buffer,
+                  residual_buffer, shape_buffer, iterations);
+  size_t local_size = 16;
+  size_t global_size = au::align16(width);
+  queue.enqueue_nd_range_kernel(kernel, 1, nullptr, &global_size, &local_size);
+  timer.print("Kernel queued.");
 }
 
 void VmeInterlacedApplication::get_field_capture_samples(

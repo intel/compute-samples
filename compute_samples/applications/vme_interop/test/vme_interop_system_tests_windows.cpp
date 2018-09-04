@@ -23,7 +23,7 @@
 #include "vme_interop/vme_interop.hpp"
 #include "vme_interop_system_tests_common.hpp"
 
-bool VmeInteropSystemTests::VerifySubtest() {
+TEST_F(VmeInteropSystemTests, ReturnsSkipStatusOnWindows) {
   const char *argv[] = {"vme_interop",
                         const_cast<char *>(input_file_.c_str()),
                         const_cast<char *>(output_file_.c_str()),
@@ -38,7 +38,7 @@ bool VmeInteropSystemTests::VerifySubtest() {
 
   compute_samples::VmeInteropApplication application;
   testing::internal::CaptureStdout();
-  application.run(argc, argv);
+  EXPECT_EQ(compute_samples::Application::Status::SKIP,
+            application.run(argc, argv));
   testing::internal::GetCapturedStdout();
-  return true; // Replace with proper exit code
 }

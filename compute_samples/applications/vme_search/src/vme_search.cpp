@@ -101,34 +101,35 @@ VmeSearchApplication::Arguments VmeSearchApplication::parse_command_line(
     throw std::invalid_argument("Invalid argument for qp. Valid range (0-51).");
   }
 
+  if (args.sub_test.compare("basic_search") &&
+      args.sub_test.compare("cost_heuristics_search") &&
+      args.sub_test.compare("larger_search")) {
+    throw std::invalid_argument("Invalid sub-test");
+  }
+
   return args;
 }
 
-void VmeSearchApplication::run_implementation(
-    std::vector<std::string> &command_line, src::logger &logger) {
+Application::Status
+VmeSearchApplication::run_implementation(std::vector<std::string> &command_line,
+                                         src::logger &logger) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
-    return;
+    return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    throw std::domain_error(
-        "The selected device doesn't support device-side motion estimation.");
+    BOOST_LOG(logger)
+        << "The selected device doesn't support device-side motion estimation.";
+    return Status::SKIP;
   }
 
   BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
   BOOST_LOG(logger) << "Frame size: " << args.width << "x" << args.height
                     << " pixels";
-
-  if (args.sub_test.compare("basic_search") &&
-      args.sub_test.compare("cost_heuristics_search") &&
-      args.sub_test.compare("larger_search")) {
-    BOOST_LOG(logger) << "Invalid sub-test " << args.sub_test;
-    throw std::invalid_argument(args.sub_test);
-  }
 
   Timer timer_total(logger);
 
@@ -151,6 +152,7 @@ void VmeSearchApplication::run_implementation(
     BOOST_LOG(logger) << "OpenCL Program Build Error!";
     BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
                       << program.build_log();
+    throw;
   }
   timer.print("Program created");
 
@@ -201,6 +203,7 @@ void VmeSearchApplication::run_implementation(
   PlanarImage::release_image(planar_image);
 
   timer_total.print("Total");
+  return Status::OK;
 }
 
 void VmeSearchApplication::run_vme_search(
@@ -230,56 +233,48 @@ void VmeSearchApplication::run_vme_search(
   au::PageAlignedVector<cl_short2> predictors(au::align64(mb_count),
                                               default_predictor);
 
-  try {
-    compute::buffer mv_buffer(
-        context, au::align64(mv_count * sizeof(cl_short2)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, mvs.data());
-    compute::buffer residual_buffer(
-        context, au::align64(mv_count * sizeof(cl_ushort)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, residuals.data());
-    compute::buffer shape_buffer(
-        context, au::align64(mb_count * sizeof(cl_uchar2)),
-        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, shapes.data());
-    compute::buffer pred_buffer(
-        context, au::align64(mb_count * sizeof(cl_short2)),
-        CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, predictors.data());
+  compute::buffer mv_buffer(context, au::align64(mv_count * sizeof(cl_short2)),
+                            CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                            mvs.data());
+  compute::buffer residual_buffer(
+      context, au::align64(mv_count * sizeof(cl_ushort)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, residuals.data());
+  compute::buffer shape_buffer(
+      context, au::align64(mb_count * sizeof(cl_uchar2)),
+      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, shapes.data());
+  compute::buffer pred_buffer(
+      context, au::align64(mb_count * sizeof(cl_short2)),
+      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, predictors.data());
 
-    timer.print("Created opencl mem objects.");
+  timer.print("Created opencl mem objects.");
 
-    std::swap(ref_image, src_image);
+  std::swap(ref_image, src_image);
 
-    capture.get_sample(frame_idx, planar_image);
-    timer.print("Read next YUV frame from disk to CPU linear memory.");
+  capture.get_sample(frame_idx, planar_image);
+  timer.print("Read next YUV frame from disk to CPU linear memory.");
 
-    size_t origin[] = {0, 0, 0};
-    size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
-                       1};
-    queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
-                              planar_image.get_pitch_y());
-    timer.print("Copied frame to GPU tiled memory.");
+  size_t origin[] = {0, 0, 0};
+  size_t region[] = {static_cast<size_t>(width), static_cast<size_t>(height),
+                     1};
+  queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
+                            planar_image.get_pitch_y());
+  timer.print("Copied frame to GPU tiled memory.");
 
-    cl_uchar qp = static_cast<cl_uchar>(args.qp);
-    cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
-    cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
-    cl_int iterations = static_cast<cl_int>(mb_image_height);
-    kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer,
-                    residual_buffer, shape_buffer, qp, sad_adjustment,
-                    pixel_mode, iterations);
-    size_t local_size = 16;
-    size_t global_size = static_cast<size_t>(au::align16(width));
-    queue.enqueue_nd_range_kernel(kernel, 1, nullptr, &global_size,
-                                  &local_size);
-    timer.print("Kernel queued.");
+  cl_uchar qp = static_cast<cl_uchar>(args.qp);
+  cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
+  cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
+  cl_int iterations = static_cast<cl_int>(mb_image_height);
+  kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer, residual_buffer,
+                  shape_buffer, qp, sad_adjustment, pixel_mode, iterations);
+  size_t local_size = 16;
+  size_t global_size = static_cast<size_t>(au::align16(width));
+  queue.enqueue_nd_range_kernel(kernel, 1, nullptr, &global_size, &local_size);
+  timer.print("Kernel queued.");
 
-    queue.finish();
-    timer.print("Kernel finished.");
+  queue.finish();
+  timer.print("Kernel finished.");
 
-    planar_image.overlay_vectors(
-        reinterpret_cast<motion_vector *>(mvs.data()),
-        reinterpret_cast<inter_shape *>(shapes.data()));
-  } catch (const std::exception &e) {
-    BOOST_LOG(logger) << "Exception enountered in OpenCL host for vme_search.";
-    throw e;
-  }
+  planar_image.overlay_vectors(reinterpret_cast<motion_vector *>(mvs.data()),
+                               reinterpret_cast<inter_shape *>(shapes.data()));
 }
 } // namespace compute_samples

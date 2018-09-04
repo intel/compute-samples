@@ -23,7 +23,7 @@
 #include "vme_interop/vme_interop.hpp"
 #include "vme_interop_system_tests_common.hpp"
 
-bool VmeInteropSystemTests::VerifySubtest() {
+TEST_F(VmeInteropSystemTests, ReturnsReferenceImage) {
   const char *argv[] = {"vme_interop",
                         const_cast<char *>(input_file_.c_str()),
                         const_cast<char *>(output_file_.c_str()),
@@ -38,7 +38,8 @@ bool VmeInteropSystemTests::VerifySubtest() {
 
   compute_samples::VmeInteropApplication application;
   testing::internal::CaptureStdout();
-  application.run(argc, argv);
+  EXPECT_EQ(compute_samples::Application::Status::SKIP,
+            application.run(argc, argv));
   testing::internal::GetCapturedStdout();
 
   std::ifstream out(output_file_, std::ios::binary);
@@ -52,9 +53,8 @@ bool VmeInteropSystemTests::VerifySubtest() {
   std::istreambuf_iterator<char> ref_iter(ref);
   std::istreambuf_iterator<char> eos_iter;
   while (ref_iter != eos_iter) {
-    if (*ref_iter++ != *out_iter++)
-      return false;
+    EXPECT_EQ(*ref_iter++, *out_iter++);
   }
 
-  return out_iter == eos_iter;
+  EXPECT_EQ(out_iter, eos_iter);
 }

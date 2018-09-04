@@ -95,7 +95,6 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ".")
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
 
 set(TEST_SOURCES
-    test/vme_interop_system_tests.cpp
     test/vme_interop_system_tests_common.hpp
 )
 
