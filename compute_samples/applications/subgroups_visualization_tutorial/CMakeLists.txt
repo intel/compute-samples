@@ -23,77 +23,38 @@
 cmake_minimum_required(VERSION 3.8)
 project(subgroups_visualization)
 
-set(LIB_SOURCES
-    include/subgroups_visualization/subgroups_visualization.hpp
-    src/subgroups_visualization.cpp
-    subgroups_visualization_kernel.cl
-    subgroups_visualization_solution.cl
+add_application_library(${PROJECT_NAME}
+    SOURCE
+    "include/subgroups_visualization/subgroups_visualization.hpp"
+    "src/subgroups_visualization.cpp"
 )
-
-add_library(${PROJECT_NAME}_lib ${LIB_SOURCES})
-add_library(compute_samples::${PROJECT_NAME}_lib ALIAS ${PROJECT_NAME}_lib)
-
-target_include_directories(${PROJECT_NAME}_lib
-    PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
-)
-
 target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
     compute_samples::timer
     Boost::log
     Boost::program_options
-    compute_samples::application
     compute_samples::image
 )
-
-file(COPY "${PROJECT_SOURCE_DIR}/subgroups_visualization_solution.cl" DESTINATION ${CMAKE_BINARY_DIR})
-add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/subgroups_visualization_kernel.cl" ${CMAKE_BINARY_DIR})
-
-install(FILES "${PROJECT_SOURCE_DIR}/subgroups_visualization_kernel.cl" DESTINATION ".")
-install(FILES "${PROJECT_SOURCE_DIR}/subgroups_visualization_solution.cl" DESTINATION ".")
-
-source_group("Kernel Files" FILES subgroups_visualization_kernel.cl subgroups_visualization_solution.cl)
-set_target_properties(${PROJECT_NAME}_lib PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-set(APP_SOURCES
-    src/main.cpp
+add_kernels(${PROJECT_NAME}_lib
+    "subgroups_visualization_kernel.cl"
+    "subgroups_visualization_solution.cl"
 )
 
-add_executable(${PROJECT_NAME} ${APP_SOURCES})
-add_executable(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-    ${PROJECT_NAME}_lib
+add_application(${PROJECT_NAME}
+    SOURCE
+    "src/main.cpp"
+)
+install_kernels(${PROJECT_NAME}
+    "subgroups_visualization_kernel.cl"
+    "subgroups_visualization_solution.cl"
 )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ".")
-
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-set(TEST_SOURCES
-    test/subgroups_visualization_system_tests.cpp
+add_application_test(${PROJECT_NAME}
+    SOURCE
+    "test/subgroups_visualization_system_tests.cpp"
 )
-
-add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
-add_executable(compute_samples::${PROJECT_NAME}_tests ALIAS ${PROJECT_NAME}_tests)
-
-target_link_libraries(${PROJECT_NAME}_tests
-    PUBLIC
-    ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+install_kernels(${PROJECT_NAME}_tests
+    "subgroups_visualization_kernel.cl"
+    "subgroups_visualization_solution.cl"
 )
-
-set_target_properties(${PROJECT_NAME}_tests PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-file(COPY "${MEDIA_DIRECTORY}/bmp/test_subgroups_visualization_reference.bmp" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-add_custom_command(TARGET ${PROJECT_NAME}_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/subgroups_visualization_solution.cl" ${CMAKE_CURRENT_BINARY_DIR})
-
-install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
-install(FILES "${MEDIA_DIRECTORY}/bmp/test_subgroups_visualization_reference.bmp" DESTINATION ".")
-
-set_target_properties(${PROJECT_NAME}_tests PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)
+install_resources(${PROJECT_NAME}_tests "${MEDIA_DIRECTORY}/bmp/test_subgroups_visualization_reference.bmp")

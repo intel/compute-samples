@@ -23,69 +23,27 @@
 cmake_minimum_required(VERSION 3.8)
 project(commands_aggregation)
 
-set(LIB_SOURCES
-    include/commands_aggregation/commands_aggregation.hpp
-    src/commands_aggregation.cpp
-    commands_aggregation.cl
+add_application_library(${PROJECT_NAME}
+    SOURCE
+    "include/commands_aggregation/commands_aggregation.hpp"
+    "src/commands_aggregation.cpp"
 )
-
-add_library(${PROJECT_NAME}_lib ${LIB_SOURCES})
-add_library(compute_samples::${PROJECT_NAME}_lib ALIAS ${PROJECT_NAME}_lib)
-
-target_include_directories(${PROJECT_NAME}_lib
-    PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
-)
-
 target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
     compute_samples::timer
     Boost::log
-    compute_samples::application
     Boost::program_options
 )
+add_kernels(${PROJECT_NAME}_lib "commands_aggregation.cl")
 
-add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/commands_aggregation.cl" ${CMAKE_BINARY_DIR})
-
-install(FILES "${PROJECT_SOURCE_DIR}/commands_aggregation.cl" DESTINATION ".")
-
-source_group("Kernel Files" FILES commands_aggregation.cl)
-set_target_properties(${PROJECT_NAME}_lib PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-set(APP_SOURCES
-    src/main.cpp
+add_application(${PROJECT_NAME}
+    SOURCE
+    "src/main.cpp"
 )
+install_kernels(${PROJECT_NAME} "commands_aggregation.cl")
 
-add_executable(${PROJECT_NAME} ${APP_SOURCES})
-add_executable(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-    ${PROJECT_NAME}_lib
+add_application_test(${PROJECT_NAME}
+    SOURCE
+    "test/commands_aggregation_system_tests.cpp"
 )
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ".")
-
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-set(TEST_SOURCES
-    test/commands_aggregation_system_tests.cpp
-)
-
-add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
-add_executable(compute_samples::${PROJECT_NAME}_tests ALIAS ${PROJECT_NAME}_tests)
-
-target_link_libraries(${PROJECT_NAME}_tests
-    PUBLIC
-    ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
-)
-
-set_target_properties(${PROJECT_NAME}_tests PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-add_custom_command(TARGET ${PROJECT_NAME}_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/commands_aggregation.cl" ${CMAKE_CURRENT_BINARY_DIR})
-
-install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
-
-add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)
+install_kernels(${PROJECT_NAME}_tests "commands_aggregation.cl")

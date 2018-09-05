@@ -23,79 +23,33 @@
 cmake_minimum_required(VERSION 3.8)
 project(median_filter)
 
-set(LIB_SOURCES
-    include/median_filter/median_filter.hpp
-    src/median_filter.cpp
-    median_filter.cl
+add_application_library(${PROJECT_NAME}
+    SOURCE
+    "include/median_filter/median_filter.hpp"
+    "src/median_filter.cpp"
 )
-
-add_library(${PROJECT_NAME}_lib ${LIB_SOURCES})
-add_library(compute_samples::${PROJECT_NAME}_lib ALIAS ${PROJECT_NAME}_lib)
-
-target_include_directories(${PROJECT_NAME}_lib
-    PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
-)
-
 target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
     compute_samples::timer
     Boost::log
-    compute_samples::application
-    compute_samples::image
-    compute_samples::version
     Boost::program_options
+    compute_samples::image
 )
+add_kernels(${PROJECT_NAME}_lib "median_filter.cl")
 
-file(COPY "${MEDIA_DIRECTORY}/png/balloons_news.png" DESTINATION ${CMAKE_BINARY_DIR})
-add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/median_filter.cl" ${CMAKE_BINARY_DIR})
-
-install(FILES "${PROJECT_SOURCE_DIR}/median_filter.cl" DESTINATION ".")
-install(FILES "${MEDIA_DIRECTORY}/png/balloons_news.png" DESTINATION ".")
-
-source_group("Kernel Files" FILES median_filter.cl)
-set_target_properties(${PROJECT_NAME}_lib PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-set(APP_SOURCES
-    src/main.cpp
+add_application(${PROJECT_NAME}
+    SOURCE
+    "src/main.cpp"
 )
+install_kernels(${PROJECT_NAME} "median_filter.cl")
+install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/png/balloons_news.png")
 
-add_executable(${PROJECT_NAME} ${APP_SOURCES})
-add_executable(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-    ${PROJECT_NAME}_lib
+add_application_test(${PROJECT_NAME}
+    SOURCE
+    "test/median_filter_system_tests.cpp"
 )
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ".")
-
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-set(TEST_SOURCES
-    test/median_filter_system_tests.cpp
+install_kernels(${PROJECT_NAME}_tests "median_filter.cl")
+install_resources(${PROJECT_NAME}_tests
+    "${MEDIA_DIRECTORY}/png/test_input.png"
+    "${MEDIA_DIRECTORY}/png/test_reference.png"
 )
-
-add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
-add_executable(compute_samples::${PROJECT_NAME}_tests ALIAS ${PROJECT_NAME}_tests)
-
-target_link_libraries(${PROJECT_NAME}_tests
-    PUBLIC
-    ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
-)
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ".")
-
-set_target_properties(${PROJECT_NAME}_tests PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-file(COPY "${MEDIA_DIRECTORY}/png/test_input.png" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY "${MEDIA_DIRECTORY}/png/test_reference.png" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-add_custom_command(TARGET ${PROJECT_NAME}_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/median_filter.cl" ${CMAKE_CURRENT_BINARY_DIR})
-
-install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
-install(FILES "${MEDIA_DIRECTORY}/png/test_input.png" DESTINATION ".")
-install(FILES "${MEDIA_DIRECTORY}/png/test_reference.png" DESTINATION ".")
-
-add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)

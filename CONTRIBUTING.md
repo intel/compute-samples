@@ -53,15 +53,15 @@ Testing instructions can be found in the [README](README.md).
 1. Prepare CMake:
     1. Add subdirectory with `your_app` to the `compute_samples/applications/CMakeLists.txt`.
     1. Create a `CMakeLists.txt` file in `compute_samples/applications/your_app`.
-        1. Create `your_app_lib` library.
-        1. Create `your_app` binary.
-        1. Create `your_app_tests` binary.
-        1. Add custom post build command to copy files to the binary directory. This technique should be used only for files which may be modified between the builds.
-        1. Copy static files to the binary directory. This technique should be used only for files which won't be modified between the builds. Path to the common media directory is available in `MEDIA_DIRECTORY`.
-        1. Install all required files in the root directory (`.`).
-        1. Add test command lines.
+        1. Create `your_app_lib` library by using `add_application_library` function.
+        1. Link any required libraries with `target_link_libraries` function.
+        1. Create `your_app` binary by using `add_application` function.
+        1. Create `your_app_tests` binary by using `add_application_test` function.
+        1. Add OpenCL kernels to the library with `add_kernels` function.
+        1. Install kernels together with the application and tests by calling `install_kernels` function.
+        1. If necessary install any other resources with `install_resources` function.
 
-        Example `CMakeLists.txt`
+        Example `CMakeLists.txt`:
         ```CMake
         #
         # Copyright(c) 2018 Intel Corporation
@@ -88,75 +88,36 @@ Testing instructions can be found in the [README](README.md).
         cmake_minimum_required(VERSION 3.8)
         project(your_app)
 
-        set(LIB_SOURCES
-            include/your_app/your_app.hpp
-            src/your_app.cpp
-            your_app_kernel.cl
+        add_application_library(${PROJECT_NAME}
+            SOURCE
+            "include/your_app/your_app.hpp"
+            "src/your_app.cpp"
         )
-
-        add_library(${PROJECT_NAME}_lib ${LIB_SOURCES})
-        add_library(compute_samples::${PROJECT_NAME}_lib ALIAS ${PROJECT_NAME}_lib)
-
-        target_include_directories(${PROJECT_NAME}_lib
-            PUBLIC
-            ${PROJECT_SOURCE_DIR}/include
-        )
-
         target_link_libraries(${PROJECT_NAME}_lib
             PUBLIC
-            compute_samples::application
+            compute_samples::image
             Boost::program_options
         )
+        add_kernels(${PROJECT_NAME}_lib "your_app_kernel.cl")
 
-        target_compile_features(${PROJECT_NAME}_lib PUBLIC cxx_std_11)
-
-        file(COPY "${MEDIA_DIRECTORY}/png/your_app_media.png" DESTINATION ${CMAKE_BINARY_DIR})
-        add_custom_command(TARGET ${PROJECT_NAME}_lib POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/your_app_kernel.cl" ${CMAKE_BINARY_DIR})
-
-        install(FILES "${PROJECT_SOURCE_DIR}/your_app_kernel.cl" DESTINATION ".")
-
-        source_group("Kernel Files" FILES your_app_kernel.cl)
-        set_target_properties(${PROJECT_NAME}_lib PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-        set(APP_SOURCES
-            src/main.cpp
+        add_application(${PROJECT_NAME}
+            SOURCE
+            "src/main.cpp"
         )
+        install_kernels(${PROJECT_NAME} "your_app_kernel.cl")
+        install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/png/your_app_media.png")
 
-        add_executable(${PROJECT_NAME} ${APP_SOURCES})
-        add_executable(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-        target_link_libraries(${PROJECT_NAME}
-            PUBLIC
-            ${PROJECT_NAME}_lib
+        add_application_test(${PROJECT_NAME}
+            SOURCE
+            "test/your_app_unit_tests.cpp"
+            "test/your_app_integration_tests.cpp"
+            "test/your_app_system_tests.cpp"
         )
-
-        install(TARGETS ${PROJECT_NAME} DESTINATION ".")
-
-        set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-        set(TEST_SOURCES
-            test/your_app_unit_tests.cpp
-            test/your_app_integration_tests.cpp
-            test/your_app_system_tests.cpp
+        install_kernels(${PROJECT_NAME}_tests "your_app_kernel.cl")
+        install_resources(${PROJECT_NAME}_tests
+            "${MEDIA_DIRECTORY}/png/test_input.png"
+            "${MEDIA_DIRECTORY}/png/test_reference.png"
         )
-
-        add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
-        add_executable(compute_samples::${PROJECT_NAME}_tests ALIAS ${PROJECT_NAME}_tests)
-
-        target_link_libraries(${PROJECT_NAME}_tests
-            PUBLIC
-            ${PROJECT_NAME}_lib
-            GTest::GTest
-            GTest::Main
-        )
-
-        set_target_properties(${PROJECT_NAME}_tests PROPERTIES FOLDER applications/${PROJECT_NAME})
-
-        add_custom_command(TARGET ${PROJECT_NAME}_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/your_app_kernel.cl" ${CMAKE_CURRENT_BINARY_DIR})
-
-        install(TARGETS ${PROJECT_NAME}_tests DESTINATION ".")
-
-        add_test(${PROJECT_NAME}_tests, ${PROJECT_NAME}_tests)
         ```
 1. Prepare the source code:
     1. Create `YourApplication` class which is derived from `Application` interface available in `application/application.hpp` header.

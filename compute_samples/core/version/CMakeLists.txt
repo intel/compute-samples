@@ -23,25 +23,15 @@
 cmake_minimum_required(VERSION 3.8)
 project(version)
 
-configure_file("${PROJECT_SOURCE_DIR}/src/version_config.cpp.in" "${PROJECT_BINARY_DIR}/generated/version_config.cpp")
-
-set(SOURCES
-    include/version/version.hpp
-    src/version.cpp
-    src/version_config.hpp
-    ${PROJECT_BINARY_DIR}/generated/version_config.cpp
+configure_file("src/version_config.cpp.in" "${PROJECT_BINARY_DIR}/generated/version_config.cpp")
+add_core_library(${PROJECT_NAME}
+    SOURCE
+    "include/version/version.hpp"
+    "src/version.cpp"
+    "src/version_config.hpp"
+    "${PROJECT_BINARY_DIR}/generated/version_config.cpp"
 )
-
-add_library(${PROJECT_NAME} ${SOURCES})
-add_library(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
 target_include_directories(${PROJECT_NAME}
-    PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
     PRIVATE
-    ${PROJECT_SOURCE_DIR}/src
+    src
 )
-
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER core/${PROJECT_NAME})

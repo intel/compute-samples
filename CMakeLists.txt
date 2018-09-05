@@ -23,6 +23,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(compute_samples)
 
+include(cmake/custom_functions.cmake)
+
 option(DOWNLOAD_BOOST "Download and build Boost" ON)
 option(DOWNLOAD_PNG "Download and build libpng" ON)
 option(DOWNLOAD_MEDIA "Download media files" ON)
