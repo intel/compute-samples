@@ -46,7 +46,7 @@ Example command line: `cmake .. -DDOWNLOAD_BOOST=OFF -DBOOST_ROOT=/home/boost_1_
 # Dependencies
 * [Boost 1.64](http://www.boost.org/)
 * [libpng 1.6.30](http://www.libpng.org/pub/png/libpng.html)
-* [Google Test](https://github.com/google/googletest)
+* [Google Test 1.8.1](https://github.com/google/googletest)
 
 # Test
 There are 3 ways to run tests depending on the use case:
