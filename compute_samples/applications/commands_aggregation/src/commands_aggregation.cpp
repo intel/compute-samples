@@ -34,24 +34,9 @@ namespace po = boost::program_options;
 #include <boost/compute/wait_list.hpp>
 
 #include "timer/timer.hpp"
+#include "ocl_utils/ocl_utils.hpp"
 
 namespace compute_samples {
-compute::kernel create_kernel(const compute::context &context,
-                              src::logger &logger) {
-  const std::string kernel_name = "commands_aggregation";
-  compute::program program = compute::program::create_with_source_file(
-      "commands_aggregation.cl", context);
-  try {
-    program.build("-cl-opt-disable");
-  } catch (compute::opencl_error &) {
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:\n"
-                      << program.build_log();
-    throw;
-  }
-  return program.create_kernel(kernel_name);
-}
-
 std::vector<uint32_t> create_input_data(const int global_work_size) {
   const uint32_t number_of_kernels = 10;
   const int number_of_elements = number_of_kernels * global_work_size;
@@ -60,10 +45,8 @@ std::vector<uint32_t> create_input_data(const int global_work_size) {
 
 compute::buffer create_buffer(const compute::context &context,
                               std::vector<uint32_t> &data) {
-  const int data_size_in_bytes =
-      static_cast<int>(data.size() * sizeof(uint32_t));
   return compute::buffer(
-      context, data_size_in_bytes,
+      context, size_in_bytes(data),
       compute::buffer::read_write | compute::buffer::use_host_ptr, data.data());
 }
 
@@ -128,7 +111,9 @@ CommandsAggregationApplication::run_workloads_out_of_order(
 
   std::vector<uint32_t> data = create_input_data(global_work_size);
   compute::buffer data_buffer = create_buffer(context, data);
-  compute::kernel kernel = create_kernel(context, logger);
+  compute::program program =
+      build_program(context, "commands_aggregation.cl", "-cl-opt-disable");
+  compute::kernel kernel = program.create_kernel("commands_aggregation");
 
   compute::command_queue ioq1(context, device);
   compute::command_queue ioq2(context, device);
@@ -198,8 +183,7 @@ CommandsAggregationApplication::run_workloads_out_of_order(
 
   timer.print("Kernels execution");
 
-  ioq1.enqueue_read_buffer(data_buffer, 0, data.size() * sizeof(uint32_t),
-                           data.data());
+  ioq1.enqueue_read_buffer(data_buffer, 0, size_in_bytes(data), data.data());
   return data;
 }
 
@@ -213,7 +197,9 @@ std::vector<uint32_t> CommandsAggregationApplication::run_workloads_in_order(
 
   std::vector<uint32_t> data = create_input_data(global_work_size);
   compute::buffer data_buffer = create_buffer(context, data);
-  compute::kernel kernel = create_kernel(context, logger);
+  compute::program program =
+      build_program(context, "commands_aggregation.cl", "-cl-opt-disable");
+  compute::kernel kernel = program.create_kernel("commands_aggregation");
 
   compute::command_queue ioq(context, device);
 
@@ -268,8 +254,7 @@ std::vector<uint32_t> CommandsAggregationApplication::run_workloads_in_order(
 
   timer.print("Kernels execution");
 
-  ioq.enqueue_read_buffer(data_buffer, 0, data.size() * sizeof(uint32_t),
-                          data.data());
+  ioq.enqueue_read_buffer(data_buffer, 0, size_in_bytes(data), data.data());
   return data;
 }
 

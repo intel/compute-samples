@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     Boost::log
     Boost::program_options
     compute_samples::image
+    compute_samples::ocl_utils
 )
 add_kernels(${PROJECT_NAME}_lib
     "subgroups_imagecopy_kernel.cl"
@@ -52,6 +53,7 @@ install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/bmp/input.bmp")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
+    "test/subgroups_imagecopy_integration_tests.cpp"
     "test/subgroups_imagecopy_system_tests.cpp"
 )
 install_kernels(${PROJECT_NAME}_tests

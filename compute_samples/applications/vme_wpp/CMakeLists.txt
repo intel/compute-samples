@@ -35,6 +35,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     Boost::program_options
     compute_samples::yuv_utils
     compute_samples::align_utils
+    compute_samples::ocl_utils
 )
 add_kernels(${PROJECT_NAME}_lib
     "scoreboard.cl"
@@ -59,6 +60,7 @@ install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
+    "test/vme_wpp_integration_tests.cpp"
     "test/vme_wpp_system_tests.cpp"
 )
 install_kernels(${PROJECT_NAME}_tests

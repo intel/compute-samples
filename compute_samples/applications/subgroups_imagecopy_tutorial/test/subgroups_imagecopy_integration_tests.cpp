@@ -21,11 +21,21 @@
  */
 
 #include "gtest/gtest.h"
-#include "template/template.hpp"
+#include "subgroups_imagecopy/subgroups_imagecopy.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
+TEST(SubgroupsImageCopyIntegrationTests, BasicProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(
+                context, "subgroups_imagecopy_kernel.cl", "-cl-std=CL2.0"));
+}
+
+TEST(SubgroupsImageCopyIntegrationTests, OptimizedProgramCanBeBuilt) {
+  const compute::device device = compute::system::default_device();
+  const compute::context context(device);
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(
+                context, "subgroups_imagecopy_solution.cl", "-cl-std=CL2.0"));
 }

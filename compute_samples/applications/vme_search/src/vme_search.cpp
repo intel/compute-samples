@@ -41,6 +41,7 @@ namespace po = boost::program_options;
 
 #include "align_utils/align_utils.hpp"
 #include "timer/timer.hpp"
+#include "ocl_utils/ocl_utils.hpp"
 namespace au = compute_samples::align_utils;
 
 namespace compute_samples {
@@ -144,16 +145,7 @@ VmeSearchApplication::run_implementation(std::vector<std::string> &command_line,
 
   BOOST_LOG(logger) << "Kernel path: " << kernel_path;
 
-  compute::program program =
-      compute::program::create_with_source_file(kernel_path, context);
-  try {
-    program.build();
-  } catch (compute::opencl_error &) {
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
-                      << program.build_log();
-    throw;
-  }
+  compute::program program = build_program(context, kernel_path);
   timer.print("Program created");
 
   std::string kernel_name = "vme_";

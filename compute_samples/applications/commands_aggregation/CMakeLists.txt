@@ -31,6 +31,7 @@ add_application_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
     compute_samples::timer
+    compute_samples::ocl_utils
     Boost::log
     Boost::program_options
 )
@@ -44,6 +45,7 @@ install_kernels(${PROJECT_NAME} "commands_aggregation.cl")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
+    "test/commands_aggregation_integration_tests.cpp"
     "test/commands_aggregation_system_tests.cpp"
 )
 install_kernels(${PROJECT_NAME}_tests "commands_aggregation.cl")

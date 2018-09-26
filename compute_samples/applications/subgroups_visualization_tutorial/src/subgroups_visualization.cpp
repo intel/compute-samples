@@ -42,6 +42,7 @@ namespace po = boost::program_options;
 
 #include "image/image.hpp"
 #include "timer/timer.hpp"
+#include "ocl_utils/ocl_utils.hpp"
 
 namespace compute_samples {
 
@@ -120,14 +121,7 @@ void SubgroupsVisualizationApplication::run_subgroups_visualization(
   ImageBMP8Bit image_file(args.global_size, args.global_size);
 
   compute::program program =
-      compute::program::create_with_source_file(args.kernel_path, context);
-  try {
-    program.build("-cl-std=CL2.0");
-  } catch (compute::opencl_error &) {
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
-                      << program.build_log();
-  }
+      build_program(context, args.kernel_path, "-cl-std=CL2.0");
   compute::kernel kernel = program.create_kernel("Visualize");
 
   compute::image_format format(CL_R, CL_UNSIGNED_INT8);

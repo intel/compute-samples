@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     Boost::log
     Boost::program_options
     compute_samples::image
+    compute_samples::ocl_utils
 )
 add_kernels(${PROJECT_NAME}_lib "median_filter.cl")
 
@@ -46,6 +47,7 @@ install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/png/balloons_news.png")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
+    "test/median_filter_integration_tests.cpp"
     "test/median_filter_system_tests.cpp"
 )
 install_kernels(${PROJECT_NAME}_tests "median_filter.cl")

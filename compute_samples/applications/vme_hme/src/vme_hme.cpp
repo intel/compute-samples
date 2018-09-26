@@ -42,6 +42,7 @@ namespace po = boost::program_options;
 
 #include "align_utils/align_utils.hpp"
 #include "timer/timer.hpp"
+#include "ocl_utils/ocl_utils.hpp"
 namespace au = compute_samples::align_utils;
 
 namespace compute_samples {
@@ -132,19 +133,7 @@ VmeHmeApplication::run_implementation(std::vector<std::string> &command_line,
   compute::command_queue queue(context, device);
 
   Timer timer(logger);
-
-  std::string kernel_path = "vme_hme.cl";
-  BOOST_LOG(logger) << "Kernel path: " << kernel_path;
-  compute::program program =
-      compute::program::create_with_source_file(kernel_path, context);
-  try {
-    program.build();
-  } catch (compute::opencl_error &) {
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
-                      << program.build_log();
-    throw;
-  }
+  compute::program program = build_program(context, "vme_hme.cl");
   timer.print("Program created");
 
   compute::kernel ds_kernel = program.create_kernel("downsample_3_tier");

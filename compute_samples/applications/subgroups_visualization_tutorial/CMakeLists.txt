@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     Boost::log
     Boost::program_options
     compute_samples::image
+    compute_samples::ocl_utils
 )
 add_kernels(${PROJECT_NAME}_lib
     "subgroups_visualization_kernel.cl"
@@ -51,6 +52,7 @@ install_kernels(${PROJECT_NAME}
 
 add_application_test(${PROJECT_NAME}
     SOURCE
+    "test/subgroups_visualization_integration_tests.cpp"
     "test/subgroups_visualization_system_tests.cpp"
 )
 install_kernels(${PROJECT_NAME}_tests

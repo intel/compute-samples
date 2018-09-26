@@ -21,31 +21,27 @@
 #
 
 cmake_minimum_required(VERSION 3.8)
-project(template)
+project(ocl_utils)
 
-add_application_library(${PROJECT_NAME}
+add_core_library(${PROJECT_NAME}
     SOURCE
-    "include/template/template.hpp"
-    "src/template.cpp"
+    "include/ocl_utils/ocl_utils.hpp"
+    "src/ocl_utils-impl.hpp"
+    "src/ocl_utils.cpp"
 )
-target_link_libraries(${PROJECT_NAME}_lib
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+    "src"
+)
+target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Boost::log
-    Boost::program_options
-    compute_samples::ocl_utils
+    OpenCL::OpenCL
+    compute_samples::image
 )
-add_kernels(${PROJECT_NAME}_lib "template.cl")
 
-add_application(${PROJECT_NAME}
+add_core_library_test(${PROJECT_NAME}
     SOURCE
-    "src/main.cpp"
+    "test/ocl_utils_unit_tests.cpp"
+    "test/ocl_utils_integration_tests.cpp"
 )
-install_kernels(${PROJECT_NAME} "template.cl")
-
-add_application_test(${PROJECT_NAME}
-    SOURCE
-    "test/template_unit_tests.cpp"
-    "test/template_integration_tests.cpp"
-    "test/template_system_tests.cpp"
-)
-install_kernels(${PROJECT_NAME}_tests "template.cl")

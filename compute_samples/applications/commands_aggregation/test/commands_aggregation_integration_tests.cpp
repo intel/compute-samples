@@ -21,11 +21,13 @@
  */
 
 #include "gtest/gtest.h"
-#include "template/template.hpp"
+#include "commands_aggregation/commands_aggregation.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
+TEST(CommandsAggregationIntegrationTests, ProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(context, "commands_aggregation.cl",
+                                           "-cl-opt-disable"));
 }

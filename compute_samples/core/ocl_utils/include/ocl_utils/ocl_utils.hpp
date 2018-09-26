@@ -20,12 +20,25 @@
  * SOFTWARE.
  */
 
-#include "gtest/gtest.h"
-#include "template/template.hpp"
-#include "ocl_utils/ocl_utils.hpp"
+#ifndef COMPUTE_SAMPLES_OCL_UTILS_HPP
+#define COMPUTE_SAMPLES_OCL_UTILS_HPP
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
-  const compute::device device = compute::system::default_device();
-  const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
-}
+#include <vector>
+
+#include <boost/compute/core.hpp>
+namespace compute = boost::compute;
+
+#include "image/image.hpp"
+
+namespace compute_samples {
+template <typename T> int size_in_bytes(const std::vector<T> &v);
+template <typename T> int size_in_bytes(const Image<T> &i);
+compute::program build_program(const compute::context &context,
+                               const std::string &file,
+                               const std::string &options = std::string());
+} // namespace compute_samples
+
+// Include template implementation
+#include "ocl_utils-impl.hpp"
+
+#endif

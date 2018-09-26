@@ -33,6 +33,7 @@ namespace po = boost::program_options;
 #include <boost/compute/utility.hpp>
 
 #include "timer/timer.hpp"
+#include "ocl_utils/ocl_utils.hpp"
 
 namespace compute_samples {
 Application::Status MedianFilterApplication::run_implementation(
@@ -100,26 +101,15 @@ void MedianFilterApplication::run_median_filter(
   BOOST_LOG(logger) << "Number of channels: " << image.number_of_channels();
   timer.print("Image read");
 
-  compute::buffer input_buffer(context, image.size_in_bytes(),
+  compute::buffer input_buffer(context, size_in_bytes(image),
                                compute::memory_object::read_only);
-  compute::buffer output_buffer(context, image.size_in_bytes(),
+  compute::buffer output_buffer(context, size_in_bytes(image),
                                 compute::memory_object::write_only);
 
-  const std::string kernel_name = "median_filter";
-  compute::program program =
-      compute::program::create_with_source_file(args.kernel_path, context);
-  try {
-    program.build();
-  } catch (compute::opencl_error &) {
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:\n"
-                      << program.build_log();
-    throw;
-  }
-  compute::kernel kernel = program.create_kernel(kernel_name);
+  compute::program program = build_program(context, args.kernel_path);
+  compute::kernel kernel = program.create_kernel("median_filter");
   kernel.set_args(input_buffer, output_buffer);
   BOOST_LOG(logger) << "Kernel path: " << args.kernel_path;
-  BOOST_LOG(logger) << "Kernel name: " << kernel_name;
   timer.print("Kernel created");
 
   write_image_to_buffer(image, input_buffer, queue);
@@ -147,7 +137,7 @@ void MedianFilterApplication::write_image_to_buffer(
     const ImagePNG32Bit &image, compute::buffer &buffer,
     compute::command_queue &queue) const {
   uint32_t *mapped_buffer = static_cast<uint32_t *>(queue.enqueue_map_buffer(
-      buffer, compute::command_queue::map_write, 0, image.size_in_bytes()));
+      buffer, compute::command_queue::map_write, 0, size_in_bytes(image)));
   std::copy(image.raw_data(), image.raw_data() + image.size(), mapped_buffer);
   queue.enqueue_unmap_buffer(buffer, mapped_buffer);
 }
@@ -156,7 +146,7 @@ void MedianFilterApplication::read_buffer_to_image(
     compute::buffer &buffer, ImagePNG32Bit &image,
     compute::command_queue &queue) const {
   uint32_t *mapped_buffer = static_cast<uint32_t *>(queue.enqueue_map_buffer(
-      buffer, compute::command_queue::map_read, 0, image.size_in_bytes()));
+      buffer, compute::command_queue::map_read, 0, size_in_bytes(image)));
   image.copy_raw_data(mapped_buffer);
   queue.enqueue_unmap_buffer(buffer, mapped_buffer);
 }

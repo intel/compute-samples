@@ -21,11 +21,12 @@
  */
 
 #include "gtest/gtest.h"
-#include "template/template.hpp"
+#include "median_filter/median_filter.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
+TEST(MedianFilterIntegrationTests, ProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(context, "median_filter.cl"));
 }

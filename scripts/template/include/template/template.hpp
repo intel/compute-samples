@@ -44,8 +44,6 @@ private:
   Arguments
   parse_command_line(const std::vector<std::string> &command_line) const;
 };
-compute::kernel create_kernel(const compute::context &context,
-                              src::logger &logger);
 std::string ascii_to_string(const std::vector<cl_char> &output);
 } // namespace compute_samples
 

@@ -21,11 +21,12 @@
  */
 
 #include "gtest/gtest.h"
-#include "template/template.hpp"
+#include "vme_hme/vme_hme.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
+TEST(VmeHmeIntegrationTests, ProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(context, "vme_hme.cl"));
 }

@@ -20,12 +20,18 @@
  * SOFTWARE.
  */
 
-#include "gtest/gtest.h"
-#include "template/template.hpp"
+#ifndef COMPUTE_SAMPLES_OCL_UTILS_IMPL_HPP
+#define COMPUTE_SAMPLES_OCL_UTILS_IMPL_HPP
+
 #include "ocl_utils/ocl_utils.hpp"
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
-  const compute::device device = compute::system::default_device();
-  const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+namespace compute_samples {
+template <typename T> int size_in_bytes(const std::vector<T> &v) {
+  return static_cast<int>(sizeof(T) * v.size());
 }
+template <typename T> int size_in_bytes(const Image<T> &i) {
+  return i.size_in_bytes();
+}
+} // namespace compute_samples
+
+#endif

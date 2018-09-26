@@ -32,7 +32,8 @@ TEST(TemplateSystemTests, ApplicationReturnsOKStatus) {
             application.run(argc, argv));
 }
 
-TEST(TemplateSystemTests, ApplicationReturnsSkipStatusGivenHelpMessageIsRequested) {
+TEST(TemplateSystemTests,
+     ApplicationReturnsSkipStatusGivenHelpMessageIsRequested) {
   compute_samples::TemplateApplication application;
   const char *argv[] = {"template_application", "--help", nullptr};
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;

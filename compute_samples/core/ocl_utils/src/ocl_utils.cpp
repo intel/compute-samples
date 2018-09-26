@@ -20,12 +20,27 @@
  * SOFTWARE.
  */
 
-#include "gtest/gtest.h"
-#include "template/template.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
-  const compute::device device = compute::system::default_device();
-  const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+namespace src = boost::log::sources;
+
+namespace compute_samples {
+compute::program build_program(const compute::context &context,
+                               const std::string &file,
+                               const std::string &options) {
+  compute::program program =
+      compute::program::create_with_source_file(file, context);
+  try {
+    program.build(options);
+  } catch (compute::opencl_error &) {
+    src::logger logger;
+    BOOST_LOG(logger) << "OpenCL Program Build Error!";
+    BOOST_LOG(logger) << "OpenCL Program Build Log is:\n"
+                      << program.build_log();
+    throw;
+  }
+  return program;
 }
+} // namespace compute_samples

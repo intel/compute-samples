@@ -32,6 +32,8 @@ namespace po = boost::program_options;
 #include <boost/compute/memory_object.hpp>
 #include <boost/compute/utility.hpp>
 
+#include "ocl_utils/ocl_utils.hpp"
+
 namespace compute_samples {
 Application::Status
 TemplateApplication::run_implementation(std::vector<std::string> &command_line,
@@ -49,15 +51,15 @@ TemplateApplication::run_implementation(std::vector<std::string> &command_line,
                                 87, 111, 114, 108, 100, 33};
   std::vector<cl_char> output(input.size(), 0);
 
-  compute::buffer input_buffer(
-      context, input.size() * sizeof(decltype(input)::value_type),
-      compute::memory_object::read_only | compute::memory_object::use_host_ptr,
-      input.data());
-  compute::buffer output_buffer(
-      context, output.size() * sizeof(decltype(output)::value_type),
-      compute::memory_object::write_only);
+  compute::buffer input_buffer(context, size_in_bytes(input),
+                               compute::memory_object::read_only |
+                                   compute::memory_object::use_host_ptr,
+                               input.data());
+  compute::buffer output_buffer(context, size_in_bytes(output),
+                                compute::memory_object::write_only);
 
-  compute::kernel kernel = create_kernel(context, logger);
+  compute::program program = build_program(context, "template.cl");
+  compute::kernel kernel = program.create_kernel("template_kernel");
   kernel.set_args(input_buffer, output_buffer);
 
   queue.enqueue_1d_range_kernel(kernel, 0, input.size(), 0);
@@ -91,22 +93,6 @@ TemplateApplication::Arguments TemplateApplication::parse_command_line(
 
   po::notify(vm);
   return args;
-}
-
-compute::kernel create_kernel(const compute::context &context,
-                              src::logger &logger) {
-  const std::string kernel_name = "template_kernel";
-  compute::program program =
-      compute::program::create_with_source_file("template.cl", context);
-  try {
-    program.build();
-  } catch (compute::opencl_error &) {
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:\n"
-                      << program.build_log();
-    throw;
-  }
-  return program.create_kernel(kernel_name);
 }
 
 std::string ascii_to_string(const std::vector<cl_char> &output) {

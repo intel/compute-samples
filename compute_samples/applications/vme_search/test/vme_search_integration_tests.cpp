@@ -21,11 +21,26 @@
  */
 
 #include "gtest/gtest.h"
-#include "template/template.hpp"
+#include "vme_search/vme_search.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
+TEST(VmeSearchIntegrationTests, BasicSearchProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(context, "vme_basic_search.cl"));
+}
+
+TEST(VmeSearchIntegrationTests, CostHeuristicsSearchProgramCanBeBuilt) {
+  const compute::device device = compute::system::default_device();
+  const compute::context context(device);
+  EXPECT_NE(compute::program(), compute_samples::build_program(
+                                    context, "vme_cost_heuristics_search.cl"));
+}
+
+TEST(VmeSearchIntegrationTests, LargerSearchProgramCanBeBuilt) {
+  const compute::device device = compute::system::default_device();
+  const compute::context context(device);
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(context, "vme_larger_search.cl"));
 }

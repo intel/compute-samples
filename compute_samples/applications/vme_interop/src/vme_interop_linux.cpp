@@ -45,6 +45,7 @@ namespace au = compute_samples::align_utils;
 #include "boost/compute/intel/image/image2d_va.hpp"
 #include "timer/timer.hpp"
 #include "yuv_utils/yuv_utils.hpp"
+#include "ocl_utils/ocl_utils.hpp"
 
 #include <CL/cl_va_api_media_sharing_intel.h>
 #include <fcntl.h>
@@ -351,24 +352,10 @@ void VmeInteropApplication::run_os_specific_implementation(
   compute::command_queue queue(context, device);
 
   Timer timer(logger);
-
-  std::string kernel_path = "vme_interop.cl";
-  BOOST_LOG(logger) << "Kernel path: " << kernel_path;
-
-  compute::program program =
-      compute::program::create_with_source_file(kernel_path, context);
-  try {
-    program.build();
-  } catch (compute::opencl_error &) {
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
-                      << program.build_log();
-    throw;
-  }
+  compute::program program = build_program(context, "vme_interop.cl");
   timer.print("Program created");
 
-  std::string kernel_name = "vme_interop";
-  compute::kernel kernel = program.create_kernel(kernel_name);
+  compute::kernel kernel = program.create_kernel("vme_interop");
   timer.print("Kernel created");
 
   Capture *capture = Capture::create_file_capture(

@@ -21,11 +21,22 @@
  */
 
 #include "gtest/gtest.h"
-#include "template/template.hpp"
+#include "subgroups_visualization/subgroups_visualization.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 
-TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
+TEST(SubgroupsVisualizationCopyIntegrationTests, WorkgroupProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(
+                context, "subgroups_visualization_kernel.cl", "-cl-std=CL2.0"));
+}
+
+TEST(SubgroupsVisualizationCopyIntegrationTests, SubgroupProgramCanBeBuilt) {
+  const compute::device device = compute::system::default_device();
+  const compute::context context(device);
+  EXPECT_NE(
+      compute::program(),
+      compute_samples::build_program(
+          context, "subgroups_visualization_solution.cl", "-cl-std=CL2.0"));
 }

@@ -40,6 +40,8 @@ namespace po = boost::program_options;
 #include <CL/cl_ext_intel.h>
 #include <thread>
 
+#include "ocl_utils/ocl_utils.hpp"
+
 namespace compute_samples {
 
 VmeInterlacedApplication::Arguments
@@ -133,24 +135,10 @@ Application::Status VmeInterlacedApplication::run_implementation(
   compute::command_queue queue(context, device);
 
   Timer timer(logger);
-
-  std::string kernel_path = "vme_interlaced.cl";
-  BOOST_LOG(logger) << "Kernel path: " << kernel_path;
-
-  compute::program program =
-      compute::program::create_with_source_file(kernel_path, context);
-  try {
-    program.build();
-  } catch (compute::opencl_error &) {
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:" << std::endl
-                      << program.build_log();
-    throw;
-  }
+  compute::program program = build_program(context, "vme_interlaced.cl");
   timer.print("Program created");
 
-  std::string kernel_name = "vme_interlaced";
-  compute::kernel kernel = program.create_kernel(kernel_name);
+  compute::kernel kernel = program.create_kernel("vme_interlaced");
   timer.print("Kernel created");
 
   Capture *capture = Capture::create_file_capture(
