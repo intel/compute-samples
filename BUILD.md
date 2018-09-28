@@ -54,3 +54,5 @@ There are 3 ways to run tests depending on the use case:
 * To run all registered tests from all modules run `ctest` from the `build` directory.
 * To run all tests from a specific module find module's tester and run it.
 * To run specific tests from a specific module find module's tester and run it with `--gtest_filter` option or use the `ctest -R *test_pattern*` option.
+
+If you want to run `ctest` on a different configuration like `Debug` or `Release` please use `-C` option according to the [CTest documentation](https://cmake.org/cmake/help/v3.8/manual/ctest.1.html).

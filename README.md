@@ -35,9 +35,11 @@ List of all available samples and their description can be found in the [Samples
     cd build
     cmake ..
     cmake --build .
-    ctest
 
 More details about building, installing and testing can be found in the [BUILD](BUILD.md) file.
+
+### Testing
+In order to run tests please read [this](BUILD.md#Test) section.
 
 ## Versioning
 We use [Semantic Versioning](http://semver.org/). Current version is `0.y.z` which means that API may change without maintaining backward compatibility.
