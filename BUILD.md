@@ -28,20 +28,20 @@ In order to create a redistributable package please use the following command:
 # CMake options
 CMake can be configured using the following parameters:
 
-* `DOWNLOAD_BOOST` - If set to `OFF` then Boost won't be downloaded and built during CMake configuration. Default is `ON`.
+* `BUILD_BOOST` - If set to `OFF` then Boost won't be downloaded and built during CMake configuration. Default is `ON`.
 Please note that most of the time to build the project the first time is in downloading and building Boost.
-* `BOOST_ROOT` - Path to the custom Boost installation directory. It is only relevant if `DOWNLOAD_BOOST` is set to `OFF`.
-* `DOWNLOAD_PNG` - If set to `OFF` then libpng won't be downloaded and built during CMake configuration. Default is `ON`.
-* `PNG_ROOT` - Path to the custom libpng installation directory. It is only relevant if `DOWNLOAD_PNG` is set to `OFF`.
-* `ZLIB_ROOT` - Path to the custom zlib installation directory. It is only relevant if `DOWNLOAD_PNG` is set to `OFF`.
+* `BOOST_ROOT` - Path to the custom Boost installation directory.
+* `BUILD_PNG` - If set to `OFF` then libpng won't be downloaded and built during CMake configuration. Default is `ON`.
+* `PNG_ROOT` - Path to the custom libpng installation directory.
+* `ZLIB_ROOT` - Path to the custom zlib installation directory.
 * `DOWNLOAD_MEDIA` - If set to `OFF` media files to use as inputs for sample application won't be downloaded. Default in `ON`.
 * `MEDIADATA_ROOT` - Path to the mediadata directory. It is only relevant if `DOWNLOAD_MEDIA` is set to `OFF`.
 * `DOWNLOAD_GTEST` - If set to `OFF` then Google Test won't be downloaded during CMake configuration. Default is `ON`.
-* `GTEST_ROOT` - Path to the custom Google Test installation directory. It is only relevant if `DOWNLOAD_GTEST` is set to `OFF`.
-* `DOWNLOAD_OCL_ICD` - If set to `OFF` then OpenCL ICD won't be downloaded and built during CMake configuration. Default is `ON`.
-* `OPENCL_ROOT` - Path to the custom OpenCL ICD installation directory. It is only relevant if `DOWNLOAD_OCL_ICD` is set to `OFF`.
+* `GTEST_ROOT` - Path to the custom Google Test installation directory.
+* `BUILD_OPENCL` - If set to `OFF` then OpenCL ICD won't be downloaded and built during CMake configuration. Default is `ON`.
+* `OPENCL_ROOT` - Path to the custom OpenCL ICD installation directory.
 
-Example command line: `cmake .. -DDOWNLOAD_BOOST=OFF -DBOOST_ROOT=/home/boost_1_64_0`
+Example command line: `cmake .. -DBUILD_BOOST=OFF -DBOOST_ROOT=/home/boost_1_64_0`
 
 # Dependencies
 * [Boost 1.64](http://www.boost.org/)
