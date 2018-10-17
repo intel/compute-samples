@@ -11,4 +11,5 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libx11-dev \
     libva-dev \
+    ocl-icd-opencl-dev \
     wget
