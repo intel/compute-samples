@@ -110,21 +110,24 @@ option(BUILD_PNG "Download and build libpng" ON)
 if(NOT DEFINED ZLIB_ROOT)
     set(ZLIB_ROOT ${THIRD_PARTY_DIRECTORY}/zlib)
 endif()
+if(BUILD_PNG AND NOT EXISTS "${ZLIB_ROOT}")
+    configure_file(cmake/ZLIB.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external/CMakeLists.txt)
+    execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external)
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external)
+endif()
+# Find static zlib
+find_library(ZLIB_LIBRARY NAMES libz.a zlibstatic zlibstaticd PATHS ${ZLIB_ROOT} PATH_SUFFIXES lib NO_DEFAULT_PATH)
+find_path(ZLIB_INCLUDE_DIR NAMES zlib.h PATHS ${ZLIB_ROOT} PATH_SUFFIXES include NO_DEFAULT_PATH)
+
 if(NOT DEFINED PNG_ROOT)
     set(PNG_ROOT ${THIRD_PARTY_DIRECTORY}/libpng)
 endif()
 if(BUILD_PNG AND NOT EXISTS "${PNG_ROOT}")
-    configure_file(cmake/ZLIB.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external/CMakeLists.txt)
-    execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external)
-    execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/zlib-external)
-
     configure_file(cmake/PNG.CMakeLists.txt.in ${THIRD_PARTY_DIRECTORY}/downloads/libpng-external/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/libpng-external)
     execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${THIRD_PARTY_DIRECTORY}/downloads/libpng-external)
 endif()
-# Find static zlib and libpng
-find_library(ZLIB_LIBRARY NAMES libz.a zlibstatic zlibstaticd PATHS ${ZLIB_ROOT} PATH_SUFFIXES lib NO_DEFAULT_PATH)
-find_path(ZLIB_INCLUDE_DIR NAMES zlib.h PATHS ${ZLIB_ROOT} PATH_SUFFIXES include NO_DEFAULT_PATH)
+# Find static libpng
 find_library(PNG_LIBRARY NAMES libpng.a libpng16_static libpng16_staticd PATHS ${PNG_ROOT} PATH_SUFFIXES lib NO_DEFAULT_PATH)
 find_path(PNG_INCLUDE_DIR NAMES png.h PATHS ${PNG_ROOT} PATH_SUFFIXES include NO_DEFAULT_PATH)
 
