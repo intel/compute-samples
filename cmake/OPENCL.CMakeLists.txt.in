@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2018 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ project(opencl-external NONE)
 include(ExternalProject)
 ExternalProject_Add(
     opencl-headers
-    URL https://codeload.github.com/KhronosGroup/OpenCL-Headers/zip/de26592167b9fdea503885e40e8755393c56523d
+    URL https://github.com/KhronosGroup/OpenCL-Headers/archive/de26592167b9fdea503885e40e8755393c56523d.zip
     CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E copy_directory . ${OPENCL_ROOT}/include
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
@@ -36,7 +36,7 @@ ExternalProject_Add(
 ExternalProject_Add(
     opencl-icd
     DEPENDS opencl-headers
-    URL https://codeload.github.com/KhronosGroup/OpenCL-ICD-Loader/zip/b342ff7b7f70a4b3f2cfc53215af8fa20adc3d86
+    URL https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/b342ff7b7f70a4b3f2cfc53215af8fa20adc3d86.zip
     PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_directory ${OPENCL_ROOT}/include inc
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E copy_directory lib ${OPENCL_ROOT}/lib
     CMAKE_ARGS -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${OPENCL_ROOT}/lib -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG=${OPENCL_ROOT}/lib -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=${OPENCL_ROOT}/lib
