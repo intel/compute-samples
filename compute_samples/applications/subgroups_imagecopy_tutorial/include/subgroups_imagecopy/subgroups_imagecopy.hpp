@@ -37,8 +37,7 @@ namespace compute_samples {
 
 class SubgroupsImageCopyApplication : public Application {
 private:
-  Status run_implementation(std::vector<std::string> &command_line,
-                            src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line) override;
   struct Arguments {
     std::string kernel_path = "";
     std::string input = "";
@@ -49,8 +48,7 @@ private:
   Arguments
   parse_command_line(const std::vector<std::string> &command_line) const;
   void run_subgroups_imagecopy(const Arguments &args, compute::context &context,
-                               compute::command_queue &queue,
-                               src::logger &logger) const;
+                               compute::command_queue &queue) const;
 };
 
 } // namespace compute_samples

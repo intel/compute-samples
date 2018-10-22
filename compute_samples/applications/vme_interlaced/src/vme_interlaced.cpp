@@ -110,12 +110,13 @@ VmeInterlacedApplication::parse_command_line(
 }
 
 Application::Status VmeInterlacedApplication::run_implementation(
-    std::vector<std::string> &command_line, src::logger &logger) {
+    std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
+  src::logger logger;
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
@@ -185,8 +186,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
       BOOST_LOG(logger) << "Processing frame " << k << "...\n";
       run_vme_interlaced_native(args, context, queue, kernel, *capture,
                                 *planar_image, *top_planar_image,
-                                *bot_planar_image, src_image, ref_image, k,
-                                logger);
+                                *bot_planar_image, src_image, ref_image, k);
       top_writer->append_frame(*top_planar_image);
       bot_writer->append_frame(*bot_planar_image);
     }
@@ -219,7 +219,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
         BOOST_LOG(logger) << "Processing field frame " << k << "...\n";
         run_vme_interlaced_split(args, context, queue, kernel, *capture,
                                  *field_planar_image[j], src_image, ref_image,
-                                 j, k, logger);
+                                 j, k);
         field_writer[j]->append_frame(*field_planar_image[j]);
       }
     }
@@ -250,7 +250,8 @@ void VmeInterlacedApplication::run_vme_interlaced_native(
     compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
     PlanarImage &planar_image, PlanarImage &top_planar_image,
     PlanarImage &bot_planar_image, compute::image2d &src_image,
-    compute::image2d &ref_image, int frame_idx, src::logger &logger) const {
+    compute::image2d &ref_image, int frame_idx) const {
+  src::logger logger;
   Timer timer(logger);
 
   int width = args.width;
@@ -283,17 +284,16 @@ void VmeInterlacedApplication::run_vme_interlaced_native(
   au::PageAlignedVector<cl_short2> predictors(au::align64(mb_count),
                                               default_predictor);
   std::thread thread(&VmeInterlacedApplication::get_field_capture_samples, this,
-                     &capture, &top_planar_image, &bot_planar_image, frame_idx,
-                     &logger);
+                     &capture, &top_planar_image, &bot_planar_image, frame_idx);
 
   run_vme_interlaced(context, queue, kernel, src_image, ref_image, top_mvs,
                      top_shapes, residuals, predictors, width, mb_count,
-                     mv_count, mb_image_height, 1, 0, timer, logger);
+                     mv_count, mb_image_height, 1, 0, timer);
   timer.print("Completed VME for next top field lines");
 
   run_vme_interlaced(context, queue, kernel, src_image, ref_image, bot_mvs,
                      bot_shapes, residuals, predictors, width, mb_count,
-                     mv_count, mb_image_height, 1, 1, timer, logger);
+                     mv_count, mb_image_height, 1, 1, timer);
   timer.print("Completed VME for next bottom field lines");
 
   thread.join();
@@ -313,8 +313,8 @@ void VmeInterlacedApplication::run_vme_interlaced_split(
     const VmeInterlacedApplication::Arguments &args, compute::context &context,
     compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
     PlanarImage &field_planar_image, compute::image2d &src_image,
-    compute::image2d &ref_image, int polarity, int frame_idx,
-    src::logger &logger) const {
+    compute::image2d &ref_image, int polarity, int frame_idx) const {
+  src::logger logger;
   Timer timer(logger);
 
   int width = args.width;
@@ -348,7 +348,7 @@ void VmeInterlacedApplication::run_vme_interlaced_split(
 
   run_vme_interlaced(context, queue, kernel, src_image, ref_image, field_mvs,
                      field_shapes, residuals, predictors, width, mb_count,
-                     mv_count, mb_image_height, 0, polarity, timer, logger);
+                     mv_count, mb_image_height, 0, polarity, timer);
   queue.finish();
   timer.print("Kernel finished.");
 
@@ -366,7 +366,8 @@ void VmeInterlacedApplication::run_vme_interlaced(
     au::PageAlignedVector<cl_ushort> &residuals,
     au::PageAlignedVector<cl_short2> &predictors, int width, int mb_count,
     int mv_count, uint32_t iterations, uint8_t interlaced, int polarity,
-    Timer &timer, src::logger &logger) const {
+    Timer &timer) const {
+  src::logger logger;
   BOOST_LOG(logger) << "Creating opencl mem objects...";
   compute::buffer mv_buffer(context, au::align64(mv_count * sizeof(cl_short2)),
                             CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
@@ -393,8 +394,9 @@ void VmeInterlacedApplication::run_vme_interlaced(
 
 void VmeInterlacedApplication::get_field_capture_samples(
     Capture *capture, PlanarImage *top_planar_image,
-    PlanarImage *bot_planar_image, int frame_idx, src::logger *logger) const {
-  Timer timer(*logger);
+    PlanarImage *bot_planar_image, int frame_idx) const {
+  src::logger logger;
+  Timer timer(logger);
   capture->get_sample(frame_idx, *top_planar_image, true, 0);
   timer.print("Read YUV next top frame from disk to CPU linear memory");
   capture->get_sample(frame_idx, *bot_planar_image, true, 1);

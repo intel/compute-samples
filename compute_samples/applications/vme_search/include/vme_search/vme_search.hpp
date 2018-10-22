@@ -37,8 +37,7 @@ namespace compute = boost::compute;
 namespace compute_samples {
 class VmeSearchApplication : public Application {
 private:
-  Status run_implementation(std::vector<std::string> &command_line,
-                            src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line) override;
   struct Arguments {
     bool output_bmp = false;
     std::string sub_test = "";
@@ -56,7 +55,7 @@ private:
                       compute::kernel &kernel, Capture &capture,
                       PlanarImage &src_planar_image,
                       compute::image2d &src_image, compute::image2d &ref_image,
-                      int frame_idx, src::logger &logger) const;
+                      int frame_idx) const;
   Arguments parse_command_line(const std::vector<std::string> &command_line);
 };
 } // namespace compute_samples

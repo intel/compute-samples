@@ -43,8 +43,7 @@ namespace au = compute_samples::align_utils;
 namespace compute_samples {
 class VmeInterlacedApplication : public Application {
 private:
-  Status run_implementation(std::vector<std::string> &command_line,
-                            src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line) override;
   struct Arguments {
     bool output_bmp = false;
     std::string sub_test = "";
@@ -63,8 +62,8 @@ private:
       compute::context &context, compute::command_queue &queue,
       compute::kernel &kernel, Capture &capture, PlanarImage &planar_image,
       PlanarImage &top_planar_image, PlanarImage &bot_planar_image,
-      compute::image2d &src_image, compute::image2d &ref_image, int frame_idx,
-      src::logger &logger) const;
+      compute::image2d &src_image, compute::image2d &ref_image,
+      int frame_idx) const;
   void run_vme_interlaced_split(const VmeInterlacedApplication::Arguments &args,
                                 compute::context &context,
                                 compute::command_queue &queue,
@@ -72,7 +71,7 @@ private:
                                 PlanarImage &field_planar_image,
                                 compute::image2d &src_image,
                                 compute::image2d &ref_image, int polarity,
-                                int frame_idx, src::logger &logger) const;
+                                int frame_idx) const;
   void run_vme_interlaced(compute::context &context,
                           compute::command_queue &queue,
                           compute::kernel &kernel, compute::image2d &src_image,
@@ -83,11 +82,11 @@ private:
                           au::PageAlignedVector<cl_short2> &predictors,
                           int width, int mb_count, int mv_count,
                           uint32_t iterations, uint8_t interlaced, int polarity,
-                          Timer &timer, src::logger &logger) const;
+                          Timer &timer) const;
   void get_field_capture_samples(Capture *capture,
                                  PlanarImage *top_planar_image,
-                                 PlanarImage *bot_planar_image, int frame_idx,
-                                 src::logger *logger) const;
+                                 PlanarImage *bot_planar_image,
+                                 int frame_idx) const;
   Arguments parse_command_line(const std::vector<std::string> &command_line);
 };
 } // namespace compute_samples

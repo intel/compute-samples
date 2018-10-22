@@ -36,8 +36,7 @@ public:
   Status run(int argc, const char **argv);
 
 private:
-  virtual Status run_implementation(std::vector<std::string> &command_line,
-                                    src::logger &logger) = 0;
+  virtual Status run_implementation(std::vector<std::string> &command_line) = 0;
 };
 } // namespace compute_samples
 

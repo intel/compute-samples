@@ -37,8 +37,7 @@ namespace compute = boost::compute;
 namespace compute_samples {
 class VmeHmeApplication : public Application {
 private:
-  Status run_implementation(std::vector<std::string> &command_line,
-                            src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line) override;
   struct Arguments {
     bool output_bmp = false;
     std::string input_yuv_path = "";
@@ -50,15 +49,17 @@ private:
     bool help = false;
   };
 
-  void run_vme_hme(
-      const VmeHmeApplication::Arguments &args, compute::context &context,
-      compute::command_queue &queue, compute::kernel &ds_kernel,
-      compute::kernel &hme_n_kernel, compute::kernel &hme_kernel,
-      Capture &capture, PlanarImage &planar_image, compute::image2d &src_image,
-      compute::image2d &ref_image, compute::image2d &src_2x_image,
-      compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
-      compute::image2d &ref_4x_image, compute::image2d &src_8x_image,
-      compute::image2d &ref_8x_image, int frame_idx, src::logger &logger) const;
+  void run_vme_hme(const VmeHmeApplication::Arguments &args,
+                   compute::context &context, compute::command_queue &queue,
+                   compute::kernel &ds_kernel, compute::kernel &hme_n_kernel,
+                   compute::kernel &hme_kernel, Capture &capture,
+                   PlanarImage &planar_image, compute::image2d &src_image,
+                   compute::image2d &ref_image, compute::image2d &src_2x_image,
+                   compute::image2d &ref_2x_image,
+                   compute::image2d &src_4x_image,
+                   compute::image2d &ref_4x_image,
+                   compute::image2d &src_8x_image,
+                   compute::image2d &ref_8x_image, int frame_idx) const;
   Arguments parse_command_line(const std::vector<std::string> &command_line);
 };
 } // namespace compute_samples

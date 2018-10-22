@@ -28,8 +28,9 @@
 namespace compute_samples {
 
 void VmeInteropApplication::run_os_specific_implementation(
-    std::vector<std::string> &, const Arguments &, const compute::device &,
-    src::logger &logger) const {
+    std::vector<std::string> &, const Arguments &,
+    const compute::device &) const {
+  src::logger logger;
   BOOST_LOG(logger) << "VA API interoperability not supported on platform.";
 }
 

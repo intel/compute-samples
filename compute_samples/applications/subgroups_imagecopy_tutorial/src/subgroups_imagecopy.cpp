@@ -47,12 +47,13 @@ namespace po = boost::program_options;
 namespace compute_samples {
 
 Application::Status SubgroupsImageCopyApplication::run_implementation(
-    std::vector<std::string> &command_line, src::logger &logger) {
+    std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
+  src::logger logger;
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
 
   if (device.supports_extension("cl_intel_subgroups")) {
@@ -70,7 +71,7 @@ Application::Status SubgroupsImageCopyApplication::run_implementation(
   compute::context context(device);
   compute::command_queue queue(context, device);
 
-  run_subgroups_imagecopy(args, context, queue, logger);
+  run_subgroups_imagecopy(args, context, queue);
   return Status::OK;
 }
 
@@ -113,8 +114,8 @@ SubgroupsImageCopyApplication::parse_command_line(
 
 void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
     const SubgroupsImageCopyApplication::Arguments &args,
-    compute::context &context, compute::command_queue &queue,
-    src::logger &logger) const {
+    compute::context &context, compute::command_queue &queue) const {
+  src::logger logger;
   Timer timer_total(logger);
 
   ImageBMP8Bit image(args.input);

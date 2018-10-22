@@ -92,11 +92,12 @@ VmeInteropApplication::Arguments VmeInteropApplication::parse_command_line(
 }
 
 Application::Status VmeInteropApplication::run_implementation(
-    std::vector<std::string> &command_line, src::logger &logger) {
+    std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return Status::SKIP;
 
+  src::logger logger;
   Timer timer_total(logger);
 
   const compute::device device = compute::system::default_device();
@@ -117,7 +118,7 @@ Application::Status VmeInteropApplication::run_implementation(
   BOOST_LOG(logger) << "Frame size: " << args.width << "x" << args.height
                     << " pixels";
 
-  run_os_specific_implementation(command_line, args, device, logger);
+  run_os_specific_implementation(command_line, args, device);
 
   timer_total.print("Total");
   return Status::OK;

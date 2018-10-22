@@ -27,5 +27,6 @@
 TEST(TemplateIntegrationTests, ProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
-  EXPECT_NE(compute::program(), compute_samples::build_program(context, "template.cl"));
+  EXPECT_NE(compute::program(),
+            compute_samples::build_program(context, "template.cl"));
 }

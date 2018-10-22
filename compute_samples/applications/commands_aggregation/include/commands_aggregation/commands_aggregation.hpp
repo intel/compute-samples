@@ -36,14 +36,13 @@ namespace compute = boost::compute;
 namespace compute_samples {
 class CommandsAggregationApplication : public Application {
 public:
-  std::vector<uint32_t> run_workloads_out_of_order(const int global_work_size,
-                                                   src::logger &logger) const;
-  std::vector<uint32_t> run_workloads_in_order(const int global_work_size,
-                                               src::logger &logger) const;
+  std::vector<uint32_t>
+  run_workloads_out_of_order(const int global_work_size) const;
+  std::vector<uint32_t>
+  run_workloads_in_order(const int global_work_size) const;
 
 private:
-  Status run_implementation(std::vector<std::string> &command_line,
-                            src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line) override;
   struct Arguments {
     bool help = false;
     bool in_order = false;

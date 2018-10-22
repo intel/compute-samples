@@ -63,7 +63,7 @@ namespace au = compute_samples::align_utils;
 
 namespace compute_samples {
 
-static VADisplay get_va_display(src::logger &logger) {
+static VADisplay get_va_display() {
   VADisplay va_display;
   int major_version, minor_version;
   VAStatus status = -1;
@@ -74,6 +74,7 @@ static VADisplay get_va_display(src::logger &logger) {
   }
 
   if (status != VA_STATUS_SUCCESS) {
+    src::logger logger;
     BOOST_LOG(logger) << "INFO: initializing VADisplay from X11 display "
                          "failed.  Trying render node";
     int drm_fd = open(DRM_RENDER_NODE_PATH, O_RDWR);
@@ -257,7 +258,8 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
                 PlanarImage &planar_image, const VADisplay va_display,
                 VASurfaceID &src_va_surface, VASurfaceID &ref_va_surface,
                 compute::image2d &src_image, compute::image2d &ref_image,
-                size_t frame_idx, src::logger &logger) {
+                size_t frame_idx) {
+  src::logger logger;
   Timer timer(logger);
 
   const size_t width = args.width;
@@ -337,8 +339,8 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
 
 void VmeInteropApplication::run_os_specific_implementation(
     std::vector<std::string> &command_line, const Arguments &args,
-    const compute::device &device, src::logger &logger) const {
-  VADisplay va_display = get_va_display(logger);
+    const compute::device &device) const {
+  VADisplay va_display = get_va_display();
 
   if (get_va_device(device.platform(), va_display) != device) {
     throw std::runtime_error("ERROR: VA API interoperable device not found.");
@@ -351,6 +353,7 @@ void VmeInteropApplication::run_os_specific_implementation(
   compute::context context(device, context_properties);
   compute::command_queue queue(context, device);
 
+  src::logger logger;
   Timer timer(logger);
   compute::program program = build_program(context, "vme_interop.cl");
   timer.print("Program created");
@@ -384,7 +387,7 @@ void VmeInteropApplication::run_os_specific_implementation(
     BOOST_LOG(logger) << "Processing frame " << k << "...\n";
     run_vme_interop(args, context, queue, kernel, *capture, *planar_image,
                     va_display, src_va_surface, ref_va_surface, src_image,
-                    ref_image, k, logger);
+                    ref_image, k);
     writer->append_frame(*planar_image);
   }
 

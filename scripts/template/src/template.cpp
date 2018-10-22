@@ -35,14 +35,14 @@ namespace po = boost::program_options;
 #include "ocl_utils/ocl_utils.hpp"
 
 namespace compute_samples {
-Application::Status
-TemplateApplication::run_implementation(std::vector<std::string> &command_line,
-                                        src::logger &logger) {
+Application::Status TemplateApplication::run_implementation(
+    std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
+  src::logger logger;
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
   compute::context context(device);
   compute::command_queue queue(context, device);

@@ -152,14 +152,14 @@ void VmeIntraApplication::write_results_to_file(
   file.close();
 }
 
-Application::Status
-VmeIntraApplication::run_implementation(std::vector<std::string> &command_line,
-                                        src::logger &logger) {
+Application::Status VmeIntraApplication::run_implementation(
+    std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
+  src::logger logger;
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
@@ -221,7 +221,7 @@ VmeIntraApplication::run_implementation(std::vector<std::string> &command_line,
     run_vme_intra(args, context, queue, ds_kernel, hme_n_kernel, intra_kernel,
                   *capture, *planar_image, src_image, ref_image, src_image_2x,
                   ref_image_2x, src_image_4x, ref_image_4x, src_image_8x,
-                  ref_image_8x, k, logger);
+                  ref_image_8x, k);
     writer->append_frame(*planar_image);
   }
 
@@ -245,7 +245,8 @@ void VmeIntraApplication::run_vme_intra(
     compute::image2d &ref_image, compute::image2d &src_2x_image,
     compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
     compute::image2d &ref_4x_image, compute::image2d &src_8x_image,
-    compute::image2d &ref_8x_image, int frame_idx, src::logger &logger) const {
+    compute::image2d &ref_8x_image, int frame_idx) const {
+  src::logger logger;
   Timer timer(logger);
 
   int width = args.width;

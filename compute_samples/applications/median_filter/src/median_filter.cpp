@@ -37,17 +37,18 @@ namespace po = boost::program_options;
 
 namespace compute_samples {
 Application::Status MedianFilterApplication::run_implementation(
-    std::vector<std::string> &command_line, src::logger &logger) {
+    std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
+  src::logger logger;
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
   compute::context context(device);
   compute::command_queue queue(context, device);
 
-  run_median_filter(args, context, queue, logger);
+  run_median_filter(args, context, queue);
   return Status::OK;
 }
 
@@ -90,7 +91,8 @@ MedianFilterApplication::Arguments MedianFilterApplication::parse_command_line(
 
 void MedianFilterApplication::run_median_filter(
     const MedianFilterApplication::Arguments &args, compute::context &context,
-    compute::command_queue &queue, src::logger &logger) const {
+    compute::command_queue &queue) const {
+  src::logger logger;
   Timer timer_total(logger);
   Timer timer(logger);
 

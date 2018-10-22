@@ -47,7 +47,7 @@ Application::Status Application::run(int argc, const char **argv) {
     PUTENV(set_default_device);
 
     std::vector<std::string> command_line(argv + 1, argv + argc);
-    return run_implementation(command_line, logger);
+    return run_implementation(command_line);
   } catch (const std::exception &e) {
     BOOST_LOG(logger) << e.what();
     return Status::ERROR;

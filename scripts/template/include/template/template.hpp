@@ -36,8 +36,7 @@ namespace compute = boost::compute;
 namespace compute_samples {
 class TemplateApplication : public Application {
 private:
-  Status run_implementation(std::vector<std::string> &command_line,
-                            src::logger &logger) override;
+  Status run_implementation(std::vector<std::string> &command_line) override;
   struct Arguments {
     bool help = false;
   };

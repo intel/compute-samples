@@ -111,14 +111,14 @@ VmeSearchApplication::Arguments VmeSearchApplication::parse_command_line(
   return args;
 }
 
-Application::Status
-VmeSearchApplication::run_implementation(std::vector<std::string> &command_line,
-                                         src::logger &logger) {
+Application::Status VmeSearchApplication::run_implementation(
+    std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
+  src::logger logger;
   BOOST_LOG(logger) << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
@@ -182,7 +182,7 @@ VmeSearchApplication::run_implementation(std::vector<std::string> &command_line,
   for (int k = 1; k < frame_count; k++) {
     BOOST_LOG(logger) << "Processing frame " << k << "...\n";
     run_vme_search(args, context, queue, kernel, *capture, *planar_image,
-                   src_image, ref_image, k, logger);
+                   src_image, ref_image, k);
     writer->append_frame(*planar_image);
   }
 
@@ -202,7 +202,8 @@ void VmeSearchApplication::run_vme_search(
     const VmeSearchApplication::Arguments &args, compute::context &context,
     compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
     PlanarImage &planar_image, compute::image2d &src_image,
-    compute::image2d &ref_image, int frame_idx, src::logger &logger) const {
+    compute::image2d &ref_image, int frame_idx) const {
+  src::logger logger;
   Timer timer(logger);
 
   int width = args.width;

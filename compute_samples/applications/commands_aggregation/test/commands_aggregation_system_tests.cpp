@@ -37,10 +37,9 @@ TEST(CommandsAggregationApplication, ReturnsOkStatus) {
 TEST(CommandsAggregationApplication, ComputesExpectedResultsUsingSingleQueue) {
   compute_samples::CommandsAggregationApplication app;
   const int global_work_size = 128;
-  src::logger logger;
 
   const std::vector<uint32_t> output =
-      app.run_workloads_in_order(global_work_size, logger);
+      app.run_workloads_in_order(global_work_size);
 
   const int number_of_kernels = 10;
   const int number_of_iterations = 1000000;
@@ -53,10 +52,9 @@ TEST(CommandsAggregationApplication,
      ComputesExpectedResultsUsingMultipleQueues) {
   compute_samples::CommandsAggregationApplication app;
   const int global_work_size = 128;
-  src::logger logger;
 
   const std::vector<uint32_t> output =
-      app.run_workloads_out_of_order(global_work_size, logger);
+      app.run_workloads_out_of_order(global_work_size);
 
   const int number_of_kernels = 10;
   const int number_of_iterations = 1000000;

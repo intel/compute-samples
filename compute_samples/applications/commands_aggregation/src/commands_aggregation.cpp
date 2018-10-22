@@ -51,16 +51,17 @@ compute::buffer create_buffer(const compute::context &context,
 }
 
 Application::Status CommandsAggregationApplication::run_implementation(
-    std::vector<std::string> &command_line, src::logger &logger) {
+    std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
   if (args.help)
     return Status::SKIP;
 
+  src::logger logger;
   Timer timer(logger);
   if (args.in_order) {
-    run_workloads_in_order(args.global_work_size, logger);
+    run_workloads_in_order(args.global_work_size);
   } else {
-    run_workloads_out_of_order(args.global_work_size, logger);
+    run_workloads_out_of_order(args.global_work_size);
   }
   timer.print("Total");
   return Status::OK;
@@ -102,7 +103,8 @@ CommandsAggregationApplication::parse_command_line(
 
 std::vector<uint32_t>
 CommandsAggregationApplication::run_workloads_out_of_order(
-    const int global_work_size, src::logger &logger) const {
+    const int global_work_size) const {
+  src::logger logger;
   BOOST_LOG(logger) << "Work size: " << global_work_size;
 
   const compute::device device = compute::system::default_device();
@@ -188,7 +190,8 @@ CommandsAggregationApplication::run_workloads_out_of_order(
 }
 
 std::vector<uint32_t> CommandsAggregationApplication::run_workloads_in_order(
-    const int global_work_size, src::logger &logger) const {
+    const int global_work_size) const {
+  src::logger logger;
   BOOST_LOG(logger) << "Work size: " << global_work_size;
 
   const compute::device device = compute::system::default_device();
