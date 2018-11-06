@@ -14,6 +14,8 @@ For example, you can generate a Visual Studio 2017 solution by running: `cmake .
 
 Note: If you have issues with building Boost with Visual Studio 2017 then please execute above commands using `Developer Command Prompt For VS 2017`.
 
+Note: In order to build the project using GCC 8, Boost 1.68 is required, becasue of [this](https://github.com/boostorg/compute/issues/778) bug in Boost::Compute.
+
 # Installation
 The following command installs project's binaries.
 By default they are installed in the `build` directory, but it can be customized by adding `CMAKE_INSTALL_PREFIX=your/path` during CMake configuration.
