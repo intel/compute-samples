@@ -21,6 +21,7 @@
  */
 
 #include "vme_interop/vme_interop.hpp"
+#include "vme_interop/vme_interop_linux.hpp"
 #include "vme_interop_system_tests_common.hpp"
 
 TEST_F(VmeInteropSystemTests, ReturnsReferenceImage) {
@@ -37,10 +38,8 @@ TEST_F(VmeInteropSystemTests, ReturnsReferenceImage) {
   int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
   compute_samples::VmeInteropApplication application;
-  testing::internal::CaptureStdout();
-  EXPECT_EQ(compute_samples::Application::Status::SKIP,
+  EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(argc, argv));
-  testing::internal::GetCapturedStdout();
 
   std::ifstream out(output_file_, std::ios::binary);
   std::string reference_file = "interop_";

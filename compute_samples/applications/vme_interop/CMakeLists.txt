@@ -26,6 +26,7 @@ project(vme_interop)
 add_application_library(${PROJECT_NAME}
     SOURCE
     "include/vme_interop/vme_interop.hpp"
+    "include/vme_interop/vme_interop_linux.hpp"
     "src/vme_interop.cpp"
 )
 target_link_libraries(${PROJECT_NAME}_lib
@@ -44,9 +45,7 @@ if(UNIX)
     target_link_libraries(${PROJECT_NAME}_lib
         PUBLIC
         X11
-        va
-        va-drm
-        va-x11
+        dl
     )
 endif()
 if(WIN32)

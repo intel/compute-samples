@@ -21,6 +21,7 @@
  */
 
 #include "vme_interop/vme_interop.hpp"
+#include "vme_interop/vme_interop_linux.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -49,9 +50,6 @@ namespace au = compute_samples::align_utils;
 
 #include <CL/cl_va_api_media_sharing_intel.h>
 #include <fcntl.h>
-#include <va/va.h>
-#include <va/va_drm.h>
-#include <va/va_x11.h>
 
 #ifndef DRM_RENDER_NODE_PATH
 #define DRM_RENDER_NODE_PATH "/dev/dri/renderD128"
@@ -63,14 +61,64 @@ namespace au = compute_samples::align_utils;
 
 namespace compute_samples {
 
+VAManager::VAManager() {
+  src::logger logger;
+  libVaHandle = dlopen("libva.so", RTLD_LAZY);
+  libVaX11Handle = dlopen("libva-x11.so", RTLD_LAZY);
+  libVaDRMHandle = dlopen("libva-drm.so", RTLD_LAZY);
+
+  if (libVaHandle == nullptr) {
+    throw std::runtime_error("Loading libva.so failed");
+  }
+  if (libVaDRMHandle == nullptr) {
+    throw std::runtime_error("Loading libva-drm.so failed");
+  }
+  if (libVaX11Handle == nullptr) {
+    throw std::runtime_error("Loading libvax11.so failed");
+  }
+
+  vaGetDisplay = (vaGetDisplayFPTR)dlsym(libVaX11Handle, "vaGetDisplay");
+  if (!vaGetDisplay) {
+    BOOST_LOG(logger) << "dlsym error vaGetDisplay: " << dlerror();
+  }
+
+  XOpenDisplay = (XOpenDisplayFPTR)dlsym(libVaX11Handle, "XOpenDisplay");
+  if (!XOpenDisplay) {
+    BOOST_LOG(logger) << "dlsym error XOpenDisplay: " << dlerror();
+  }
+
+  vaGetDisplayDRM =
+      (vaGetDisplayDRMFPTR)dlsym(libVaDRMHandle, "vaGetDisplayDRM");
+  if (!vaGetDisplayDRM) {
+    BOOST_LOG(logger) << "dlsym error vaGetDisplayDRM: " << dlerror();
+  }
+
+  vaInitialize = (vaInitializeFPTR)dlsym(libVaHandle, "vaInitialize");
+  vaDeriveImage = (vaDeriveImageFPTR)dlsym(libVaHandle, "vaDeriveImage");
+  vaMapBuffer = (vaMapBufferFPTR)dlsym(libVaHandle, "vaMapBuffer");
+  vaUnmapBuffer = (vaUnmapBufferFPTR)dlsym(libVaHandle, "vaUnmapBuffer");
+  vaDestroyImage = (vaDestroyImageFPTR)dlsym(libVaHandle, "vaDestroyImage");
+  vaCreateSurfaces =
+      (vaCreateSurfacesFPTR)dlsym(libVaHandle, "vaCreateSurfaces");
+}
+
+VAManager::~VAManager() {
+  dlclose(libVaHandle);
+  dlclose(libVaX11Handle);
+  dlclose(libVaDRMHandle);
+}
+
+VAManager manager;
+
 static VADisplay get_va_display() {
   VADisplay va_display;
   int major_version, minor_version;
   VAStatus status = -1;
 
-  if (XOpenDisplay(nullptr)) {
-    va_display = vaGetDisplay(XOpenDisplay(NULL));
-    status = vaInitialize(va_display, &major_version, &minor_version);
+  VADisplay display = manager.XOpenDisplay(nullptr);
+  if (display) {
+    va_display = manager.vaGetDisplay(display);
+    status = manager.vaInitialize(va_display, &major_version, &minor_version);
   }
 
   if (status != VA_STATUS_SUCCESS) {
@@ -87,8 +135,8 @@ static VADisplay get_va_display() {
         status = VA_STATUS_ERROR_OPERATION_FAILED;
       }
     }
-    va_display = vaGetDisplayDRM(drm_fd);
-    status = vaInitialize(va_display, &major_version, &minor_version);
+    va_display = manager.vaGetDisplayDRM(drm_fd);
+    status = manager.vaInitialize(va_display, &major_version, &minor_version);
   }
 
   if ((va_display == NULL) || (status != VA_STATUS_SUCCESS)) {
@@ -131,8 +179,8 @@ compute::device get_va_device(const compute::platform &platform,
 static void create_va_surface(uint32_t width, uint32_t height,
                               const VADisplay va_display,
                               VASurfaceID &va_surface) {
-  if (vaCreateSurfaces(va_display, VA_FOURCC_NV12, width, height, &va_surface,
-                       1, NULL, 0) != VA_STATUS_SUCCESS) {
+  if (manager.vaCreateSurfaces(va_display, VA_FOURCC_NV12, width, height,
+                               &va_surface, 1, NULL, 0) != VA_STATUS_SUCCESS) {
     throw std::runtime_error("vaCreateSurfaces() failed!\n");
   }
 }
@@ -171,13 +219,13 @@ static void write_va_surface(const VADisplay va_display,
                              const VASurfaceID va_surface,
                              const PlanarImage &planar_image) {
   VAImage va_image;
-  VAStatus status = vaDeriveImage(va_display, va_surface, &va_image);
+  VAStatus status = manager.vaDeriveImage(va_display, va_surface, &va_image);
   if (status != VA_STATUS_SUCCESS) {
     throw std::runtime_error("ERROR: write_va_surface failed");
   }
 
   uint8_t *ptr;
-  status = vaMapBuffer(va_display, va_image.buf, (void **)&ptr);
+  status = manager.vaMapBuffer(va_display, va_image.buf, (void **)&ptr);
   if (status != VA_STATUS_SUCCESS) {
     throw std::runtime_error("ERROR: write_va_surface failed");
   }
@@ -240,12 +288,12 @@ static void write_va_surface(const VADisplay va_display,
     chroma_dst = chroma_tmp + va_image.pitches[1];
   }
 
-  status = vaUnmapBuffer(va_display, va_image.buf);
+  status = manager.vaUnmapBuffer(va_display, va_image.buf);
   if (status != VA_STATUS_SUCCESS) {
     throw std::runtime_error("ERROR: write_va_surface failed");
   }
 
-  status = vaDestroyImage(va_display, va_image.image_id);
+  status = manager.vaDestroyImage(va_display, va_image.image_id);
   if (status != VA_STATUS_SUCCESS) {
     throw std::runtime_error("ERROR: write_va_surface failed");
   }
