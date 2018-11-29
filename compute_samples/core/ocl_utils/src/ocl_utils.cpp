@@ -24,14 +24,11 @@
 
 #include <boost/log/sources/logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
+
 namespace src = boost::log::sources;
 
 namespace compute_samples {
-compute::program build_program(const compute::context &context,
-                               const std::string &file,
-                               const std::string &options) {
-  compute::program program =
-      compute::program::create_with_source_file(file, context);
+void try_build(compute::program &program, const std::string &options) {
   try {
     program.build(options);
   } catch (compute::opencl_error &) {
@@ -41,6 +38,39 @@ compute::program build_program(const compute::context &context,
                       << program.build_log();
     throw;
   }
+}
+
+compute::program build_program(const compute::context &context,
+                               const std::string &file,
+                               const std::string &options) {
+  compute::program program =
+      compute::program::create_with_source_file(file, context);
+  try_build(program, options);
+  return program;
+}
+compute::program create_with_il_file(const std::string &file,
+                                     const compute::context &context) {
+  cl_program clprogram;
+  std::ifstream sprv_stream(file, std::ios::in | std::ios::binary);
+
+  std::vector<uint8_t> binary_spv_file(
+      (std::istreambuf_iterator<char>(sprv_stream)),
+      std::istreambuf_iterator<char>());
+  cl_int error = 0;
+  clprogram = clCreateProgramWithIL(context, binary_spv_file.data(),
+                                    binary_spv_file.size(), &error);
+  if (error) {
+    BOOST_THROW_EXCEPTION(compute::opencl_error(error));
+  }
+
+  return compute::program(clprogram, true);
+}
+
+compute::program build_program_il(const compute::context &context,
+                                  const std::string &file,
+                                  const std::string &options) {
+  compute::program program = create_with_il_file(file, context);
+  try_build(program, options);
   return program;
 }
 } // namespace compute_samples

@@ -36,6 +36,9 @@ template <typename T> int size_in_bytes(const Image<T> &i);
 compute::program build_program(const compute::context &context,
                                const std::string &file,
                                const std::string &options = std::string());
+compute::program build_program_il(const compute::context &context,
+                                  const std::string &file,
+                                  const std::string &options = "");
 } // namespace compute_samples
 
 // Include template implementation
