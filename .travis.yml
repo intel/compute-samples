@@ -8,6 +8,11 @@ addons:
     packages:
       - libx11-dev
       - libva-dev
+      - clang-format-5.0
+before_install:
+  - cd scripts
+  - python3 format.py --check --clang-format=clang-format-5.0
+  - cd ..
 install:
   - cmake --version
   - g++ --version
