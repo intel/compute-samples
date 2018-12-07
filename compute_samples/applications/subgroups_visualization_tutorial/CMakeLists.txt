@@ -59,4 +59,4 @@ install_kernels(${PROJECT_NAME}_tests
     "subgroups_visualization_kernel.cl"
     "subgroups_visualization_solution.cl"
 )
-install_resources(${PROJECT_NAME}_tests "${MEDIA_DIRECTORY}/bmp/test_subgroups_visualization_reference.bmp")
+install_resources(${PROJECT_NAME}_tests FILES "${MEDIA_DIRECTORY}/bmp/test_subgroups_visualization_reference.bmp")

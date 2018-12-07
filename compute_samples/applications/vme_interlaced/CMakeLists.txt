@@ -44,7 +44,7 @@ add_application(${PROJECT_NAME}
     "src/main.cpp"
 )
 install_kernels(${PROJECT_NAME} "vme_interlaced.cl")
-install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/yuv/football_interlaced_720x480.yuv")
+install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/yuv/football_interlaced_720x480.yuv")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
@@ -52,4 +52,4 @@ add_application_test(${PROJECT_NAME}
     "test/vme_interlaced_system_tests.cpp"
 )
 install_kernels(${PROJECT_NAME}_tests "vme_interlaced.cl")
-install_resources(${PROJECT_NAME}_tests "${MEDIA_DIRECTORY}/yuv/football_interlaced_720x480.yuv")
+install_resources(${PROJECT_NAME}_tests FILES "${MEDIA_DIRECTORY}/yuv/football_interlaced_720x480.yuv")

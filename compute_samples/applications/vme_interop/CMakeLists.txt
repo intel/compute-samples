@@ -58,7 +58,7 @@ add_application(${PROJECT_NAME}
     "src/main.cpp"
 )
 install_kernels(${PROJECT_NAME} "vme_interop.cl")
-install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv")
+install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
@@ -67,6 +67,7 @@ add_application_test(${PROJECT_NAME}
 )
 install_kernels(${PROJECT_NAME}_tests "vme_interop.cl")
 install_resources(${PROJECT_NAME}_tests
+    FILES
     "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv"
     "${MEDIA_DIRECTORY}/yuv/interop_foreman_176x144.yuv"
 )

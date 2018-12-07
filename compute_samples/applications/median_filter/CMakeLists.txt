@@ -43,7 +43,7 @@ add_application(${PROJECT_NAME}
     "src/main.cpp"
 )
 install_kernels(${PROJECT_NAME} "median_filter.cl")
-install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/png/balloons_news.png")
+install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/png/balloons_news.png")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
@@ -52,6 +52,7 @@ add_application_test(${PROJECT_NAME}
 )
 install_kernels(${PROJECT_NAME}_tests "median_filter.cl")
 install_resources(${PROJECT_NAME}_tests
+    FILES
     "${MEDIA_DIRECTORY}/png/test_input.png"
     "${MEDIA_DIRECTORY}/png/test_reference.png"
 )

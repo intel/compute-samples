@@ -53,7 +53,7 @@ install_kernels(${PROJECT_NAME}
     "../vme_hme/vme_streaminout.cl"
     "../vme_hme/vme_hme_n_tier.cl"
 )
-install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv")
+install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
@@ -68,6 +68,7 @@ install_kernels(${PROJECT_NAME}_tests
     "../vme_hme/vme_hme_n_tier.cl"
 )
 install_resources(${PROJECT_NAME}_tests
+    FILES
     "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv"
     "${MEDIA_DIRECTORY}/yuv/intra_foreman_176x144.yuv"
 )

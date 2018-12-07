@@ -49,7 +49,7 @@ install_kernels(${PROJECT_NAME}
     "subgroups_imagecopy_kernel.cl"
     "subgroups_imagecopy_solution.cl"
 )
-install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/bmp/input.bmp")
+install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/bmp/input.bmp")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
@@ -60,4 +60,4 @@ install_kernels(${PROJECT_NAME}_tests
     "subgroups_imagecopy_kernel.cl"
     "subgroups_imagecopy_solution.cl"
 )
-install_resources(${PROJECT_NAME}_tests "${MEDIA_DIRECTORY}/bmp/input.bmp")
+install_resources(${PROJECT_NAME}_tests FILES "${MEDIA_DIRECTORY}/bmp/input.bmp")

@@ -45,6 +45,7 @@ add_core_library_test(${PROJECT_NAME}
     "test/image_integration_tests.cpp"
 )
 install_resources(${PROJECT_NAME}_tests
+    FILES
     "${MEDIA_DIRECTORY}/png/rgb_3x1.png"
     "${MEDIA_DIRECTORY}/bmp/kwkw_4x1_mono.bmp"
     "${MEDIA_DIRECTORY}/bmp/rgb_3x1_argb.bmp"
