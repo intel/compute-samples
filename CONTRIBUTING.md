@@ -109,7 +109,7 @@ If you want to manually prepare an application from scratch then please follow t
             "src/main.cpp"
         )
         install_kernels(${PROJECT_NAME} "your_app_kernel.cl")
-        install_resources(${PROJECT_NAME} "${MEDIA_DIRECTORY}/png/your_app_media.png")
+        install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/png/your_app_media.png")
 
         add_application_test(${PROJECT_NAME}
             SOURCE
@@ -119,6 +119,7 @@ If you want to manually prepare an application from scratch then please follow t
         )
         install_kernels(${PROJECT_NAME}_tests "your_app_kernel.cl")
         install_resources(${PROJECT_NAME}_tests
+            FILES
             "${MEDIA_DIRECTORY}/png/test_input.png"
             "${MEDIA_DIRECTORY}/png/test_reference.png"
         )
