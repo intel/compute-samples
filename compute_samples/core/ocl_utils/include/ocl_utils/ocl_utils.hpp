@@ -39,7 +39,30 @@ compute::program build_program(const compute::context &context,
 compute::program build_program_il(const compute::context &context,
                                   const std::string &file,
                                   const std::string &options = "");
+template <typename T> struct cl_scalar_type {};
+template <typename T> bool compare_cl_vectors(const T &lhs, const T &rhs);
 } // namespace compute_samples
+
+// Global namespace
+bool operator==(const cl_int2 &lhs, const cl_int2 &rhs);
+bool operator==(const cl_int4 &lhs, const cl_int4 &rhs);
+bool operator==(const cl_int8 &lhs, const cl_int8 &rhs);
+bool operator==(const cl_short2 &lhs, const cl_short2 &rhs);
+bool operator==(const cl_short4 &lhs, const cl_short4 &rhs);
+bool operator==(const cl_short8 &lhs, const cl_short8 &rhs);
+bool operator==(const cl_char2 &lhs, const cl_char2 &rhs);
+bool operator==(const cl_char4 &lhs, const cl_char4 &rhs);
+bool operator==(const cl_char8 &lhs, const cl_char8 &rhs);
+
+std::ostream &operator<<(std::ostream &os, const cl_int2 &x);
+std::ostream &operator<<(std::ostream &os, const cl_int4 &x);
+std::ostream &operator<<(std::ostream &os, const cl_int8 &x);
+std::ostream &operator<<(std::ostream &os, const cl_short2 &x);
+std::ostream &operator<<(std::ostream &os, const cl_short4 &x);
+std::ostream &operator<<(std::ostream &os, const cl_short8 &x);
+std::ostream &operator<<(std::ostream &os, const cl_char2 &x);
+std::ostream &operator<<(std::ostream &os, const cl_char4 &x);
+std::ostream &operator<<(std::ostream &os, const cl_char8 &x);
 
 // Include template implementation
 #include "ocl_utils-impl.hpp"

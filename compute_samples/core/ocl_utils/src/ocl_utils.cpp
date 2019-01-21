@@ -74,3 +74,31 @@ compute::program build_program_il(const compute::context &context,
   return program;
 }
 } // namespace compute_samples
+
+bool operator==(const cl_int2 &lhs, const cl_int2 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_int4 &lhs, const cl_int4 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_int8 &lhs, const cl_int8 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_short2 &lhs, const cl_short2 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_short4 &lhs, const cl_short4 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_short8 &lhs, const cl_short8 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_char2 &lhs, const cl_char2 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_char4 &lhs, const cl_char4 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_char8 &lhs, const cl_char8 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}

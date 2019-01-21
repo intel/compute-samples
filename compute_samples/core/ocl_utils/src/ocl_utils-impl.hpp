@@ -32,6 +32,45 @@ template <typename T> int size_in_bytes(const std::vector<T> &v) {
 template <typename T> int size_in_bytes(const Image<T> &i) {
   return i.size_in_bytes();
 }
+template <> struct cl_scalar_type<cl_int8> { using type = cl_int; };
+template <> struct cl_scalar_type<cl_uint8> { using type = cl_uint; };
+template <> struct cl_scalar_type<cl_int4> { using type = cl_int; };
+template <> struct cl_scalar_type<cl_uint4> { using type = cl_uint; };
+template <> struct cl_scalar_type<cl_int2> { using type = cl_int; };
+template <> struct cl_scalar_type<cl_uint2> { using type = cl_uint; };
+template <> struct cl_scalar_type<cl_int> { using type = cl_int; };
+template <> struct cl_scalar_type<cl_uint> { using type = cl_uint; };
+template <> struct cl_scalar_type<cl_short8> { using type = cl_short; };
+template <> struct cl_scalar_type<cl_ushort8> { using type = cl_ushort; };
+template <> struct cl_scalar_type<cl_short4> { using type = cl_short; };
+template <> struct cl_scalar_type<cl_ushort4> { using type = cl_ushort; };
+template <> struct cl_scalar_type<cl_short2> { using type = cl_short; };
+template <> struct cl_scalar_type<cl_ushort2> { using type = cl_ushort; };
+template <> struct cl_scalar_type<cl_short> { using type = cl_short; };
+template <> struct cl_scalar_type<cl_ushort> { using type = cl_ushort; };
+template <> struct cl_scalar_type<cl_char8> { using type = cl_char; };
+template <> struct cl_scalar_type<cl_uchar8> { using type = cl_uchar; };
+template <> struct cl_scalar_type<cl_char4> { using type = cl_char; };
+template <> struct cl_scalar_type<cl_uchar4> { using type = cl_uchar; };
+template <> struct cl_scalar_type<cl_char2> { using type = cl_char; };
+template <> struct cl_scalar_type<cl_uchar2> { using type = cl_uchar; };
+template <> struct cl_scalar_type<cl_char> { using type = cl_char; };
+template <> struct cl_scalar_type<cl_uchar> { using type = cl_uchar; };
+template <> struct cl_scalar_type<cl_float8> { using type = cl_float; };
+template <> struct cl_scalar_type<cl_float4> { using type = cl_float; };
+template <> struct cl_scalar_type<cl_float2> { using type = cl_float; };
+template <> struct cl_scalar_type<cl_float> { using type = cl_float; };
+
+template <typename T> bool compare_cl_vectors(const T &lhs, const T &rhs) {
+  const int size = sizeof(T) / sizeof(typename cl_scalar_type<T>::type);
+  for (auto i = 0; i < size; ++i) {
+    if (lhs.s[i] != rhs.s[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 } // namespace compute_samples
 
 #endif
