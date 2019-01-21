@@ -71,6 +71,20 @@ template <typename T> bool compare_cl_vectors(const T &lhs, const T &rhs) {
   return true;
 }
 
+template <typename T> std::string cl_vector_to_string(const T &x) {
+  const int size = sizeof(T) / sizeof(typename cl_scalar_type<T>::type);
+  std::stringstream ss;
+  ss << "[";
+  for (auto i = 0; i < size; ++i) {
+    if (i != 0) {
+      ss << ", ";
+    }
+    ss << x.s[i];
+  }
+  ss << "]";
+  return ss.str();
+}
+
 } // namespace compute_samples
 
 #endif

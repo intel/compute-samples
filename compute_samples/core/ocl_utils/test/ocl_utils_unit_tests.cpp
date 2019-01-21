@@ -101,3 +101,19 @@ TEST(CompareCLVectors, cl_int2_not_equal) {
   const cl_int2 rhs = {1, 2};
   EXPECT_FALSE(compute_samples::compare_cl_vectors(lhs, rhs));
 }
+
+TEST(CLVectorToString, cl_int8) {
+  const cl_int8 x = {0, 1, 2, 3, 4, 5, 6, 7};
+  EXPECT_EQ("[0, 1, 2, 3, 4, 5, 6, 7]",
+            compute_samples::cl_vector_to_string(x));
+}
+
+TEST(CLVectorToString, cl_int4) {
+  const cl_int4 x = {0, 1, 2, 3};
+  EXPECT_EQ("[0, 1, 2, 3]", compute_samples::cl_vector_to_string(x));
+}
+
+TEST(CLVectorToString, cl_int2) {
+  const cl_int2 x = {0, 1};
+  EXPECT_EQ("[0, 1]", compute_samples::cl_vector_to_string(x));
+}
