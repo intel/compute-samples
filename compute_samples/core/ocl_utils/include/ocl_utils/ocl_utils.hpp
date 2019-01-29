@@ -42,6 +42,8 @@ compute::program build_program_il(const compute::context &context,
 template <typename T> struct cl_scalar_type {};
 template <typename T> bool compare_cl_vectors(const T &lhs, const T &rhs);
 template <typename T> std::string cl_vector_to_string(const T &x);
+template <typename T> std::string to_cl_c_string();
+
 } // namespace compute_samples
 
 // Global namespace

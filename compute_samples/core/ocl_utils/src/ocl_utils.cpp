@@ -73,6 +73,36 @@ compute::program build_program_il(const compute::context &context,
   try_build(program, options);
   return program;
 }
+
+template <> std::string to_cl_c_string<cl_int>() { return "int"; }
+template <> std::string to_cl_c_string<cl_int2>() { return "int2"; }
+template <> std::string to_cl_c_string<cl_int4>() { return "int4"; }
+template <> std::string to_cl_c_string<cl_int8>() { return "int8"; }
+template <> std::string to_cl_c_string<cl_uint>() { return "uint"; }
+template <> std::string to_cl_c_string<cl_uint2>() { return "uint2"; }
+template <> std::string to_cl_c_string<cl_uint4>() { return "uint4"; }
+template <> std::string to_cl_c_string<cl_uint8>() { return "uint8"; }
+template <> std::string to_cl_c_string<cl_short>() { return "short"; }
+template <> std::string to_cl_c_string<cl_short2>() { return "short2"; }
+template <> std::string to_cl_c_string<cl_short4>() { return "short4"; }
+template <> std::string to_cl_c_string<cl_short8>() { return "short8"; }
+template <> std::string to_cl_c_string<cl_ushort>() { return "ushort"; }
+template <> std::string to_cl_c_string<cl_ushort2>() { return "ushort2"; }
+template <> std::string to_cl_c_string<cl_ushort4>() { return "ushort4"; }
+template <> std::string to_cl_c_string<cl_ushort8>() { return "ushort8"; }
+template <> std::string to_cl_c_string<cl_char>() { return "char"; }
+template <> std::string to_cl_c_string<cl_char2>() { return "char2"; }
+template <> std::string to_cl_c_string<cl_char4>() { return "char4"; }
+template <> std::string to_cl_c_string<cl_char8>() { return "char8"; }
+template <> std::string to_cl_c_string<cl_uchar>() { return "uchar"; }
+template <> std::string to_cl_c_string<cl_uchar2>() { return "uchar2"; }
+template <> std::string to_cl_c_string<cl_uchar4>() { return "uchar4"; }
+template <> std::string to_cl_c_string<cl_uchar8>() { return "uchar8"; }
+template <> std::string to_cl_c_string<cl_float>() { return "float"; }
+template <> std::string to_cl_c_string<cl_float2>() { return "float2"; }
+template <> std::string to_cl_c_string<cl_float4>() { return "float4"; }
+template <> std::string to_cl_c_string<cl_float8>() { return "float8"; }
+
 } // namespace compute_samples
 
 bool operator==(const cl_int2 &lhs, const cl_int2 &rhs) {
