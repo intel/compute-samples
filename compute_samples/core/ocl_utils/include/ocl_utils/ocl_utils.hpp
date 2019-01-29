@@ -54,6 +54,9 @@ bool operator==(const cl_short8 &lhs, const cl_short8 &rhs);
 bool operator==(const cl_char2 &lhs, const cl_char2 &rhs);
 bool operator==(const cl_char4 &lhs, const cl_char4 &rhs);
 bool operator==(const cl_char8 &lhs, const cl_char8 &rhs);
+bool operator==(const cl_uchar2 &lhs, const cl_uchar2 &rhs);
+bool operator==(const cl_uchar4 &lhs, const cl_uchar4 &rhs);
+bool operator==(const cl_uchar8 &lhs, const cl_uchar8 &rhs);
 
 std::ostream &operator<<(std::ostream &os, const cl_int2 &x);
 std::ostream &operator<<(std::ostream &os, const cl_int4 &x);
@@ -64,6 +67,9 @@ std::ostream &operator<<(std::ostream &os, const cl_short8 &x);
 std::ostream &operator<<(std::ostream &os, const cl_char2 &x);
 std::ostream &operator<<(std::ostream &os, const cl_char4 &x);
 std::ostream &operator<<(std::ostream &os, const cl_char8 &x);
+std::ostream &operator<<(std::ostream &os, const cl_uchar2 &x);
+std::ostream &operator<<(std::ostream &os, const cl_uchar4 &x);
+std::ostream &operator<<(std::ostream &os, const cl_uchar8 &x);
 
 // Include template implementation
 #include "ocl_utils-impl.hpp"

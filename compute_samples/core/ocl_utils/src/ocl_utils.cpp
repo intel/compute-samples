@@ -102,6 +102,15 @@ bool operator==(const cl_char4 &lhs, const cl_char4 &rhs) {
 bool operator==(const cl_char8 &lhs, const cl_char8 &rhs) {
   return compute_samples::compare_cl_vectors(lhs, rhs);
 }
+bool operator==(const cl_uchar2 &lhs, const cl_uchar2 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_uchar4 &lhs, const cl_uchar4 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_uchar8 &lhs, const cl_uchar8 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
 
 std::ostream &operator<<(std::ostream &os, const cl_int2 &x) {
   return os << compute_samples::cl_vector_to_string(x);
@@ -128,5 +137,14 @@ std::ostream &operator<<(std::ostream &os, const cl_char4 &x) {
   return os << compute_samples::cl_vector_to_string(x);
 }
 std::ostream &operator<<(std::ostream &os, const cl_char8 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_uchar2 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_uchar4 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_uchar8 &x) {
   return os << compute_samples::cl_vector_to_string(x);
 }
