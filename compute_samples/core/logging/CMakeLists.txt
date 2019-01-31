@@ -20,12 +20,24 @@
 # SOFTWARE.
 #
 
-add_subdirectory(align_utils)
-add_subdirectory(application)
-add_subdirectory(boost_intel)
-add_subdirectory(image)
-add_subdirectory(timer)
-add_subdirectory(version)
-add_subdirectory(yuv_utils)
-add_subdirectory(ocl_utils)
-add_subdirectory(logging)
+cmake_minimum_required(VERSION 3.8)
+project(logging)
+
+add_core_library(${PROJECT_NAME}
+    SOURCE
+    "include/logging/logging.hpp"
+    "src/logging.cpp"
+)
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+    "src"
+)
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    Boost::log
+)
+
+add_core_library_test(${PROJECT_NAME}
+    SOURCE
+    "test/logging_unit_tests.cpp"
+)
