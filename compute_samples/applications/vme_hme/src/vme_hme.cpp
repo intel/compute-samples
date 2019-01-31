@@ -32,8 +32,6 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <boost/log/sources/record_ostream.hpp>
-
 #include <boost/compute/core.hpp>
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
@@ -43,6 +41,7 @@ namespace po = boost::program_options;
 #include "align_utils/align_utils.hpp"
 #include "timer/timer.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 namespace au = compute_samples::align_utils;
 
 namespace compute_samples {
@@ -113,26 +112,24 @@ VmeHmeApplication::run_implementation(std::vector<std::string> &command_line) {
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
-  src::logger logger;
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    BOOST_LOG(logger)
+    LOG_ERROR
         << "The selected device doesn't support device-side motion estimation.";
     return Status::SKIP;
   }
 
-  BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
-  BOOST_LOG(logger) << "Frame size: " << args.width << "x" << args.height
-                    << " pixels";
+  LOG_INFO << "Input yuv path: " << args.input_yuv_path;
+  LOG_INFO << "Frame size: " << args.width << "x" << args.height << " pixels";
 
-  Timer timer_total(logger);
+  Timer timer_total;
 
   compute::context context(device);
   compute::command_queue queue(context, device);
 
-  Timer timer(logger);
+  Timer timer;
   compute::program program = build_program(context, "vme_hme.cl");
   timer.print("Program created");
 
@@ -189,7 +186,7 @@ VmeHmeApplication::run_implementation(std::vector<std::string> &command_line) {
   timer.print("Enqueued downsample_3_tier kernel for frame 0");
 
   for (int k = 1; k < frame_count; k++) {
-    BOOST_LOG(logger) << "Processing frame " << k << "...\n";
+    LOG_INFO << "Processing frame " << k << "...";
     run_vme_hme(args, context, queue, ds_kernel, hme_n_kernel, hme_kernel,
                 *capture, *planar_image, src_image, ref_image, src_image_2x,
                 ref_image_2x, src_image_4x, ref_image_4x, src_image_8x,
@@ -197,8 +194,8 @@ VmeHmeApplication::run_implementation(std::vector<std::string> &command_line) {
     writer->append_frame(*planar_image);
   }
 
-  BOOST_LOG(logger) << "Wrote " << frame_count << " frames with overlaid "
-                    << "motion vectors to " << args.output_yuv_path << " .\n";
+  LOG_INFO << "Wrote " << frame_count << " frames with overlaid "
+           << "motion vectors to " << args.output_yuv_path << " .";
   writer->write_to_file(args.output_yuv_path.c_str());
 
   FrameWriter::release(writer);
@@ -218,8 +215,7 @@ void VmeHmeApplication::run_vme_hme(
     compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
     compute::image2d &ref_4x_image, compute::image2d &src_8x_image,
     compute::image2d &ref_8x_image, int frame_idx) const {
-  src::logger logger;
-  Timer timer(logger);
+  Timer timer;
 
   int width = args.width;
   int height = args.height;

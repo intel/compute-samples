@@ -27,14 +27,13 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <boost/log/sources/record_ostream.hpp>
-
 #include <boost/compute/memory_object.hpp>
 #include <boost/compute/utility.hpp>
 #include <boost/compute/wait_list.hpp>
 
 #include "timer/timer.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 std::vector<uint32_t> create_input_data(const int global_work_size) {
@@ -56,8 +55,7 @@ Application::Status CommandsAggregationApplication::run_implementation(
   if (args.help)
     return Status::SKIP;
 
-  src::logger logger;
-  Timer timer(logger);
+  Timer timer;
   if (args.in_order) {
     run_workloads_in_order(args.global_work_size);
   } else {
@@ -104,11 +102,10 @@ CommandsAggregationApplication::parse_command_line(
 std::vector<uint32_t>
 CommandsAggregationApplication::run_workloads_out_of_order(
     const int global_work_size) const {
-  src::logger logger;
-  BOOST_LOG(logger) << "Work size: " << global_work_size;
+  LOG_INFO << "Work size: " << global_work_size;
 
   const compute::device device = compute::system::default_device();
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
   compute::context context(device);
 
   std::vector<uint32_t> data = create_input_data(global_work_size);
@@ -129,7 +126,7 @@ CommandsAggregationApplication::run_workloads_out_of_order(
   uint32_t kernel_id = 0;
 
   // we measure clock timing on CPU as profiling will switch aggregation off
-  Timer timer(logger);
+  Timer timer;
 
   // cmd1
   kernel.set_args(data_buffer, kernel_id++);
@@ -191,11 +188,10 @@ CommandsAggregationApplication::run_workloads_out_of_order(
 
 std::vector<uint32_t> CommandsAggregationApplication::run_workloads_in_order(
     const int global_work_size) const {
-  src::logger logger;
-  BOOST_LOG(logger) << "Work size: " << global_work_size;
+  LOG_INFO << "Work size: " << global_work_size;
 
   const compute::device device = compute::system::default_device();
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
   compute::context context(device);
 
   std::vector<uint32_t> data = create_input_data(global_work_size);
@@ -207,7 +203,7 @@ std::vector<uint32_t> CommandsAggregationApplication::run_workloads_in_order(
   compute::command_queue ioq(context, device);
 
   uint32_t kernel_id = 0;
-  Timer timer(logger);
+  Timer timer;
   // cmd1
   kernel.set_args(data_buffer, kernel_id++);
   ioq.enqueue_1d_range_kernel(kernel, 0, global_work_size, 0);

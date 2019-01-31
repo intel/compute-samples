@@ -35,13 +35,14 @@ target_include_directories(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-    Boost::log
+    compute_samples::logging
     OpenCL::OpenCL
     compute_samples::image
 )
 
 add_core_library_test(${PROJECT_NAME}
     SOURCE
+    "test/main.cpp"
     "test/ocl_utils_unit_tests.cpp"
     "test/ocl_utils_integration_tests.cpp"
 )

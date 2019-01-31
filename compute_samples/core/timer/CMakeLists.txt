@@ -30,6 +30,6 @@ add_core_library(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-    Boost::log
     Boost::timer
+    compute_samples::logging
 )

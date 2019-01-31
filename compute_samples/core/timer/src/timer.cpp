@@ -21,16 +21,15 @@
  */
 
 #include "timer/timer.hpp"
-
-#include <boost/log/sources/record_ostream.hpp>
+#include "logging/logging.hpp"
 
 namespace compute_samples {
-Timer::Timer(src::logger &logger) : logger_(logger) { timer_.start(); }
+Timer::Timer() { timer_.start(); }
 
 void Timer::print(const std::string &event_name) {
   timer_.stop();
-  BOOST_LOG(logger_) << event_name << ": "
-                     << timer_.format(timer::default_places, timer_format_);
+  LOG_INFO << event_name << ": "
+           << timer_.format(timer::default_places, timer_format_);
   timer_.start();
 }
 } // namespace compute_samples

@@ -35,6 +35,8 @@ target_include_directories(${PROJECT_NAME}
     "src"
 )
 target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    compute_samples::logging
     PRIVATE
     Boost::boost
     PNG::PNG
@@ -42,6 +44,7 @@ target_link_libraries(${PROJECT_NAME}
 
 add_core_library_test(${PROJECT_NAME}
     SOURCE
+    "test/main.cpp"
     "test/image_integration_tests.cpp"
 )
 install_resources(${PROJECT_NAME}_tests

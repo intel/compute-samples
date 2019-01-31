@@ -23,18 +23,12 @@
 #include "application/application.hpp"
 
 #include "version/version.hpp"
-
-#include <boost/log/sources/logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-namespace src = boost::log::sources;
+#include "logging/logging.hpp"
 
 namespace compute_samples {
-Application::~Application(){};
 Application::Status Application::run(int argc, const char **argv) {
-  src::logger logger;
-
   try {
-    BOOST_LOG(logger) << "Version: " << compute_samples::get_version_string();
+    LOG_INFO << "Version: " << get_version_string();
 
 #ifndef _WIN32
 #define PUTENV putenv
@@ -49,7 +43,7 @@ Application::Status Application::run(int argc, const char **argv) {
     std::vector<std::string> command_line(argv + 1, argv + argc);
     return run_implementation(command_line);
   } catch (const std::exception &e) {
-    BOOST_LOG(logger) << e.what();
+    LOG_FATAL << e.what();
     return Status::ERROR;
   }
 }

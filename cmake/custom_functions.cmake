@@ -48,6 +48,7 @@ function(add_application project_name)
     target_link_libraries(${name}
         PUBLIC
         compute_samples::${project_name}_lib
+        compute_samples::logging
     )
 
     install(TARGETS ${name} DESTINATION ".")
@@ -65,7 +66,6 @@ function(add_application_test project_name)
         PUBLIC
         compute_samples::${project_name}_lib
         GTest::GTest
-        GTest::Main
     )
 
     install(TARGETS ${name} DESTINATION ".")
@@ -124,7 +124,6 @@ function(add_core_library_test project_name)
         PUBLIC
         compute_samples::${project_name}
         GTest::GTest
-        GTest::Main
     )
 
     install(TARGETS ${name} DESTINATION ".")

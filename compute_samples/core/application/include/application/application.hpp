@@ -24,15 +24,13 @@
 #define COMPUTE_SAMPLES_APPLICATION_HPP
 
 #include <vector>
-
-#include <boost/log/sources/logger.hpp>
-namespace src = boost::log::sources;
+#include <string>
 
 namespace compute_samples {
 class Application {
 public:
   enum class Status { OK = 0, ERROR = 1, SKIP = 2 };
-  virtual ~Application();
+  virtual ~Application() = default;
   Status run(int argc, const char **argv);
 
 private:

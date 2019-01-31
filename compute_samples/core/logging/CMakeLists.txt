@@ -39,5 +39,6 @@ target_link_libraries(${PROJECT_NAME}
 
 add_core_library_test(${PROJECT_NAME}
     SOURCE
+    "test/main.cpp"
     "test/logging_unit_tests.cpp"
 )

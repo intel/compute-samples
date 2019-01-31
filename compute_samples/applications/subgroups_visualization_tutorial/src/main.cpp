@@ -21,8 +21,11 @@
  */
 
 #include "subgroups_visualization/subgroups_visualization.hpp"
+#include "logging/logging.hpp"
 
 int main(int argc, const char **argv) {
+  compute_samples::init_logging();
+  compute_samples::set_simple_format();
   compute_samples::SubgroupsVisualizationApplication application;
   return static_cast<int>(application.run(argc, argv));
 }

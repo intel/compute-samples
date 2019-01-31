@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-#include "vme_interlaced/vme_interlaced.hpp"
+#include "gtest/gtest.h"
 #include "logging/logging.hpp"
 
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
   compute_samples::init_logging();
-  compute_samples::set_simple_format();
-  compute_samples::VmeInterlacedApplication application;
-  return static_cast<int>(application.run(argc, argv));
+  compute_samples::set_precise_format();
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

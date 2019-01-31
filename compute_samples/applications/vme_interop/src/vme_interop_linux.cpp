@@ -36,7 +36,6 @@ namespace po = boost::program_options;
 #include <boost/compute/core.hpp>
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
-#include <boost/log/sources/record_ostream.hpp>
 
 #include <CL/cl_ext_intel.h>
 
@@ -47,6 +46,7 @@ namespace au = compute_samples::align_utils;
 #include "timer/timer.hpp"
 #include "yuv_utils/yuv_utils.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 
 #include <CL/cl_va_api_media_sharing_intel.h>
 #include <fcntl.h>
@@ -62,7 +62,6 @@ namespace au = compute_samples::align_utils;
 namespace compute_samples {
 
 VAManager::VAManager() {
-  src::logger logger;
   libVaHandle = dlopen("libva.so", RTLD_LAZY);
   libVaX11Handle = dlopen("libva-x11.so", RTLD_LAZY);
   libVaDRMHandle = dlopen("libva-drm.so", RTLD_LAZY);
@@ -79,18 +78,18 @@ VAManager::VAManager() {
 
   vaGetDisplay = (vaGetDisplayFPTR)dlsym(libVaX11Handle, "vaGetDisplay");
   if (!vaGetDisplay) {
-    BOOST_LOG(logger) << "dlsym error vaGetDisplay: " << dlerror();
+    LOG_ERROR << "dlsym error vaGetDisplay: " << dlerror();
   }
 
   XOpenDisplay = (XOpenDisplayFPTR)dlsym(libVaX11Handle, "XOpenDisplay");
   if (!XOpenDisplay) {
-    BOOST_LOG(logger) << "dlsym error XOpenDisplay: " << dlerror();
+    LOG_ERROR << "dlsym error XOpenDisplay: " << dlerror();
   }
 
   vaGetDisplayDRM =
       (vaGetDisplayDRMFPTR)dlsym(libVaDRMHandle, "vaGetDisplayDRM");
   if (!vaGetDisplayDRM) {
-    BOOST_LOG(logger) << "dlsym error vaGetDisplayDRM: " << dlerror();
+    LOG_ERROR << "dlsym error vaGetDisplayDRM: " << dlerror();
   }
 
   vaInitialize = (vaInitializeFPTR)dlsym(libVaHandle, "vaInitialize");
@@ -122,16 +121,15 @@ static VADisplay get_va_display() {
   }
 
   if (status != VA_STATUS_SUCCESS) {
-    src::logger logger;
-    BOOST_LOG(logger) << "INFO: initializing VADisplay from X11 display "
-                         "failed.  Trying render node";
+    LOG_INFO << "initializing VADisplay from X11 display "
+                "failed.  Trying render node";
     int drm_fd = open(DRM_RENDER_NODE_PATH, O_RDWR);
     if (drm_fd < 0) {
-      BOOST_LOG(logger) << "INFO: initializing VADisplay from render node "
-                           "failed. Trying card0 handle";
+      LOG_INFO << "initializing VADisplay from render node "
+                  "failed. Trying card0 handle";
       drm_fd = open(DRM_DEVICE_PATH, O_RDWR);
       if (drm_fd < 0) {
-        BOOST_LOG(logger) << "ERROR: initializing VADisplay from card0 failed.";
+        LOG_ERROR << "initializing VADisplay from card0 failed.";
         status = VA_STATUS_ERROR_OPERATION_FAILED;
       }
     }
@@ -140,7 +138,7 @@ static VADisplay get_va_display() {
   }
 
   if ((va_display == NULL) || (status != VA_STATUS_SUCCESS)) {
-    throw std::runtime_error("ERROR: get_va_display failed\n");
+    throw std::runtime_error("get_va_display failed");
   }
 
   return va_display;
@@ -170,7 +168,7 @@ compute::device get_va_device(const compute::platform &platform,
       CL_PREFERRED_DEVICES_FOR_VA_API_INTEL, 1, va_devices, &num_va_devices);
 
   if (error != CL_SUCCESS && error != CL_DEVICE_NOT_FOUND) {
-    throw std::runtime_error("ERROR: get_va_device failed");
+    throw std::runtime_error("get_va_device failed");
   }
 
   return compute::device(va_devices[0]);
@@ -181,7 +179,7 @@ static void create_va_surface(uint32_t width, uint32_t height,
                               VASurfaceID &va_surface) {
   if (manager.vaCreateSurfaces(va_display, VA_FOURCC_NV12, width, height,
                                &va_surface, 1, NULL, 0) != VA_STATUS_SUCCESS) {
-    throw std::runtime_error("vaCreateSurfaces() failed!\n");
+    throw std::runtime_error("vaCreateSurfaces() failed!");
   }
 }
 
@@ -195,7 +193,7 @@ static void acquire_va_surfaces(const compute::platform &platform,
           platform.get_extension_function_address(
               "clEnqueueAcquireVA_APIMediaSurfacesINTEL");
   if (!cl_acquire_va_surface) {
-    throw std::runtime_error("ERROR: acquire_va_surface failed");
+    throw std::runtime_error("acquire_va_surface failed");
   }
   cl_acquire_va_surface(queue.get(), 2, images_shared, 0, NULL, NULL);
 }
@@ -210,7 +208,7 @@ static void release_va_surfaces(const compute::platform &platform,
           platform.get_extension_function_address(
               "clEnqueueReleaseVA_APIMediaSurfacesINTEL");
   if (!cl_release_va_surface) {
-    throw std::runtime_error("ERROR: release_va_surface failed");
+    throw std::runtime_error("release_va_surface failed");
   }
   cl_release_va_surface(queue.get(), 2, images_shared, 0, NULL, NULL);
 }
@@ -221,13 +219,13 @@ static void write_va_surface(const VADisplay va_display,
   VAImage va_image;
   VAStatus status = manager.vaDeriveImage(va_display, va_surface, &va_image);
   if (status != VA_STATUS_SUCCESS) {
-    throw std::runtime_error("ERROR: write_va_surface failed");
+    throw std::runtime_error("write_va_surface failed");
   }
 
   uint8_t *ptr;
   status = manager.vaMapBuffer(va_display, va_image.buf, (void **)&ptr);
   if (status != VA_STATUS_SUCCESS) {
-    throw std::runtime_error("ERROR: write_va_surface failed");
+    throw std::runtime_error("write_va_surface failed");
   }
 
   // Write luma.
@@ -290,12 +288,12 @@ static void write_va_surface(const VADisplay va_display,
 
   status = manager.vaUnmapBuffer(va_display, va_image.buf);
   if (status != VA_STATUS_SUCCESS) {
-    throw std::runtime_error("ERROR: write_va_surface failed");
+    throw std::runtime_error("write_va_surface failed");
   }
 
   status = manager.vaDestroyImage(va_display, va_image.image_id);
   if (status != VA_STATUS_SUCCESS) {
-    throw std::runtime_error("ERROR: write_va_surface failed");
+    throw std::runtime_error("write_va_surface failed");
   }
 }
 
@@ -307,8 +305,7 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
                 VASurfaceID &src_va_surface, VASurfaceID &ref_va_surface,
                 compute::image2d &src_image, compute::image2d &ref_image,
                 size_t frame_idx) {
-  src::logger logger;
-  Timer timer(logger);
+  Timer timer;
 
   const size_t width = args.width;
   const size_t height = args.height;
@@ -320,7 +317,7 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
   size_t mv_count = mv_image_width * mv_image_height;
   size_t mb_count = mb_image_width * mb_image_height;
 
-  BOOST_LOG(logger) << "Creating opencl mem objects...";
+  LOG_INFO << "Creating opencl mem objects...";
 
   au::PageAlignedVector<cl_short2> mvs(au::align64(mv_count));
   au::PageAlignedVector<cl_short> residuals(au::align64(mv_count));
@@ -380,7 +377,7 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
         reinterpret_cast<motion_vector *>(mvs.data()),
         reinterpret_cast<inter_shape *>(shapes.data()));
   } catch (const std::exception &e) {
-    BOOST_LOG(logger) << "Exception enountered in OpenCL host for vme_interop.";
+    LOG_FATAL << "Exception enountered in OpenCL host for vme_interop.";
     throw e;
   }
 }
@@ -391,7 +388,7 @@ void VmeInteropApplication::run_os_specific_implementation(
   VADisplay va_display = get_va_display();
 
   if (get_va_device(device.platform(), va_display) != device) {
-    throw std::runtime_error("ERROR: VA API interoperable device not found.");
+    throw std::runtime_error("VA API interoperable device not found.");
   }
 
   cl_context_properties context_properties[] = {
@@ -401,8 +398,7 @@ void VmeInteropApplication::run_os_specific_implementation(
   compute::context context(device, context_properties);
   compute::command_queue queue(context, device);
 
-  src::logger logger;
-  Timer timer(logger);
+  Timer timer;
   compute::program program = build_program(context, "vme_interop.cl");
   timer.print("Program created");
 
@@ -432,15 +428,15 @@ void VmeInteropApplication::run_os_specific_implementation(
   compute::image2d_va ref_image(context, &ref_va_surface, -1);
 
   for (size_t k = 1; k < frame_count; k++) {
-    BOOST_LOG(logger) << "Processing frame " << k << "...\n";
+    LOG_INFO << "Processing frame " << k << "...";
     run_vme_interop(args, context, queue, kernel, *capture, *planar_image,
                     va_display, src_va_surface, ref_va_surface, src_image,
                     ref_image, k);
     writer->append_frame(*planar_image);
   }
 
-  BOOST_LOG(logger) << "Wrote " << frame_count << " frames with overlaid "
-                    << "motion vectors to " << args.output_yuv_path << " .\n";
+  LOG_INFO << "Wrote " << frame_count << " frames with overlaid "
+           << "motion vectors to " << args.output_yuv_path << " .";
   writer->write_to_file(args.output_yuv_path.c_str());
 
   FrameWriter::release(writer);

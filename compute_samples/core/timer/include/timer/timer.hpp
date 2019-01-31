@@ -23,20 +23,16 @@
 #ifndef COMPUTE_SAMPLES_TIMER_HPP
 #define COMPUTE_SAMPLES_TIMER_HPP
 
-#include <boost/log/sources/logger.hpp>
-namespace src = boost::log::sources;
-
 #include <boost/timer/timer.hpp>
 namespace timer = boost::timer;
 
 namespace compute_samples {
 class Timer {
 public:
-  Timer(src::logger &logger);
+  Timer();
   void print(const std::string &event_name);
 
 private:
-  src::logger &logger_;
   timer::cpu_timer timer_;
   const std::string timer_format_ = "%ws";
 };

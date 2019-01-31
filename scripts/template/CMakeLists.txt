@@ -30,7 +30,7 @@ add_application_library(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
-    Boost::log
+    compute_samples::logging
     Boost::program_options
     compute_samples::ocl_utils
 )
@@ -44,6 +44,7 @@ install_kernels(${PROJECT_NAME} "template.cl")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
+    "test/main.cpp"
     "test/template_unit_tests.cpp"
     "test/template_integration_tests.cpp"
     "test/template_system_tests.cpp"

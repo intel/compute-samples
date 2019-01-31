@@ -35,12 +35,12 @@ namespace po = boost::program_options;
 #include <boost/compute/core.hpp>
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
-#include <boost/log/sources/record_ostream.hpp>
 
 #include <CL/cl_ext_intel.h>
 #include <thread>
 
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 
@@ -116,26 +116,24 @@ Application::Status VmeInterlacedApplication::run_implementation(
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
-  src::logger logger;
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    BOOST_LOG(logger)
+    LOG_ERROR
         << "The selected device doesn't support device-side motion estimation.";
     return Status::SKIP;
   }
 
-  BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
-  BOOST_LOG(logger) << "Frame size: " << args.width << "x" << args.height
-                    << " pixels";
+  LOG_INFO << "Input yuv path: " << args.input_yuv_path;
+  LOG_INFO << "Frame size: " << args.width << "x" << args.height << " pixels";
 
-  Timer timer_total(logger);
+  Timer timer_total;
 
   compute::context context(device);
   compute::command_queue queue(context, device);
 
-  Timer timer(logger);
+  Timer timer;
   compute::program program = build_program(context, "vme_interlaced.cl");
   timer.print("Program created");
 
@@ -183,7 +181,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
     bot_writer->append_frame(*bot_planar_image);
 
     for (int k = 1; k < frame_count; k++) {
-      BOOST_LOG(logger) << "Processing frame " << k << "...\n";
+      LOG_INFO << "Processing frame " << k << "...";
       run_vme_interlaced_native(args, context, queue, kernel, *capture,
                                 *planar_image, *top_planar_image,
                                 *bot_planar_image, src_image, ref_image, k);
@@ -201,7 +199,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
     PlanarImage *field_planar_image[] = {top_planar_image, bot_planar_image};
 
     for (int j = 0; j < 2; j++) {
-      BOOST_LOG(logger) << "Processing field polarity " << j;
+      LOG_INFO << "Processing field polarity " << j;
       capture->get_sample(0, *field_planar_image[j], true, j);
       timer.print("Read YUV field frame 0 from disk to CPU linear memory.");
 
@@ -216,7 +214,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
       timer.print("Copied field frame 0 to tiled memory.");
 
       for (int k = 1; k < frame_count; k++) {
-        BOOST_LOG(logger) << "Processing field frame " << k << "...\n";
+        LOG_INFO << "Processing field frame " << k << "...";
         run_vme_interlaced_split(args, context, queue, kernel, *capture,
                                  *field_planar_image[j], src_image, ref_image,
                                  j, k);
@@ -225,14 +223,12 @@ Application::Status VmeInterlacedApplication::run_implementation(
     }
   }
 
-  BOOST_LOG(logger) << "Wrote " << frame_count << " top frames with overlaid "
-                    << "motion vectors to " << args.output_top_yuv_path
-                    << " .\n";
+  LOG_INFO << "Wrote " << frame_count << " top frames with overlaid "
+           << "motion vectors to " << args.output_top_yuv_path << " .";
   top_writer->write_to_file(args.output_top_yuv_path.c_str());
 
-  BOOST_LOG(logger) << "Wrote " << frame_count << " bot frames with overlaid "
-                    << "motion vectors to " << args.output_bot_yuv_path
-                    << " .\n";
+  LOG_INFO << "Wrote " << frame_count << " bot frames with overlaid "
+           << "motion vectors to " << args.output_bot_yuv_path << " .";
   bot_writer->write_to_file(args.output_bot_yuv_path.c_str());
 
   PlanarImage::release_image(top_planar_image);
@@ -251,8 +247,7 @@ void VmeInterlacedApplication::run_vme_interlaced_native(
     PlanarImage &planar_image, PlanarImage &top_planar_image,
     PlanarImage &bot_planar_image, compute::image2d &src_image,
     compute::image2d &ref_image, int frame_idx) const {
-  src::logger logger;
-  Timer timer(logger);
+  Timer timer;
 
   int width = args.width;
   int height = args.height;
@@ -314,8 +309,7 @@ void VmeInterlacedApplication::run_vme_interlaced_split(
     compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
     PlanarImage &field_planar_image, compute::image2d &src_image,
     compute::image2d &ref_image, int polarity, int frame_idx) const {
-  src::logger logger;
-  Timer timer(logger);
+  Timer timer;
 
   int width = args.width;
   int height = args.height / 2;
@@ -367,8 +361,7 @@ void VmeInterlacedApplication::run_vme_interlaced(
     au::PageAlignedVector<cl_short2> &predictors, int width, int mb_count,
     int mv_count, uint32_t iterations, uint8_t interlaced, int polarity,
     Timer &timer) const {
-  src::logger logger;
-  BOOST_LOG(logger) << "Creating opencl mem objects...";
+  LOG_INFO << "Creating opencl mem objects...";
   compute::buffer mv_buffer(context, au::align64(mv_count * sizeof(cl_short2)),
                             CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
                             mvs.data());
@@ -395,8 +388,7 @@ void VmeInterlacedApplication::run_vme_interlaced(
 void VmeInterlacedApplication::get_field_capture_samples(
     Capture *capture, PlanarImage *top_planar_image,
     PlanarImage *bot_planar_image, int frame_idx) const {
-  src::logger logger;
-  Timer timer(logger);
+  Timer timer;
   capture->get_sample(frame_idx, *top_planar_image, true, 0);
   timer.print("Read YUV next top frame from disk to CPU linear memory");
   capture->get_sample(frame_idx, *bot_planar_image, true, 1);

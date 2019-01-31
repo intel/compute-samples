@@ -27,13 +27,12 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <boost/log/sources/record_ostream.hpp>
-
 #include <boost/compute/memory_object.hpp>
 #include <boost/compute/utility.hpp>
 
 #include "timer/timer.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 Application::Status MedianFilterApplication::run_implementation(
@@ -43,8 +42,7 @@ Application::Status MedianFilterApplication::run_implementation(
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
-  src::logger logger;
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
   compute::context context(device);
   compute::command_queue queue(context, device);
 
@@ -92,15 +90,14 @@ MedianFilterApplication::Arguments MedianFilterApplication::parse_command_line(
 void MedianFilterApplication::run_median_filter(
     const MedianFilterApplication::Arguments &args, compute::context &context,
     compute::command_queue &queue) const {
-  src::logger logger;
-  Timer timer_total(logger);
-  Timer timer(logger);
+  Timer timer_total;
+  Timer timer;
 
   ImagePNG32Bit image(args.input_image_path);
-  BOOST_LOG(logger) << "Input image path: " << args.input_image_path;
-  BOOST_LOG(logger) << "Image size: " << image.width() << "x" << image.height()
-                    << " pixels";
-  BOOST_LOG(logger) << "Number of channels: " << image.number_of_channels();
+  LOG_INFO << "Input image path: " << args.input_image_path;
+  LOG_INFO << "Image size: " << image.width() << "x" << image.height()
+           << " pixels";
+  LOG_INFO << "Number of channels: " << image.number_of_channels();
   timer.print("Image read");
 
   compute::buffer input_buffer(context, size_in_bytes(image),
@@ -111,7 +108,7 @@ void MedianFilterApplication::run_median_filter(
   compute::program program = build_program(context, args.kernel_path);
   compute::kernel kernel = program.create_kernel("median_filter");
   kernel.set_args(input_buffer, output_buffer);
-  BOOST_LOG(logger) << "Kernel path: " << args.kernel_path;
+  LOG_INFO << "Kernel path: " << args.kernel_path;
   timer.print("Kernel created");
 
   write_image_to_buffer(image, input_buffer, queue);
@@ -129,7 +126,7 @@ void MedianFilterApplication::run_median_filter(
   timer.print("Output ready");
 
   image.write(args.output_image_path);
-  BOOST_LOG(logger) << "Output image path: " << args.output_image_path;
+  LOG_INFO << "Output image path: " << args.output_image_path;
   timer.print("Report");
 
   timer_total.print("Total");

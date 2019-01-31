@@ -35,13 +35,13 @@ namespace po = boost::program_options;
 #include <boost/compute/core.hpp>
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
-#include <boost/log/sources/record_ostream.hpp>
 
 #include <CL/cl_ext_intel.h>
 
 #include "align_utils/align_utils.hpp"
 #include "timer/timer.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 namespace au = compute_samples::align_utils;
 
 namespace compute_samples {
@@ -118,32 +118,30 @@ Application::Status VmeSearchApplication::run_implementation(
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
-  src::logger logger;
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    BOOST_LOG(logger)
+    LOG_ERROR
         << "The selected device doesn't support device-side motion estimation.";
     return Status::SKIP;
   }
 
-  BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
-  BOOST_LOG(logger) << "Frame size: " << args.width << "x" << args.height
-                    << " pixels";
+  LOG_INFO << "Input yuv path: " << args.input_yuv_path;
+  LOG_INFO << "Frame size: " << args.width << "x" << args.height << " pixels";
 
-  Timer timer_total(logger);
+  Timer timer_total;
 
   compute::context context(device);
   compute::command_queue queue(context, device);
 
-  Timer timer(logger);
+  Timer timer;
 
   std::string kernel_path = "vme_";
   kernel_path += args.sub_test;
   kernel_path += ".cl";
 
-  BOOST_LOG(logger) << "Kernel path: " << kernel_path;
+  LOG_INFO << "Kernel path: " << kernel_path;
 
   compute::program program = build_program(context, kernel_path);
   timer.print("Program created");
@@ -180,14 +178,14 @@ Application::Status VmeSearchApplication::run_implementation(
   timer.print("Copied frame 0 to tiled memory.");
 
   for (int k = 1; k < frame_count; k++) {
-    BOOST_LOG(logger) << "Processing frame " << k << "...\n";
+    LOG_INFO << "Processing frame " << k << "...";
     run_vme_search(args, context, queue, kernel, *capture, *planar_image,
                    src_image, ref_image, k);
     writer->append_frame(*planar_image);
   }
 
-  BOOST_LOG(logger) << "Wrote " << frame_count << " frames with overlaid "
-                    << "motion vectors to " << args.output_yuv_path << " .\n";
+  LOG_INFO << "Wrote " << frame_count << " frames with overlaid "
+           << "motion vectors to " << args.output_yuv_path << " .";
   writer->write_to_file(args.output_yuv_path.c_str());
 
   FrameWriter::release(writer);
@@ -203,8 +201,7 @@ void VmeSearchApplication::run_vme_search(
     compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
     PlanarImage &planar_image, compute::image2d &src_image,
     compute::image2d &ref_image, int frame_idx) const {
-  src::logger logger;
-  Timer timer(logger);
+  Timer timer;
 
   int width = args.width;
   int height = args.height;
@@ -216,7 +213,7 @@ void VmeSearchApplication::run_vme_search(
   int mv_count = mv_image_width * mv_image_height;
   int mb_count = mb_image_width * mb_image_height;
 
-  BOOST_LOG(logger) << "Creating opencl mem objects...";
+  LOG_INFO << "Creating opencl mem objects...";
 
   au::PageAlignedVector<cl_short2> mvs(au::align64(mv_count));
   au::PageAlignedVector<cl_short> residuals(au::align64(mv_count));

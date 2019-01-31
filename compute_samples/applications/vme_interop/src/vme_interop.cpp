@@ -33,9 +33,9 @@ namespace po = boost::program_options;
 
 #include <boost/compute/core.hpp>
 #include <boost/compute/utility.hpp>
-#include <boost/log/sources/record_ostream.hpp>
 
 #include "timer/timer.hpp"
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 
@@ -97,26 +97,24 @@ Application::Status VmeInteropApplication::run_implementation(
   if (args.help)
     return Status::SKIP;
 
-  src::logger logger;
-  Timer timer_total(logger);
+  Timer timer_total;
 
   const compute::device device = compute::system::default_device();
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    BOOST_LOG(logger) << vme_extension_msg;
+    LOG_ERROR << vme_extension_msg;
     return Status::SKIP;
   }
 
   if (!device.supports_extension("cl_intel_va_api_media_sharing")) {
-    BOOST_LOG(logger) << vaapi_extension_msg;
+    LOG_ERROR << vaapi_extension_msg;
     return Status::SKIP;
   }
 
-  BOOST_LOG(logger) << "Input yuv path: " << args.input_yuv_path;
-  BOOST_LOG(logger) << "Frame size: " << args.width << "x" << args.height
-                    << " pixels";
+  LOG_INFO << "Input yuv path: " << args.input_yuv_path;
+  LOG_INFO << "Frame size: " << args.width << "x" << args.height << " pixels";
 
   run_os_specific_implementation(command_line, args, device);
 

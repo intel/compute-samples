@@ -32,8 +32,6 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <boost/log/sources/record_ostream.hpp>
-
 #include <boost/compute/core.hpp>
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
@@ -43,6 +41,7 @@ namespace po = boost::program_options;
 #include "image/image.hpp"
 #include "timer/timer.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 
@@ -53,19 +52,18 @@ Application::Status SubgroupsVisualizationApplication::run_implementation(
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
-  src::logger logger;
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
 
   if (device.supports_extension("cl_intel_subgroups")) {
-    BOOST_LOG(logger) << "cl_intel_subgroups is supported.";
+    LOG_INFO << "cl_intel_subgroups is supported.";
   }
   if (device.supports_extension("cl_intel_required_subgroup_size")) {
-    BOOST_LOG(logger) << "cl_intel_required_subgroup_size is supported.";
+    LOG_INFO << "cl_intel_required_subgroup_size is supported.";
   }
   if (!(device.supports_extension("cl_khr_subgroups") ||
         device.supports_extension("cl_intel_subgroups"))) {
-    BOOST_LOG(logger) << "This tutorial requires the cl_khr_subgroups or "
-                         "cl_intel_subgroups extension.";
+    LOG_ERROR << "This tutorial requires the cl_khr_subgroups or "
+                 "cl_intel_subgroups extension.";
     return Status::SKIP;
   }
 
@@ -116,8 +114,7 @@ SubgroupsVisualizationApplication::parse_command_line(
 void SubgroupsVisualizationApplication::run_subgroups_visualization(
     const SubgroupsVisualizationApplication::Arguments &args,
     compute::context &context, compute::command_queue &queue) const {
-  src::logger logger;
-  Timer timer_total(logger);
+  Timer timer_total;
 
   ImageBMP8Bit image_file(args.global_size, args.global_size);
 
@@ -144,13 +141,12 @@ void SubgroupsVisualizationApplication::run_subgroups_visualization(
   queue.enqueue_nd_range_kernel(kernel, compute::dim(0, 0), globalSize,
                                 localSize);
 
-  BOOST_LOG(logger) << "Global size is: " << globalSize[0] << "x"
-                    << globalSize[1];
-  BOOST_LOG(logger) << "Local size is: " << localSize[0] << "x" << localSize[1];
-  BOOST_LOG(logger) << "Subgroup size is: "
-                    << kernel.get_work_group_info<size_t>(
-                           queue.get_device(),
-                           CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE);
+  LOG_INFO << "Global size is: " << globalSize[0] << "x" << globalSize[1];
+  LOG_INFO << "Local size is: " << localSize[0] << "x" << localSize[1];
+  LOG_INFO << "Subgroup size is: "
+           << kernel.get_work_group_info<size_t>(
+                  queue.get_device(),
+                  CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE);
 
   size_t row_pitch = 0;
   size_t slice_pitch = 0;

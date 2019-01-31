@@ -23,15 +23,15 @@
 #include "vme_interop/vme_interop.hpp"
 
 #include <boost/compute/utility.hpp>
-#include <boost/log/sources/record_ostream.hpp>
+
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 
 void VmeInteropApplication::run_os_specific_implementation(
     std::vector<std::string> &, const Arguments &,
     const compute::device &) const {
-  src::logger logger;
-  BOOST_LOG(logger) << "VA API interoperability not supported on platform.";
+  LOG_INFO << "VA API interoperability not supported on platform.";
 }
 
 } // namespace compute_samples

@@ -32,8 +32,6 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <boost/log/sources/record_ostream.hpp>
-
 #include <boost/compute/core.hpp>
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
@@ -43,6 +41,7 @@ namespace po = boost::program_options;
 #include "image/image.hpp"
 #include "timer/timer.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 
@@ -53,18 +52,16 @@ Application::Status SubgroupsImageCopyApplication::run_implementation(
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
-  src::logger logger;
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
+  LOG_INFO << "OpenCL device: " << device.name();
 
   if (device.supports_extension("cl_intel_subgroups")) {
-    BOOST_LOG(logger) << "cl_intel_subgroups is supported.";
+    LOG_INFO << "cl_intel_subgroups is supported.";
   }
   if (device.supports_extension("cl_intel_media_block_io")) {
-    BOOST_LOG(logger) << "cl_intel_media_block_io is supported.";
+    LOG_INFO << "cl_intel_media_block_io is supported.";
   }
   if (!(device.supports_extension("cl_intel_subgroups"))) {
-    BOOST_LOG(logger)
-        << "This tutorial requires the cl_intel_subgroups extension.";
+    LOG_ERROR << "This tutorial requires the cl_intel_subgroups extension.";
     return Status::SKIP;
   }
 
@@ -115,13 +112,11 @@ SubgroupsImageCopyApplication::parse_command_line(
 void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
     const SubgroupsImageCopyApplication::Arguments &args,
     compute::context &context, compute::command_queue &queue) const {
-  src::logger logger;
-  Timer timer_total(logger);
+  Timer timer_total;
 
   ImageBMP8Bit image(args.input);
 
-  BOOST_LOG(logger) << "Image Dimensions: " << image.width() << "x"
-                    << image.height();
+  LOG_INFO << "Image Dimensions: " << image.width() << "x" << image.height();
 
   compute::program program =
       build_program(context, args.kernel_path, "-cl-std=CL2.0");
@@ -140,16 +135,15 @@ void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
                                  static_cast<size_t>(image.height())};
   compute::extents<2> localSize{32, 1};
 
-  BOOST_LOG(logger) << "Executing " << args.iterations << " iterations.";
-  BOOST_LOG(logger) << "Global size is: " << globalSize[0] << "x"
-                    << globalSize[1];
-  BOOST_LOG(logger) << "Local size is: " << localSize[0] << "x" << localSize[1];
-  BOOST_LOG(logger) << "Subgroup size is: "
-                    << kernel.get_work_group_info<size_t>(
-                           queue.get_device(),
-                           CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE);
+  LOG_INFO << "Executing " << args.iterations << " iterations.";
+  LOG_INFO << "Global size is: " << globalSize[0] << "x" << globalSize[1];
+  LOG_INFO << "Local size is: " << localSize[0] << "x" << localSize[1];
+  LOG_INFO << "Subgroup size is: "
+           << kernel.get_work_group_info<size_t>(
+                  queue.get_device(),
+                  CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE);
 
-  Timer timer_execution(logger);
+  Timer timer_execution;
 
   for (int i = 0; i < args.iterations; i++) {
     // By default, the global work size is setup so there is one work item

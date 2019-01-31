@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "logging/logging.hpp"
+
 namespace compute_samples {
 
 #pragma pack(push, 1)
@@ -139,7 +141,7 @@ bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, int width,
   uint32_t *out_u_int_buf =
       (uint32_t *)malloc(width * height * sizeof(uint32_t));
   if (!out_u_int_buf) {
-    printf("Failed to allocate memory for output BMP image!\n");
+    LOG_ERROR << "Failed to allocate memory for output BMP image!";
     return false;
   }
 
@@ -187,7 +189,7 @@ bool BmpUtils::save_image_as_bmp_8u(uint8_t *ptr, int width, int height,
   uint32_t *out_u_int_buf =
       (uint32_t *)malloc(width * height * sizeof(uint32_t));
   if (!out_u_int_buf) {
-    printf("Failed to allocate memory for output BMP image!\n");
+    LOG_ERROR << "Failed to allocate memory for output BMP image!";
     return false;
   }
 
@@ -326,7 +328,7 @@ bool BmpUtils::load_bmp_image_8u(uint8_t *&data, int &width, int &height,
                                 0.07f * src_pixel[2]);
           break;
         default:
-          printf("Unexpected bits per pixel %d!\n", src_bits_per_pixel);
+          LOG_WARNING << "Unexpected bits per pixel: " << src_bits_per_pixel;
         }
       }
     }

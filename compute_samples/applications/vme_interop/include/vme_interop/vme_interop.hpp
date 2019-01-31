@@ -26,9 +26,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/log/sources/logger.hpp>
-namespace src = boost::log::sources;
-
 #include <boost/compute/core.hpp>
 namespace compute = boost::compute;
 

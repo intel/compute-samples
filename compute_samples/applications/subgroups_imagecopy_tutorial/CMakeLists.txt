@@ -31,7 +31,7 @@ add_application_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
     compute_samples::timer
-    Boost::log
+    compute_samples::logging
     Boost::program_options
     compute_samples::image
     compute_samples::ocl_utils
@@ -53,6 +53,7 @@ install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/bmp/input.bmp")
 
 add_application_test(${PROJECT_NAME}
     SOURCE
+    "test/main.cpp"
     "test/subgroups_imagecopy_integration_tests.cpp"
     "test/subgroups_imagecopy_system_tests.cpp"
 )

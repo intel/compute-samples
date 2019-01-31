@@ -22,20 +22,15 @@
 
 #include "ocl_utils/ocl_utils.hpp"
 
-#include <boost/log/sources/logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-
-namespace src = boost::log::sources;
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 void try_build(compute::program &program, const std::string &options) {
   try {
     program.build(options);
   } catch (compute::opencl_error &) {
-    src::logger logger;
-    BOOST_LOG(logger) << "OpenCL Program Build Error!";
-    BOOST_LOG(logger) << "OpenCL Program Build Log is:\n"
-                      << program.build_log();
+    LOG_ERROR << "OpenCL Program Build Error!";
+    LOG_ERROR << "OpenCL Program Build Log is:\n" << program.build_log();
     throw;
   }
 }

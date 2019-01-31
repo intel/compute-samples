@@ -21,8 +21,6 @@
  */
 
 #include "gtest/gtest.h"
-#include <boost/log/sources/logger.hpp>
-namespace src = boost::log::sources;
 
 #include "commands_aggregation/commands_aggregation.hpp"
 

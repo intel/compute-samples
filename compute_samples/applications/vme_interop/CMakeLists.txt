@@ -26,13 +26,12 @@ project(vme_interop)
 add_application_library(${PROJECT_NAME}
     SOURCE
     "include/vme_interop/vme_interop.hpp"
-    "include/vme_interop/vme_interop_linux.hpp"
     "src/vme_interop.cpp"
 )
 target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
     compute_samples::timer
-    Boost::log
+    compute_samples::logging
     Boost::program_options
     compute_samples::yuv_utils
     compute_samples::align_utils
@@ -41,7 +40,7 @@ target_link_libraries(${PROJECT_NAME}_lib
 )
 add_kernels(${PROJECT_NAME}_lib "vme_interop.cl")
 if(UNIX)
-    target_sources(${PROJECT_NAME}_lib PRIVATE "src/vme_interop_linux.cpp")
+    target_sources(${PROJECT_NAME}_lib PRIVATE "include/vme_interop/vme_interop_linux.hpp" "src/vme_interop_linux.cpp")
     target_link_libraries(${PROJECT_NAME}_lib
         PUBLIC
         X11
@@ -61,6 +60,7 @@ install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yu
 
 add_application_test(${PROJECT_NAME}
     SOURCE
+    "test/main.cpp"
     "test/vme_interop_integration_tests.cpp"
     "test/vme_interop_system_tests_common.hpp"
 )

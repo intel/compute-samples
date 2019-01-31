@@ -27,12 +27,11 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <boost/log/sources/record_ostream.hpp>
-
 #include <boost/compute/memory_object.hpp>
 #include <boost/compute/utility.hpp>
 
 #include "ocl_utils/ocl_utils.hpp"
+#include "logging/logging.hpp"
 
 namespace compute_samples {
 Application::Status TemplateApplication::run_implementation(
@@ -42,10 +41,9 @@ Application::Status TemplateApplication::run_implementation(
     return Status::SKIP;
 
   const compute::device device = compute::system::default_device();
-  src::logger logger;
-  BOOST_LOG(logger) << "OpenCL device: " << device.name();
-  compute::context context(device);
-  compute::command_queue queue(context, device);
+  LOG_INFO << "OpenCL device: " << device.name();
+  compute::context context = compute::system::default_context();
+  compute::command_queue queue = compute::system::default_queue();
 
   std::vector<cl_char> input = {72, 101, 108, 108, 111, 32,
                                 87, 111, 114, 108, 100, 33};
@@ -65,7 +63,7 @@ Application::Status TemplateApplication::run_implementation(
   queue.enqueue_1d_range_kernel(kernel, 0, input.size(), 0);
 
   queue.enqueue_read_buffer(output_buffer, 0, output.size(), output.data());
-  BOOST_LOG(logger) << "Output: " << std::string(output.begin(), output.end());
+  LOG_INFO << "Output: " << std::string(output.begin(), output.end());
 
   return Status::OK;
 }

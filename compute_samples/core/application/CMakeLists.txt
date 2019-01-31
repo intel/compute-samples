@@ -30,7 +30,7 @@ add_core_library(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-    Boost::log
+    compute_samples::logging
     OpenCL::OpenCL
     compute_samples::version
 )
