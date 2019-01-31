@@ -24,8 +24,8 @@
 #include "logging/logging.hpp"
 
 int main(int argc, char **argv) {
-  compute_samples::init_logging();
-  compute_samples::set_precise_format();
   ::testing::InitGoogleTest(&argc, argv);
+  std::vector<std::string> command_line(argv + 1, argv + argc);
+  compute_samples::init_logging(command_line);
   return RUN_ALL_TESTS();
 }

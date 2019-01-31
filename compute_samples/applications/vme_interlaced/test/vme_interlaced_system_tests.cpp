@@ -48,36 +48,33 @@ protected:
 };
 
 TEST_F(VmeInterlacedSystemTests, ReturnsReferenceImage) {
-  const char *argv[] = {"vme_interlaced",
-                        const_cast<char *>(input_file_.c_str()),
-                        const_cast<char *>(output_top_file_.c_str()),
-                        const_cast<char *>(output_bot_file_.c_str()),
-                        "--width",
-                        "720",
-                        "--height",
-                        "480",
-                        "-s",
-                        "native",
-                        "-f",
-                        "30",
-                        nullptr};
-  int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+  std::vector<std::string> command_line = {input_file_,
+                                           output_top_file_,
+                                           output_bot_file_,
+                                           "--width",
+                                           "720",
+                                           "--height",
+                                           "480",
+                                           "-s",
+                                           "native",
+                                           "-f",
+                                           "30"};
 
   compute_samples::VmeInterlacedApplication application;
 
   EXPECT_EQ(compute_samples::Application::Status::OK,
-            application.run(argc, argv));
+            application.run(command_line));
 
-  static const int reference_top_file_pos = 2;
+  static const int reference_top_file_pos = 1;
   static const int reference_bot_file_pos = reference_top_file_pos + 1;
   static const int sub_test_pos = reference_top_file_pos + 7;
 
-  argv[reference_top_file_pos] = reference_top_file_.c_str();
-  argv[reference_bot_file_pos] = reference_bot_file_.c_str();
-  argv[sub_test_pos] = "split";
+  command_line[reference_top_file_pos] = reference_top_file_;
+  command_line[reference_bot_file_pos] = reference_bot_file_;
+  command_line[sub_test_pos] = "split";
 
   EXPECT_EQ(compute_samples::Application::Status::OK,
-            application.run(argc, argv));
+            application.run(command_line));
 
   std::ifstream out_top(output_top_file_, std::ios::binary);
   std::ifstream ref_top(reference_top_file_, std::ios::binary);

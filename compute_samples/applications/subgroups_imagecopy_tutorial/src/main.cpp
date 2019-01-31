@@ -24,8 +24,8 @@
 #include "logging/logging.hpp"
 
 int main(int argc, const char **argv) {
-  compute_samples::init_logging();
-  compute_samples::set_simple_format();
+  std::vector<std::string> command_line(argv + 1, argv + argc);
+  compute_samples::init_logging(command_line);
   compute_samples::SubgroupsImageCopyApplication application;
-  return static_cast<int>(application.run(argc, argv));
+  return static_cast<int>(application.run(command_line));
 }

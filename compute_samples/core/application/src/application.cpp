@@ -26,7 +26,7 @@
 #include "logging/logging.hpp"
 
 namespace compute_samples {
-Application::Status Application::run(int argc, const char **argv) {
+Application::Status Application::run(std::vector<std::string> &command_line) {
   try {
     LOG_INFO << "Version: " << get_version_string();
 
@@ -40,7 +40,6 @@ Application::Status Application::run(int argc, const char **argv) {
     PUTENV(set_default_vendor);
     PUTENV(set_default_device);
 
-    std::vector<std::string> command_line(argv + 1, argv + argc);
     return run_implementation(command_line);
   } catch (const std::exception &e) {
     LOG_FATAL << e.what();

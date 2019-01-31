@@ -25,21 +25,13 @@
 #include "vme_interop_system_tests_common.hpp"
 
 TEST_F(VmeInteropSystemTests, ReturnsReferenceImage) {
-  const char *argv[] = {"vme_interop",
-                        const_cast<char *>(input_file_.c_str()),
-                        const_cast<char *>(output_file_.c_str()),
-                        "--width",
-                        "176",
-                        "--height",
-                        "144",
-                        "-f",
-                        "50",
-                        nullptr};
-  int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+  std::vector<std::string> command_line = {input_file_, output_file_, "--width",
+                                           "176",       "--height",   "144",
+                                           "-f",        "50"};
 
   compute_samples::VmeInteropApplication application;
   EXPECT_EQ(compute_samples::Application::Status::OK,
-            application.run(argc, argv));
+            application.run(command_line));
 
   std::ifstream out(output_file_, std::ios::binary);
   std::string reference_file = "interop_";

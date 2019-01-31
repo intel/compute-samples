@@ -25,6 +25,8 @@
 
 #include <boost/smart_ptr/make_shared_object.hpp>
 
+#include <regex>
+
 namespace cs = compute_samples;
 
 class LoggingTest : public ::testing::Test {
@@ -69,4 +71,67 @@ TEST_F(LoggingTest, PrintError) {
 TEST_F(LoggingTest, PrintFatal) {
   LOG_FATAL << "Message";
   EXPECT_EQ("[fatal] Message\n", logs->str());
+}
+
+TEST(LoggingCommandLineParser, ChooseSimpleFormatFromCommandLine) {
+  std::vector<std::string> cmd = {"--logging-format=simple"};
+  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  EXPECT_EQ(cs::logging_format::simple, settings.format);
+}
+
+TEST(LoggingCommandLineParser, ChoosePreciseFormatFromCommandLine) {
+  std::vector<std::string> cmd = {"--logging-format=precise"};
+  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  EXPECT_EQ(cs::logging_format::precise, settings.format);
+}
+
+TEST(LoggingCommandLineParser, PreciseFormatIsDefault) {
+  std::vector<std::string> cmd;
+  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  EXPECT_EQ(cs::logging_format::precise, settings.format);
+}
+
+TEST(LoggingCommandLineParser, ChooseUnknownFormatFromCommandLine) {
+  std::vector<std::string> cmd = {"--logging-format=unknown"};
+  EXPECT_THROW(cs::parse_command_line(cmd), std::runtime_error);
+}
+
+TEST(LoggingCommandLineParser, ConsumeOnlyKnownOptionsFromCommandLine) {
+  std::vector<std::string> cmd = {"--logging-format=precise",
+                                  "positional_option", "--option"};
+  cs::parse_command_line(cmd);
+  EXPECT_EQ(2, cmd.size());
+}
+
+class LoggingInitTest : public ::testing::Test {
+protected:
+  void SetUp() override { logs = boost::make_shared<std::stringstream>(); }
+
+  void TearDown() override { cs::stop_logging(); }
+
+  boost::shared_ptr<std::stringstream> logs;
+};
+
+TEST_F(LoggingInitTest, SimpleFormatFromSettings) {
+  cs::LoggingSettings settings;
+  settings.format = cs::logging_format::simple;
+  cs::init_logging(settings);
+  cs::add_stream(logs);
+  LOG_INFO << "Message";
+  EXPECT_EQ("[info] Message\n", logs->str());
+}
+
+TEST_F(LoggingInitTest, PreciseFormatFromSettings) {
+  cs::LoggingSettings settings;
+  settings.format = cs::logging_format::precise;
+  cs::init_logging(settings);
+  cs::add_stream(logs);
+
+  LOG_INFO << "Message";
+
+  const std::string timestamp = "\\[.+\\]";
+  const std::string severity = "\\[info\\]";
+  const std::string message = "Message\\n";
+  const std::regex r(timestamp + " " + severity + " " + message);
+  EXPECT_TRUE(std::regex_match(logs->str(), r));
 }

@@ -37,12 +37,11 @@ protected:
 
 TEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
   compute_samples::SubgroupsImageCopyApplication application;
-  const char *argv[] = {"subgroups_imagecopy", "-k",
-                        "subgroups_imagecopy_kernel.cl", nullptr};
-  int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+  std::vector<std::string> command_line = {"-k",
+                                           "subgroups_imagecopy_kernel.cl"};
 
   EXPECT_EQ(compute_samples::Application::Status::OK,
-            application.run(argc, argv));
+            application.run(command_line));
 
   compute_samples::ImageBMP8Bit output_image(output_file_);
   compute_samples::ImageBMP8Bit reference_image(reference_file_);
@@ -54,12 +53,11 @@ TEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
 
 TEST_F(SubgroupsImageCopySystemTests, OptimizedCopy) {
   compute_samples::SubgroupsImageCopyApplication application;
-  const char *argv[] = {"subgroups_imagecopy", "-k",
-                        "subgroups_imagecopy_solution.cl", nullptr};
-  int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+  std::vector<std::string> command_line = {"-k",
+                                           "subgroups_imagecopy_solution.cl"};
 
   EXPECT_EQ(compute_samples::Application::Status::OK,
-            application.run(argc, argv));
+            application.run(command_line));
 
   compute_samples::ImageBMP8Bit output_image(output_file_);
   compute_samples::ImageBMP8Bit reference_image(reference_file_);

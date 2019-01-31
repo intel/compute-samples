@@ -35,6 +35,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     Boost::log
+    Boost::program_options
 )
 
 add_core_library_test(${PROJECT_NAME}

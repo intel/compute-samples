@@ -25,6 +25,8 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
+#include <iostream>
 
 #include <boost/log/trivial.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -38,11 +40,23 @@ namespace compute_samples {
 #define LOG_ERROR BOOST_LOG_TRIVIAL(error)
 #define LOG_FATAL BOOST_LOG_TRIVIAL(fatal)
 
+enum class logging_format { simple, precise };
+std::ostream &operator<<(std::ostream &os, const logging_format &f);
+std::istream &operator>>(std::istream &is, logging_format &f);
+
+struct LoggingSettings {
+  logging_format format;
+};
+
 void init_logging();
+void init_logging(const LoggingSettings settings);
+void init_logging(std::vector<std::string> &command_line);
 void stop_logging();
 void add_stream(const boost::shared_ptr<std::ostream> &stream);
 void set_simple_format();
 void set_precise_format();
+
+LoggingSettings parse_command_line(std::vector<std::string> &command_line);
 
 } // namespace compute_samples
 

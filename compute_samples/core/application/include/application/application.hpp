@@ -31,7 +31,7 @@ class Application {
 public:
   enum class Status { OK = 0, ERROR = 1, SKIP = 2 };
   virtual ~Application() = default;
-  Status run(int argc, const char **argv);
+  Status run(std::vector<std::string> &command_line);
 
 private:
   virtual Status run_implementation(std::vector<std::string> &command_line) = 0;

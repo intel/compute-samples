@@ -26,10 +26,9 @@
 
 TEST(CommandsAggregationApplication, ReturnsOkStatus) {
   compute_samples::CommandsAggregationApplication application;
-  const char *argv[] = {"commands_aggregation", nullptr};
-  int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+  std::vector<std::string> command_line = {};
   EXPECT_EQ(compute_samples::Application::Status::OK,
-            application.run(argc, argv));
+            application.run(command_line));
 }
 
 TEST(CommandsAggregationApplication, ComputesExpectedResultsUsingSingleQueue) {

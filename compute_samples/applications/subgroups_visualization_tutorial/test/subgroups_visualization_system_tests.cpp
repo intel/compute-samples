@@ -38,12 +38,10 @@ protected:
 
 TEST_F(SubgroupsVisualizationSystemTests, GeneratesOutputImage) {
   compute_samples::SubgroupsVisualizationApplication application;
-  const char *argv[] = {"subgroups_visualization", "-k",
-                        const_cast<char *>(solution_cl_file.c_str()), nullptr};
-  int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+  std::vector<std::string> command_line = {"-k", solution_cl_file};
 
   EXPECT_EQ(compute_samples::Application::Status::OK,
-            application.run(argc, argv));
+            application.run(command_line));
 
   compute_samples::ImageBMP8Bit output_image(output_file_);
   compute_samples::ImageBMP8Bit reference_image(reference_file_);
