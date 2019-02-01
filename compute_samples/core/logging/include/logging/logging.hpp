@@ -58,6 +58,17 @@ void stop_logging();
 void add_stream(const boost::shared_ptr<std::ostream> &stream);
 LoggingSettings parse_command_line(std::vector<std::string> &command_line);
 
+template <typename T> std::string to_string(const std::vector<T> &x) {
+  std::stringstream ss;
+  ss << '[';
+  if (!x.empty()) {
+    std::copy(x.begin(), x.end() - 1, std::ostream_iterator<T>(ss, ", "));
+    ss << x.back();
+  }
+  ss << ']';
+  return ss.str();
+}
+
 } // namespace compute_samples
 
 #endif

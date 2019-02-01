@@ -200,3 +200,29 @@ TEST_F(LoggingInitTest, WarningLevelFromSettings) {
   LOG_WARNING << "Message";
   EXPECT_EQ("[warning] Message\n", logs->str());
 }
+
+TEST(VectorToString, Empty) {
+  const std::vector<int> x = {};
+  EXPECT_EQ("[]", cs::to_string(x));
+}
+
+TEST(VectorToString, SingleElement) {
+  const std::vector<int> x = {1};
+  EXPECT_EQ("[1]", cs::to_string(x));
+}
+
+TEST(VectorToString, MultipleElements) {
+  const std::vector<int> x = {1, 2, 3};
+  EXPECT_EQ("[1, 2, 3]", cs::to_string(x));
+}
+
+TEST(VectorToString, StringType) {
+  const std::vector<std::string> x = {"ab", "cd", "ef"};
+  EXPECT_EQ("[ab, cd, ef]", cs::to_string(x));
+}
+
+TEST(VectorToString, LoggingFormatType) {
+  const std::vector<cs::logging_format> x = {cs::logging_format::simple,
+                                             cs::logging_format::precise};
+  EXPECT_EQ("[simple, precise]", cs::to_string(x));
+}
