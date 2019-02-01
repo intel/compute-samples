@@ -50,6 +50,7 @@ If you want to manually prepare an application from scratch then please follow t
     │   └── your_app.cpp
     │   └── main.cpp
     └── test
+        ├── main.cpp
         ├── your_app_integration_tests.cpp
         ├── your_app_system_tests.cpp
         └── your_app_unit_tests.cpp
@@ -113,6 +114,7 @@ If you want to manually prepare an application from scratch then please follow t
 
         add_application_test(${PROJECT_NAME}
             SOURCE
+            "test/main.cpp"
             "test/your_app_unit_tests.cpp"
             "test/your_app_integration_tests.cpp"
             "test/your_app_system_tests.cpp"
@@ -128,3 +130,13 @@ If you want to manually prepare an application from scratch then please follow t
     1. Create `YourApplication` class which is derived from `Application` interface available in `application/application.hpp` header.
     1. Implement all methods required by the `Application` interface e.g. `Application::run_implementation`.
     1. Add tests using [Google Test](https://github.com/google/googletest) to the `compute_samples/applications/your_app/test` directory.
+
+## Logging levels
+Logging levels are a way of grouping certain types of messages printed by an application. Proper usage of all levels may greatly increase readability of produced logs and maintainability of the application.
+That's why we strongly encourage you to get familiar with all available logging levels described below:
+* Fatal - reserved for critical failures when the application is about to abort.
+* Error - describes serious issues which should be further investigated. Such situations often occur within a single unit and the application as a whole may handle it gracefully.
+* Warning - indicates any abnormalities that occurred but were properly handled by the application.
+* Information - tells users what the application is currently doing; this is the default.
+* Debug - adds additional information and contexts to the messages.
+* Trace - the most fine-grained messages, reserved for purely diagnostic purposes.
