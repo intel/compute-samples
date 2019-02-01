@@ -40,6 +40,9 @@ namespace compute_samples {
 #define LOG_ERROR BOOST_LOG_TRIVIAL(error)
 #define LOG_FATAL BOOST_LOG_TRIVIAL(fatal)
 
+#define LOG_ENTER_FUNCTION LOG_TRACE << "Enter function: " << __func__;
+#define LOG_EXIT_FUNCTION LOG_TRACE << "Exit function: " << __func__;
+
 enum class logging_format { simple, precise };
 std::ostream &operator<<(std::ostream &os, const logging_format &f);
 std::istream &operator>>(std::istream &is, logging_format &f);

@@ -26,23 +26,38 @@
 
 namespace compute_samples {
 void try_build(compute::program &program, const std::string &options) {
+  LOG_ENTER_FUNCTION
+  LOG_DEBUG << "Build options: " << options;
+
   try {
     program.build(options);
   } catch (compute::opencl_error &) {
     LOG_ERROR << "OpenCL Program Build Error!";
     LOG_ERROR << "OpenCL Program Build Log is:\n" << program.build_log();
+    LOG_TRACE << "Throwing exception from try_build";
     throw;
   }
+
+  LOG_DEBUG << "Program successfully built";
+  LOG_EXIT_FUNCTION
 }
 
 compute::program build_program(const compute::context &context,
                                const std::string &file,
                                const std::string &options) {
+  LOG_ENTER_FUNCTION
+  LOG_DEBUG << "Program file: " << file;
+  LOG_DEBUG << "Build options: " << options;
+
   compute::program program =
       compute::program::create_with_source_file(file, context);
+  LOG_DEBUG << "Program successfully created with source file";
   try_build(program, options);
+
+  LOG_EXIT_FUNCTION
   return program;
 }
+
 compute::program create_with_il_file(const std::string &file,
                                      const compute::context &context) {
   cl_program clprogram;
@@ -64,8 +79,15 @@ compute::program create_with_il_file(const std::string &file,
 compute::program build_program_il(const compute::context &context,
                                   const std::string &file,
                                   const std::string &options) {
+  LOG_ENTER_FUNCTION
+  LOG_DEBUG << "Program file: " << file;
+  LOG_DEBUG << "Build options: " << options;
+
   compute::program program = create_with_il_file(file, context);
+  LOG_DEBUG << "Program successfully created with il file";
   try_build(program, options);
+
+  LOG_EXIT_FUNCTION
   return program;
 }
 
