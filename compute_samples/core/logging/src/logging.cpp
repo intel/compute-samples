@@ -42,6 +42,28 @@ namespace compute_samples {
 typedef sinks::synchronous_sink<sinks::text_ostream_backend> text_sink;
 static boost::shared_ptr<text_sink> sink;
 
+void set_format(const logging_format format) {
+  logging::formatter formatter;
+  if (format == logging_format::simple) {
+    formatter = expr::stream << '[' << logging::trivial::severity << ']' << ' '
+                             << expr::smessage;
+  } else if (format == logging_format::precise) {
+    formatter = expr::stream
+                << '['
+                << expr::format_date_time<boost::posix_time::ptime>(
+                       "TimeStamp", "%Y-%m-%d %H:%M:%S")
+                << ']' << ' ' << '[' << logging::trivial::severity << ']' << ' '
+                << expr::smessage;
+  } else {
+    throw std::runtime_error("Unknown logging_format");
+  }
+  sink->set_formatter(formatter);
+}
+
+void set_min_level(const logging_level level) {
+  logging::core::get()->set_filter(logging::trivial::severity >= level);
+}
+
 void init_logging() {
   sink = logging::add_console_log();
   logging::add_common_attributes();
@@ -50,13 +72,8 @@ void init_logging() {
 void init_logging(const LoggingSettings settings) {
   init_logging();
 
-  if (settings.format == logging_format::simple) {
-    set_simple_format();
-  } else if (settings.format == logging_format::precise) {
-    set_precise_format();
-  } else {
-    throw std::runtime_error("Unknown logging_format");
-  }
+  set_format(settings.format);
+  set_min_level(settings.level);
 }
 
 void init_logging(std::vector<std::string> &command_line) {
@@ -72,28 +89,15 @@ void add_stream(const boost::shared_ptr<std::ostream> &stream) {
   sink->locked_backend()->add_stream(stream);
 }
 
-void set_simple_format() {
-  sink->set_formatter(expr::stream << '[' << logging::trivial::severity << ']'
-                                   << ' ' << expr::smessage);
-}
-
-void set_precise_format() {
-  sink->set_formatter(expr::stream
-                      << '['
-                      << expr::format_date_time<boost::posix_time::ptime>(
-                             "TimeStamp", "%Y-%m-%d %H:%M:%S")
-                      << ']' << ' ' << '[' << logging::trivial::severity << ']'
-                      << ' ' << expr::smessage);
-}
-
 std::ostream &operator<<(std::ostream &os, const logging_format &f) {
   if (f == logging_format::simple) {
-    return os << "simple";
+    os << "simple";
   } else if (f == logging_format::precise) {
-    return os << "precise";
+    os << "precise";
   } else {
     throw std::runtime_error("Unknown logging_format");
   }
+  return os;
 }
 
 std::istream &operator>>(std::istream &is, logging_format &f) {
@@ -104,7 +108,7 @@ std::istream &operator>>(std::istream &is, logging_format &f) {
   } else if (s == "precise") {
     f = logging_format::precise;
   } else {
-    throw std::runtime_error("Unknown logging_format");
+    is.setstate(std::ios_base::failbit);
   }
   return is;
 }
@@ -117,6 +121,9 @@ LoggingSettings parse_command_line(std::vector<std::string> &command_line) {
   options("logging-format",
           po::value(&settings.format)->default_value(logging_format::precise),
           "format of logged messages");
+  options("logging-level",
+          po::value(&settings.level)->default_value(logging_level::info),
+          "minimal logging level to print");
 
   po::parsed_options parsed = po::command_line_parser(command_line)
                                   .options(desc)

@@ -44,8 +44,11 @@ enum class logging_format { simple, precise };
 std::ostream &operator<<(std::ostream &os, const logging_format &f);
 std::istream &operator>>(std::istream &is, logging_format &f);
 
+using logging_level = boost::log::trivial::severity_level;
+
 struct LoggingSettings {
   logging_format format;
+  logging_level level;
 };
 
 void init_logging();
@@ -53,9 +56,6 @@ void init_logging(const LoggingSettings settings);
 void init_logging(std::vector<std::string> &command_line);
 void stop_logging();
 void add_stream(const boost::shared_ptr<std::ostream> &stream);
-void set_simple_format();
-void set_precise_format();
-
 LoggingSettings parse_command_line(std::vector<std::string> &command_line);
 
 } // namespace compute_samples
