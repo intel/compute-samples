@@ -50,8 +50,8 @@ std::istream &operator>>(std::istream &is, logging_format &f);
 using logging_level = boost::log::trivial::severity_level;
 
 struct LoggingSettings {
-  logging_format format;
-  logging_level level;
+  logging_format format = logging_format::precise;
+  logging_level level = logging_level::info;
 };
 
 void init_logging();
