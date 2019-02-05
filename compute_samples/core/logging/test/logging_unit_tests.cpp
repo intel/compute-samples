@@ -202,7 +202,7 @@ TEST_F(LoggingInitTest, WarningLevelFromSettings) {
 }
 
 TEST(VectorToString, Empty) {
-  const std::vector<int> x = {};
+  const std::vector<int> x;
   EXPECT_EQ("[]", cs::to_string(x));
 }
 
