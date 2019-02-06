@@ -77,9 +77,11 @@ def check_formatting(files, clang_format):
 def format_files(files, clang_format):
     logging.info('Running clang-format')
     with ThreadPoolExecutor() as executor:
-        executor.map(run_clang_format_star,
-                     zip(files, repeat(clang_format),
-                         repeat('-i')))
+        stdout = executor.map(run_clang_format_star,
+                              zip(files, repeat(clang_format),
+                                  repeat('-i')))
+        for o in stdout:
+            logging.debug('clang-format output: {}'.format(o))
     logging.info('Formatting is done')
     return 0
 
