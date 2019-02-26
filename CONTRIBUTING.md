@@ -134,9 +134,26 @@ If you want to manually prepare an application from scratch then please follow t
 ## Logging levels
 Logging levels are a way of grouping certain types of messages printed by an application. Proper usage of all levels may greatly increase readability of produced logs and maintainability of the application.
 That's why we strongly encourage you to get familiar with all available logging levels described below:
-* Fatal - reserved for critical failures when the application is about to abort.
-* Error - describes serious issues which should be further investigated. Such situations often occur within a single unit and the application as a whole may handle it gracefully.
-* Warning - indicates any abnormalities that occurred but were properly handled by the application.
-* Information - tells users what the application is currently doing; this is the default.
-* Debug - adds additional information and contexts to the messages.
-* Trace - the most fine-grained messages, reserved for purely diagnostic purposes.
+* `Fatal` - reserved for critical failures when the application is about to abort.
+* `Error` - describes serious issues which should be further investigated. Such situations often occur within a single unit and the application as a whole may handle it gracefully.
+* `Warning` - indicates any abnormalities that occurred but were properly handled by the application.
+* `Information` - tells users what the application is currently doing; this is the default.
+* `Debug` - adds additional information and contexts to the messages.
+* `Trace` - the most fine-grained messages, reserved for purely diagnostic purposes.
+
+## Naming conventions
+We are using the following naming conventions:
+* `Class` - UpperCamelCase - `class MyClass`
+* `Class data member` - snake_case_with_suffix - `MyClass::my_class_data_member_`
+* `Struct` - UpperCamelCase - `struct MyStruct`
+* `Struct data member` - snake_case - `MyStruct::my_struct_data_member`
+* `Function` - snake_case - `void my_function()`
+* `Variable` - snake_case - `int my_variable`
+* `Constant` - snake_case - `const int my_constant`
+* `Enum` - snake_case - `enum class my_enum`
+* `Enum member` - snake_case - `my_enum::my_enum_member`
+* `Namespace` - snake_case - `namespace my_namespace`
+* `Macro` - CAPITALIZED_WITH_UNDERSCORES - `#define MY_MACRO`
+* `File` - snake_case - `my_file.cpp`
+* `Module` - snake_case - `my_module`
+* `Test` - UpperCamelCase - `TEST(MyTestCase, MyTest)`
