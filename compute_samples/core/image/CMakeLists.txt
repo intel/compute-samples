@@ -45,6 +45,7 @@ target_link_libraries(${PROJECT_NAME}
 add_core_library_test(${PROJECT_NAME}
     SOURCE
     "test/main.cpp"
+    "test/image_unit_tests.cpp"
     "test/image_integration_tests.cpp"
 )
 install_resources(${PROJECT_NAME}_tests

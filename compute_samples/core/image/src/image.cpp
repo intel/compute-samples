@@ -42,6 +42,11 @@ ImagePNG<T>::ImagePNG(const int width, const int height)
   pixels_.resize(size());
 }
 
+template <typename T>
+ImagePNG<T>::ImagePNG(const int width, const int height,
+                      const std::vector<T> &data)
+    : width_(width), height_(height), pixels_(data) {}
+
 template <> bool ImagePNG<uint32_t>::read(const std::string &image_path) {
   gil::rgba8_image_t image;
   gil::png_read_and_convert_image(image_path, image);
@@ -101,6 +106,15 @@ template <typename T> int ImagePNG<T>::size_in_bytes() const {
   return static_cast<int>(pixels_.size() * sizeof(T));
 }
 
+template <typename T> T ImagePNG<T>::get_pixel(const int x, const int y) const {
+  return pixels_[y * width() + x];
+}
+
+template <typename T>
+void ImagePNG<T>::set_pixel(const int x, const int y, const T data) {
+  pixels_[y * width() + x] = data;
+}
+
 template <typename T>
 std::vector<T> compute_samples::ImagePNG<T>::get_pixels() const {
   return pixels_;
@@ -134,6 +148,11 @@ ImageBMP<T>::ImageBMP(const int width, const int height)
     : width_(width), height_(height) {
   pixels_.resize(size());
 }
+
+template <typename T>
+ImageBMP<T>::ImageBMP(const int width, const int height,
+                      const std::vector<T> &data)
+    : width_(width), height_(height), pixels_(data) {}
 
 template <typename T> bool ImageBMP<T>::read(const std::string &image_path) {
   std::unique_ptr<uint8_t> data = nullptr;
@@ -195,6 +214,15 @@ template <typename T> int ImageBMP<T>::size() const {
 
 template <typename T> int ImageBMP<T>::size_in_bytes() const {
   return static_cast<int>(pixels_.size() * sizeof(T));
+}
+
+template <typename T> T ImageBMP<T>::get_pixel(const int x, const int y) const {
+  return pixels_[y * width() + x];
+}
+
+template <typename T>
+void ImageBMP<T>::set_pixel(const int x, const int y, const T data) {
+  pixels_[y * width() + x] = data;
 }
 
 template <typename T> std::vector<T> ImageBMP<T>::get_pixels() const {
