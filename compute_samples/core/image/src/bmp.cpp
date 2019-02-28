@@ -118,7 +118,8 @@ bool BmpUtils::save_image_as_bmp(uint32_t *ptr, int width, int height,
   uint8_t buffer[4];
   memset(buffer, 0, sizeof(buffer));
   for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++, ppix++) {
+    for (int x = 0; x < width; x++) {
+      ppix = ptr + (height - 1 - y) * width + x;
       if (4 != fwrite(ppix, 1, 4, stream)) {
         goto error_exit;
       }
@@ -169,13 +170,10 @@ bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, int width,
         tmp_f_val = 255.0f;
       ui_tmp[3] = 1; // Alfa
 
-      out_u_int_buf[(height - 1 - y) * width + x] = 0x000000FF & ui_tmp[2];
-      out_u_int_buf[(height - 1 - y) * width + x] |=
-          0x0000FF00 & ((ui_tmp[1]) << 8);
-      out_u_int_buf[(height - 1 - y) * width + x] |=
-          0x00FF0000 & ((ui_tmp[0]) << 16);
-      out_u_int_buf[(height - 1 - y) * width + x] |=
-          0xFF000000 & ((ui_tmp[3]) << 24);
+      out_u_int_buf[y * width + x] = 0x000000FF & ui_tmp[2];
+      out_u_int_buf[y * width + x] |= 0x0000FF00 & ((ui_tmp[1]) << 8);
+      out_u_int_buf[y * width + x] |= 0x00FF0000 & ((ui_tmp[0]) << 16);
+      out_u_int_buf[y * width + x] |= 0xFF000000 & ((ui_tmp[3]) << 24);
     }
   }
 
@@ -200,7 +198,7 @@ bool BmpUtils::save_image_as_bmp_8u(uint8_t *ptr, int width, int height,
       uint32_t ui_data =
           0xFF000000 + (uc_data << 16) + (uc_data << 8) + (uc_data);
 
-      out_u_int_buf[(height - 1 - y) * width + x] = ui_data;
+      out_u_int_buf[y * width + x] = ui_data;
     }
   }
 
