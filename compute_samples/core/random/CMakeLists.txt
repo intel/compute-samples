@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2018 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,21 @@
 # SOFTWARE.
 #
 
-add_subdirectory(align_utils)
-add_subdirectory(application)
-add_subdirectory(boost_intel)
-add_subdirectory(image)
-add_subdirectory(timer)
-add_subdirectory(version)
-add_subdirectory(yuv_utils)
-add_subdirectory(ocl_utils)
-add_subdirectory(logging)
-add_subdirectory(random)
+cmake_minimum_required(VERSION 3.8)
+project(random)
+
+add_core_library(${PROJECT_NAME}
+    SOURCE
+    "include/random/random.hpp"
+    "src/random.cpp"
+)
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    compute_samples::logging
+)
+
+add_core_library_test(${PROJECT_NAME}
+    SOURCE
+    "test/main.cpp"
+    "test/random_unit_tests.cpp"
+)
