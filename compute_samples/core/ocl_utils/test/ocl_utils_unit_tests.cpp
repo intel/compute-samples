@@ -22,48 +22,29 @@
 
 #include "ocl_utils/ocl_utils.hpp"
 #include "gtest/gtest.h"
+#include "utils/utils.hpp"
 
 namespace cs = compute_samples;
 
-template <typename T> class SizeInBytesOpenCL : public testing::Test {};
+template <typename T> class SizeInBytes : public testing::Test {};
 typedef testing::Types<cl_char, cl_uchar, cl_short, cl_ushort, cl_int, cl_uint,
                        cl_long, cl_ulong, cl_half, cl_float, cl_double>
     OpenCLTypes;
-TYPED_TEST_CASE(SizeInBytesOpenCL, OpenCLTypes);
+TYPED_TEST_CASE(SizeInBytes, OpenCLTypes);
 
-TYPED_TEST(SizeInBytesOpenCL, EmptyVector) {
+TYPED_TEST(SizeInBytes, EmptyVector) {
   const std::vector<TypeParam> vector(0);
   EXPECT_EQ(0, cs::size_in_bytes(vector));
 }
 
-TYPED_TEST(SizeInBytesOpenCL, SingleElement) {
+TYPED_TEST(SizeInBytes, SingleElement) {
   const std::vector<TypeParam> vector(1);
   EXPECT_EQ(sizeof(TypeParam) * vector.size(), cs::size_in_bytes(vector));
 }
 
-TYPED_TEST(SizeInBytesOpenCL, MultipleElements) {
+TYPED_TEST(SizeInBytes, MultipleElements) {
   const std::vector<TypeParam> vector(2);
   EXPECT_EQ(sizeof(TypeParam) * vector.size(), cs::size_in_bytes(vector));
-}
-
-template <typename T> class SizeInBytesImage : public testing::Test {};
-typedef testing::Types<cs::ImagePNG32Bit, cs::ImageBMP8Bit, cs::ImageBMP32Bit>
-    ImageTypes;
-TYPED_TEST_CASE(SizeInBytesImage, ImageTypes);
-
-TYPED_TEST(SizeInBytesImage, EmptyImage) {
-  const TypeParam image(0, 0);
-  EXPECT_EQ(image.size_in_bytes(), cs::size_in_bytes(image));
-}
-
-TYPED_TEST(SizeInBytesImage, SinglePixel) {
-  const TypeParam image(1, 1);
-  EXPECT_EQ(image.size_in_bytes(), cs::size_in_bytes(image));
-}
-
-TYPED_TEST(SizeInBytesImage, MultiplePixels) {
-  const TypeParam image(2, 2);
-  EXPECT_EQ(image.size_in_bytes(), cs::size_in_bytes(image));
 }
 
 TEST(CompareCLVectors, cl_int8_equal) {

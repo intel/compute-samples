@@ -36,8 +36,8 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     compute_samples::logging
+    compute_samples::utils
     OpenCL::OpenCL
-    compute_samples::image
 )
 
 add_core_library_test(${PROJECT_NAME}

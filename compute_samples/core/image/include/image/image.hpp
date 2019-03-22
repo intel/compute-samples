@@ -116,6 +116,10 @@ private:
 typedef ImageBMP<uint8_t> ImageBMP8Bit;
 typedef ImageBMP<uint32_t> ImageBMP32Bit;
 
+template <typename T> int size_in_bytes(const Image<T> &i) {
+  return i.size_in_bytes();
+}
+
 } // namespace compute_samples
 
 #endif

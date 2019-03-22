@@ -133,3 +133,25 @@ TEST(ImageBMP8Bit, SetPixel) {
   image.set_pixel(2, 1, pixels[5]);
   EXPECT_EQ(pixels, image.get_pixels());
 }
+
+template <typename T> class SizeInBytes : public testing::Test {};
+typedef testing::Types<compute_samples::ImagePNG32Bit,
+                       compute_samples::ImageBMP8Bit,
+                       compute_samples::ImageBMP32Bit>
+    ImageTypes;
+TYPED_TEST_CASE(SizeInBytes, ImageTypes);
+
+TYPED_TEST(SizeInBytes, EmptyImage) {
+  const TypeParam image(0, 0);
+  EXPECT_EQ(image.size_in_bytes(), compute_samples::size_in_bytes(image));
+}
+
+TYPED_TEST(SizeInBytes, SinglePixel) {
+  const TypeParam image(1, 1);
+  EXPECT_EQ(image.size_in_bytes(), compute_samples::size_in_bytes(image));
+}
+
+TYPED_TEST(SizeInBytes, MultiplePixels) {
+  const TypeParam image(2, 2);
+  EXPECT_EQ(image.size_in_bytes(), compute_samples::size_in_bytes(image));
+}

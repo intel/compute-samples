@@ -23,6 +23,7 @@
 #include "ocl_utils/ocl_utils.hpp"
 #include "gtest/gtest.h"
 
+#include "utils/utils.hpp"
 #include <fstream>
 
 #include <boost/compute/utility/source.hpp>
@@ -42,14 +43,6 @@ protected:
                             const std::string &file) {
     std::ofstream ofs(file);
     ofs << source;
-    ofs.close();
-  }
-
-  void write_binary_to_file(void *source, size_t size,
-                            const std::string &file) {
-    typedef std::basic_ofstream<uint8_t, std::char_traits<uint8_t>> uofstream;
-    uofstream ofs(file, std::ios::binary);
-    ofs.write(static_cast<uint8_t *>(source), size);
     ofs.close();
   }
 
@@ -90,8 +83,7 @@ TEST_F(BuildProgram, ValidProgramSpirV) {
       0x43, 0x4c, 0x2e, 0x73, 0x74, 0x64, 0x00, 0x00, 0x0e, 0x00, 0x03, 0x00,
       0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03, 0x00,
       0x03, 0x00, 0x00, 0x00, 0x70, 0x8e, 0x01, 0x00};
-  write_binary_to_file(spriv_file_source.data(), spriv_file_source.size(),
-                       spv_file);
+  compute_samples::save_binary_file(spriv_file_source, spv_file);
   EXPECT_NE(compute::program(),
             cs::build_program_il(context, spv_file, "-cl-std=CL2.0"));
 }
@@ -105,8 +97,7 @@ TEST_F(BuildProgram, InvalidProgramSpirV) {
       0x43, 0x4c, 0x2e, 0x73, 0x74, 0x64, 0x00, 0x00, 0x0e, 0x00, 0x03, 0x00,
       0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03, 0x00,
       0x03, 0x00, 0x00, 0x00, 0x70, 0x8e, 0x01, 0x00};
-  write_binary_to_file(spriv_file_source.data(), spriv_file_source.size(),
-                       spv_file);
+  compute_samples::save_binary_file(spriv_file_source, spv_file);
   EXPECT_THROW(cs::build_program_il(context, spv_file, "-cl-std=CL2.0"),
                compute::opencl_error);
 }

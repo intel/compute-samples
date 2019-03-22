@@ -20,14 +20,26 @@
 # SOFTWARE.
 #
 
-add_subdirectory(align_utils)
-add_subdirectory(application)
-add_subdirectory(boost_intel)
-add_subdirectory(image)
-add_subdirectory(timer)
-add_subdirectory(version)
-add_subdirectory(yuv_utils)
-add_subdirectory(ocl_utils)
-add_subdirectory(logging)
-add_subdirectory(random)
-add_subdirectory(utils)
+cmake_minimum_required(VERSION 3.8)
+project(utils)
+
+add_core_library(${PROJECT_NAME}
+    SOURCE
+    "include/utils/utils.hpp"
+    "src/utils.cpp"
+)
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    compute_samples::logging
+)
+
+add_core_library_test(${PROJECT_NAME}
+    SOURCE
+    "test/main.cpp"
+    "test/utils_unit_tests.cpp"
+    "test/utils_integration_tests.cpp"
+)
+install_resources(${PROJECT_NAME}_tests
+    FILES
+    "test/binary_file.bin"
+)

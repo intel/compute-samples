@@ -26,12 +26,6 @@
 #include "ocl_utils/ocl_utils.hpp"
 
 namespace compute_samples {
-template <typename T> int size_in_bytes(const std::vector<T> &v) {
-  return static_cast<int>(sizeof(T) * v.size());
-}
-template <typename T> int size_in_bytes(const Image<T> &i) {
-  return i.size_in_bytes();
-}
 template <> struct cl_scalar_type<cl_int8> { using type = cl_int; };
 template <> struct cl_scalar_type<cl_uint8> { using type = cl_uint; };
 template <> struct cl_scalar_type<cl_int4> { using type = cl_int; };

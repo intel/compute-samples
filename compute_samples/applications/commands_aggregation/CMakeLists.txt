@@ -32,6 +32,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     PUBLIC
     compute_samples::timer
     compute_samples::ocl_utils
+    compute_samples::utils
     compute_samples::logging
     Boost::program_options
 )

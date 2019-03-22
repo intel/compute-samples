@@ -21,7 +21,7 @@
  */
 
 #include "ocl_utils/ocl_utils.hpp"
-
+#include "utils/utils.hpp"
 #include "logging/logging.hpp"
 
 namespace compute_samples {
@@ -60,15 +60,11 @@ compute::program build_program(const compute::context &context,
 
 compute::program create_with_il_file(const std::string &file,
                                      const compute::context &context) {
-  cl_program clprogram;
-  std::ifstream sprv_stream(file, std::ios::in | std::ios::binary);
+  std::vector<uint8_t> binary_spv_file = load_binary_file(file);
 
-  std::vector<uint8_t> binary_spv_file(
-      (std::istreambuf_iterator<char>(sprv_stream)),
-      std::istreambuf_iterator<char>());
   cl_int error = 0;
-  clprogram = clCreateProgramWithIL(context, binary_spv_file.data(),
-                                    binary_spv_file.size(), &error);
+  cl_program clprogram = clCreateProgramWithIL(context, binary_spv_file.data(),
+                                               binary_spv_file.size(), &error);
   if (error) {
     BOOST_THROW_EXCEPTION(compute::opencl_error(error));
   }

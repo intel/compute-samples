@@ -28,11 +28,7 @@
 #include <boost/compute/core.hpp>
 namespace compute = boost::compute;
 
-#include "image/image.hpp"
-
 namespace compute_samples {
-template <typename T> int size_in_bytes(const std::vector<T> &v);
-template <typename T> int size_in_bytes(const Image<T> &i);
 compute::program build_program(const compute::context &context,
                                const std::string &file,
                                const std::string &options = std::string());

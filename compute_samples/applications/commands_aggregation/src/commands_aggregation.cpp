@@ -33,6 +33,7 @@ namespace po = boost::program_options;
 
 #include "timer/timer.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "utils/utils.hpp"
 #include "logging/logging.hpp"
 
 namespace compute_samples {
