@@ -21,6 +21,7 @@
  */
 
 #include "template/template.hpp"
+#include "utils/utils.hpp"
 
 #include <iostream>
 
