@@ -27,6 +27,11 @@ In order to create a redistributable package please use the following command:
 
     cmake --build . --target package
 
+# Source Package
+In order to create a redistributable source package please use the following command:
+
+    cmake --build . --target package_source
+
 # CMake options
 CMake can be configured using the following parameters:
 
