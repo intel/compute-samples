@@ -2,13 +2,21 @@ language: cpp
 sudo: false
 os: linux
 dist: xenial
-compiler: gcc
+compiler: 
+  - gcc
+  - clang
+  - gcc
+  - gcc-6
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - libx11-dev
       - libva-dev
       - clang-format-5.0
+      - g++-6
+      - gcc-6
 before_install:
   - cd scripts
   - python3 format.py --check --clang-format=clang-format-5.0
@@ -18,6 +26,7 @@ install:
   - g++ --version
   - JOBS=2
 before_script:
+  - eval "${MATRIX_EVAL}"
   - mkdir build
   - cd build
   - cmake ..
