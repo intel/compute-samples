@@ -4,15 +4,15 @@ matrix:
   include:
     - os: linux
     - dist: xenial
-    addons:
-      apt:
-        packages:
-        - libx11-dev
-        - libva-dev
-        - clang-format-5.0
-    compiler: 
-      - gcc
-      - clang
+      addons:
+        apt:
+          packages:
+            - libx11-dev
+            - libva-dev
+            - clang-format-5.0
+      compiler: 
+        - gcc
+        - clang
     - os: linux
     - dist: xenial
       addons:
