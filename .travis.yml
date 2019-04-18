@@ -1,4 +1,3 @@
-language: cpp
 sudo: false
 matrix:
   include:
