@@ -10,9 +10,21 @@ matrix:
             - libx11-dev
             - libva-dev
             - clang-format-5.0
-      compiler: 
-        - gcc
-        - clang
+      env:
+        - MATRIX_EVAL="CC=gcc && CXX=g++"
+      compiler: gcc
+  include:
+    - os: linux
+    - dist: xenial
+      addons:
+        apt:
+          packages:
+            - libx11-dev
+            - libva-dev
+            - clang-format-5.0
+      env:
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+      compiler: clang
     - os: linux
     - dist: xenial
       addons:
