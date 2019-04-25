@@ -153,9 +153,9 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory("${GTEST_ROOT}/googletest-src"
                  "${GTEST_ROOT}/googletest-build" EXCLUDE_FROM_ALL)
 add_library(GTest::GTest ALIAS gtest)
-add_library(GTest::Main ALIAS gtest_main)
+add_library(GMock::GMock ALIAS gmock)
 set_target_properties(gtest PROPERTIES FOLDER third_party/gtest)
-set_target_properties(gtest_main PROPERTIES FOLDER third_party/gtest)
+set_target_properties(gmock PROPERTIES FOLDER third_party/gtest)
 
 # Prepare OpenCL
 option(BUILD_OPENCL "Download and build OpenCL ICD" ON)

@@ -132,3 +132,26 @@ function(add_core_library_test project_name)
 
     add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 endfunction()
+
+function(add_test_suite name)
+    cmake_parse_arguments(F "" "" "SOURCE" ${ARGN})
+    add_library(${name} ${F_SOURCE})
+    add_library(compute_samples::${name} ALIAS ${name})
+
+    target_include_directories(${name}
+        PUBLIC
+        include
+    )
+
+    target_link_libraries(${name}
+        PUBLIC
+        GMock::GMock
+        GTest::GTest
+    )
+
+    install(TARGETS ${name} DESTINATION ".")
+
+    set_target_properties(${name} PROPERTIES FOLDER tests/${name})
+
+    add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+endfunction()
