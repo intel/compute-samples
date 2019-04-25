@@ -135,8 +135,7 @@ endfunction()
 
 function(add_test_suite name)
     cmake_parse_arguments(F "" "" "SOURCE" ${ARGN})
-    add_library(${name} ${F_SOURCE})
-    add_library(compute_samples::${name} ALIAS ${name})
+    add_executable(${name} ${F_SOURCE})
 
     target_include_directories(${name}
         PUBLIC
