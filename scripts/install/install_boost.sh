@@ -1,5 +1,7 @@
+#!/bin/bash
+
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +22,26 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(mediadata-external NONE)
+echo "Downloading Boost"
+wget https://prdownloads.sourceforge.net/boost/boost/1.64.0/boost_1_64_0.tar.gz -O boost_1_64_0.tar.gz
 
-include(ExternalProject)
-ExternalProject_Add(
-    mediadata-intel
-    URL https://software.intel.com/file/604709/download
-    SOURCE_DIR "${MEDIADATA_ROOT}/yuv"
-    BINARY_DIR "${MEDIADATA_ROOT}/yuv"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-)
+echo "Extracting Boost"
+tar xvf boost_1_64_0.tar.gz
+
+echo "Installing Boost"
+SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+INSTALL_PATH="$SCRIPT_PATH/../../third_party"
+BOOST_PATH="$INSTALL_PATH/boost"
+JOBS="${JOBS:-4}"
+
+pushd .
+cd boost_1_64_0
+
+./bootstrap.sh
+./b2 address-model=64 install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix=$BOOST_PATH -j$JOBS
+popd
+
+echo "Cleaning Boost"
+rm -rf boost_1_64_0
+rm boost_1_64_0.tar.gz
 

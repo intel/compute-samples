@@ -10,6 +10,7 @@ matrix:
             - libx11-dev
             - libva-dev
             - clang-format-5.0
+            - libpng-dev
       env:
         - MATRIX_EVAL="CC=gcc && CXX=g++"
       compiler: gcc
@@ -34,6 +35,7 @@ matrix:
             - libx11-dev
             - libva-dev
             - clang-format-5.0
+            - libpng-dev
             - clang-3.8
       env:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
@@ -48,6 +50,7 @@ matrix:
             - libx11-dev
             - libva-dev
             - clang-format-5.0
+            - libpng-dev
             - clang-4.0
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
@@ -62,6 +65,7 @@ matrix:
             - libx11-dev
             - libva-dev
             - clang-format-5.0
+            - libpng-dev
             - clang-5.0
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
@@ -76,6 +80,7 @@ matrix:
             - libx11-dev
             - libva-dev
             - clang-format-5.0
+            - libpng-dev
             - clang-6.0
       env:
         - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
@@ -90,6 +95,7 @@ matrix:
             - libx11-dev
             - libva-dev
             - clang-format-5.0
+            - libpng-dev
             - g++-6
             - gcc-6
       env:
@@ -105,6 +111,7 @@ matrix:
             - libx11-dev
             - libva-dev
             - clang-format-5.0
+            - libpng-dev
             - g++-7
             - gcc-7
       env:
@@ -118,11 +125,11 @@ before_install:
 install:
   - cmake --version
   - g++ --version
-  - JOBS=2
-before_script:
   - eval "${MATRIX_EVAL}"
+  - scripts/install/install_ubuntu16.04.sh
+before_script:
   - mkdir build
   - cd build
   - cmake ..
 script:
-  - cmake --build . -- -j${JOBS}
+  - cmake --build .

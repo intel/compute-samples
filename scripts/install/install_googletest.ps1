@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,23 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(libpng-external NONE)
+echo "Downloading googletest"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+wget -Uri https://github.com/google/googletest/archive/release-1.8.1.zip -OutFile googletest-release-1.8.1.zip
 
-include(ExternalProject)
-ExternalProject_Add(
-    libpng
-    URL http://download.sourceforge.net/libpng/libpng-1.6.30.tar.xz
-    URL_MD5 88A729D47EAF880D61A0EF90F4BD5E8F
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PNG_ROOT} -DPNG_BUILD_ZLIB=ON -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} -DZLIB_LIBRARY=${ZLIB_LIBRARY} -DPNG_SHARED=OFF
-)
+echo "Extracting googletest"
+. "C:\Program Files\7-Zip\7z.exe" x googletest-release-1.8.1.zip
+
+echo "Installing googletest"
+$rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
+$installPath = $rootPath + "/third_party"
+mkdir $installPath -Force
+$googletestPath = $installPath + "/googletest"
+
+mkdir $googletestPath | Out-Null
+
+cp -Recurse googletest-release-1.8.1/* "$googletestPath"
+
+echo "Cleaning googletest"
+rm -R googletest-release-1.8.1
+rm googletest-release-1.8.1.zip

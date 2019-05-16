@@ -1,5 +1,7 @@
+#!/bin/bash
+
 #
-# Copyright(c) 2018 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +22,12 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(googletest-external NONE)
+echo "Installing all dependencies"
+SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+$SCRIPT_PATH/install_opencl.sh
+$SCRIPT_PATH/install_googletest.sh
+$SCRIPT_PATH/install_boost.sh
+$SCRIPT_PATH/download_mediadata.sh
+echo "Please install remaining packages using the following command line:"
+echo "apt-get install libpng-dev"
 
-include(ExternalProject)
-ExternalProject_Add(
-    googletest
-    URL https://github.com/google/googletest/archive/release-1.8.1.zip
-    SOURCE_DIR "${GTEST_ROOT}/googletest-src"
-    BINARY_DIR "${GTEST_ROOT}/googletest-build"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    TEST_COMMAND ""
-)

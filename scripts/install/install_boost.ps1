@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2018 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,24 +20,28 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(opencl-external NONE)
+echo "Downloading Boost"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+wget -Uri https://prdownloads.sourceforge.net/boost/boost/1.64.0/boost_1_64_0.zip -OutFile boost_1_64_0.zip -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer
 
-include(ExternalProject)
-ExternalProject_Add(
-    opencl-headers
-    URL https://github.com/KhronosGroup/OpenCL-Headers/archive/de26592167b9fdea503885e40e8755393c56523d.zip
-    CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E copy_directory . ${OPENCL_ROOT}/include
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE TRUE
-)
+echo "Extracting boost"
+. "C:\Program Files\7-Zip\7z.exe" x boost_1_64_0.zip
 
-ExternalProject_Add(
-    opencl-icd
-    DEPENDS opencl-headers
-    URL https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/b342ff7b7f70a4b3f2cfc53215af8fa20adc3d86.zip
-    PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_directory ${OPENCL_ROOT}/include inc
-    INSTALL_COMMAND "${CMAKE_COMMAND}" -E copy_directory lib ${OPENCL_ROOT}/lib
-    CMAKE_ARGS -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${OPENCL_ROOT}/lib -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG=${OPENCL_ROOT}/lib -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=${OPENCL_ROOT}/lib
-)
+echo "Installing Boost"
+$rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
+$installPath = $rootPath + "/third_party"
+mkdir $installPath -Force
+$boostPath = $installPath + "/boost"
+$jobs = 4
+
+pushd
+cd boost_1_64_0
+
+./bootstrap
+./b2 address-model=64 install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix="$boostPath" -j"$jobs"
+
+popd
+
+echo "Cleaning Boost"
+rm -R boost_1_64_0 -Force
+rm boost_1_64_0.zip

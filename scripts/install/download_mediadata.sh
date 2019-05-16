@@ -1,5 +1,7 @@
+#!/bin/bash
+
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +22,21 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(zlib-external NONE)
+echo "Downloading mediadata"
+wget https://software.intel.com/file/604709/download -O yuv_samples.tgz
 
-include(ExternalProject)
-ExternalProject_Add(
-    zlib
-    URL https://zlib.net/zlib1211.zip
-    URL_MD5 16b41357b2cd81bca5e1947238e64465
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${ZLIB_ROOT}
-)
+echo "Extracting mediadata"
+tar xvf yuv_samples.tgz
+
+echo "Installing mediadata"
+CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+INSTALL_PATH="$CURRENT_PATH/../../mediadata"
+YUV_PATH="$INSTALL_PATH/external/yuv"
+
+mkdir -p $YUV_PATH
+cp -R yuv_samples/* $YUV_PATH
+
+echo "Cleaning mediadata"
+rm -rf yuv_samples
+rm yuv_samples.tgz
+

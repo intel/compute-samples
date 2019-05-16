@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2017 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,11 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(boost-external NONE)
-
-include(ExternalProject)
-ExternalProject_Add(
-    boost
-    URL http://download.sourceforge.net/boost/boost/1.64.0/boost_1_64_0.zip
-    URL_MD5 36093e4018aecd5b0e31e80457ac5fc1
-    CONFIGURE_COMMAND ${BOOTSTRAP_BINARY}
-    BUILD_COMMAND ""
-    BUILD_IN_SOURCE TRUE
-    INSTALL_COMMAND ${B2_BINARY} address-model=${ADDRESS_MODEL} install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix=${BOOST_ROOT} ${TOOLSET}
-)
+echo "Installing all dependencies"
+. "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvars64.bat"
+. "$PSScriptRoot/install_zlib"
+. "$PSScriptRoot/install_libpng"
+. "$PSScriptRoot/install_opencl"
+. "$PSScriptRoot/install_googletest"
+. "$PSScriptRoot/install_boost"
+. "$PSScriptRoot/download_mediadata"

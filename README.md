@@ -27,16 +27,27 @@ List of all available samples and their description can be found in the [Samples
   * [libva, libva-drm, libva-x11 (VAAPI runtime libraries for Linux)](https://01.org/linuxgraphics/community/vaapi)
   * [libX11 (X Windows client library)](https://www.x.org)
 
-### Build
+### Clone repository
 
     git clone https://github.com/intel/compute-samples
     cd compute-samples
+
+### Install dependencies
+
+Dependencies can be installed manually or by using installation scripts like the one below:
+
+    scripts/install/install_ubuntu_18_04.sh
+
+More details can be found in the [BUILD](BUILD.md#Dependencies) file.
+
+### Build
+
     mkdir build
     cd build
     cmake ..
     cmake --build .
 
-More details about building, installing and testing can be found in the [BUILD](BUILD.md) file.
+More details can be found in the [BUILD](BUILD.md) file.
 
 ### Testing
 In order to run tests please read [this](BUILD.md#Test) section.
