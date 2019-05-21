@@ -126,7 +126,7 @@ install:
   - cmake --version
   - g++ --version
   - eval "${MATRIX_EVAL}"
-  - scripts/install/install_ubuntu16.04.sh
+  - scripts/install/install_ubuntu_16_04.sh
 before_script:
   - mkdir build
   - cd build

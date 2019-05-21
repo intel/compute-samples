@@ -2,9 +2,9 @@ image: Visual Studio 2015
 
 install:
   - cmake --version
-  - scripts/install/install_vs2015.ps1
 
 before_build:
+  - scripts\install\install_vs2015.ps1
   - mkdir build
   - cd build
   - cmake .. -G "Visual Studio 14 2015 Win64"
