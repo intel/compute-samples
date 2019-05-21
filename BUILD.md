@@ -14,16 +14,19 @@ There are utility scripts available that help with installation of all dependenc
 
 Note: In order to build the project using GCC 8, Boost 1.68 is required, becasue of [this](https://github.com/boostorg/compute/issues/778) bug in Boost::Compute.
 
+Note: By default all dependencies on Windows are built for x64.
+
 # Build
 Given that all dependencies are installed then use the following commands to build the project:
 
     mkdir build
     cd build
     cmake ..
+    # cmake .. -A x64 on Visual Studio, because by default solutions are generated for x86
     cmake --build .
 
 In order to use a different generator than a default one please use `-G` option based on the [CMake documentation](https://cmake.org/cmake/help/v3.8/manual/cmake-generators.7.html). 
-For example, you can generate a Visual Studio 2017 solution by running: `cmake .. -G "Visual Studio 15 2017"`
+For example, you can generate a Visual Studio 2017 solution by running: `cmake .. -G "Visual Studio 15 2017 Win64"`
 
 # Installation
 The following command installs project's binaries.
