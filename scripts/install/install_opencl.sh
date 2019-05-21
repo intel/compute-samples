@@ -27,7 +27,7 @@ OPENCL_HEADERS_HASH="de26592167b9fdea503885e40e8755393c56523d"
 wget "https://github.com/KhronosGroup/OpenCL-Headers/archive/$OPENCL_HEADERS_HASH.zip" -O "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
 
 echo "Extracting OpenCL Headers"
-unzip "OpenCL-Headers-$OPENCL_HEADERS_HAHS.zip"
+unzip "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
 
 echo "Installing OpenCL Headers"
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

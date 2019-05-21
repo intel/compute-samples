@@ -4,7 +4,7 @@ install:
   - cmake --version
 
 before_build:
-  - scripts\install\install_vs2015.ps1
+  - ps: scripts\install\install_vs2015.ps1
   - mkdir build
   - cd build
   - cmake .. -G "Visual Studio 14 2015 Win64"
