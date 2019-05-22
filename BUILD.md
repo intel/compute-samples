@@ -1,7 +1,7 @@
 # Dependencies
 The following packages are required to build the project:
 * [Boost 1.64](http://www.boost.org/)
-* [libpng 1.6.30](http://www.libpng.org/pub/png/libpng.html)
+* [libpng 1.6.37](http://www.libpng.org/pub/png/libpng.html)
 * [Google Test 1.8.1](https://github.com/google/googletest)
 
 There are utility scripts available that help with installation of all dependencies on Windows and Linux. Examples below:

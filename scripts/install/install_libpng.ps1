@@ -22,10 +22,10 @@
 
 echo "Downloading libpng"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-wget -Uri https://prdownloads.sourceforge.net/libpng/lpng1630.zip -OutFile lpng1630.zip -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer
+wget -Uri https://prdownloads.sourceforge.net/libpng/lpng1637.zip -OutFile lpng1637.zip -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer
 
 echo "Extracting libpng"
-. "C:\Program Files\7-Zip\7z.exe" x lpng1630.zip
+. "C:\Program Files\7-Zip\7z.exe" x lpng1637.zip
 
 echo "Installing libpng"
 $rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
@@ -37,7 +37,7 @@ $zlibIncludePath = $zlibPath + "/include"
 $zlibLibPath = $zlibPath + "/lib/zlibstatic.lib"
 
 pushd
-cd lpng1630
+cd lpng1637
 mkdir build | Out-Null
 cd build
 
@@ -46,5 +46,5 @@ cmake --build . --target INSTALL --config Release
 popd
 
 echo "Cleaning libpng"
-rm -R lpng1630
-rm lpng1630.zip
+rm -R lpng1637
+rm lpng1637.zip
