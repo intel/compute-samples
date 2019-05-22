@@ -38,7 +38,7 @@ pushd .
 cd boost_1_64_0
 
 ./bootstrap.sh
-./b2 address-model=64 install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix=$BOOST_PATH -j$JOBS
+./b2 address-model=64 install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix=$BOOST_PATH -j$JOBS -d0
 popd
 
 echo "Cleaning Boost"

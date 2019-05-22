@@ -38,7 +38,7 @@ pushd
 cd boost_1_64_0
 
 ./bootstrap
-./b2 address-model=64 install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix="$boostPath" -j"$jobs"
+./b2 address-model=64 install --with-program_options --with-timer --with-chrono --with-log --with-system --prefix="$boostPath" -j"$jobs" -d0
 
 popd
 
