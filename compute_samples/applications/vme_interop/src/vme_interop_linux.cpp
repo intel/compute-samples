@@ -424,8 +424,8 @@ void VmeInteropApplication::run_os_specific_implementation(
   create_va_surface(args.width, args.height, va_display, ref_va_surface);
   write_va_surface(va_display, src_va_surface, *planar_image);
   timer.print("Copied frame 0 to GPU tiled memory using VAAPI.");
-  compute::image2d_va src_image(context, &src_va_surface, -1);
-  compute::image2d_va ref_image(context, &ref_va_surface, -1);
+  compute::image2d_va src_image(context, &src_va_surface, 0);
+  compute::image2d_va ref_image(context, &ref_va_surface, 0);
 
   for (size_t k = 1; k < frame_count; k++) {
     LOG_INFO << "Processing frame " << k << "...";
