@@ -76,20 +76,25 @@ VAManager::VAManager() {
     throw std::runtime_error("Loading libvax11.so failed");
   }
 
+  char *error = NULL;
+
   vaGetDisplay = (vaGetDisplayFPTR)dlsym(libVaX11Handle, "vaGetDisplay");
-  if (!vaGetDisplay) {
-    LOG_ERROR << "dlsym error vaGetDisplay: " << dlerror();
+  error = dlerror();
+  if (!vaGetDisplay && error != NULL) {
+    LOG_ERROR << "dlsym error vaGetDisplay: " << error;
   }
 
   XOpenDisplay = (XOpenDisplayFPTR)dlsym(libVaX11Handle, "XOpenDisplay");
-  if (!XOpenDisplay) {
-    LOG_ERROR << "dlsym error XOpenDisplay: " << dlerror();
+  error = dlerror();
+  if (!XOpenDisplay && error != NULL) {
+    LOG_ERROR << "dlsym error XOpenDisplay: " << error;
   }
 
   vaGetDisplayDRM =
       (vaGetDisplayDRMFPTR)dlsym(libVaDRMHandle, "vaGetDisplayDRM");
-  if (!vaGetDisplayDRM) {
-    LOG_ERROR << "dlsym error vaGetDisplayDRM: " << dlerror();
+  error = dlerror();
+  if (!vaGetDisplayDRM && error != NULL) {
+    LOG_ERROR << "dlsym error vaGetDisplayDRM: " << error;
   }
 
   vaInitialize = (vaInitializeFPTR)dlsym(libVaHandle, "vaInitialize");
