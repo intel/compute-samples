@@ -26,7 +26,7 @@ echo "Downloading mediadata"
 wget https://software.intel.com/file/604709/download -O yuv_samples.tgz
 
 echo "Extracting mediadata"
-tar xvf yuv_samples.tgz
+tar xf yuv_samples.tgz
 
 echo "Installing mediadata"
 CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

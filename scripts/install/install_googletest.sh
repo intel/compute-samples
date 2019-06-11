@@ -26,7 +26,7 @@ echo "Downloading googletest"
 wget https://github.com/google/googletest/archive/release-1.8.1.zip -O googletest-release-1.8.1.zip
 
 echo "Extracting googletest"
-unzip googletest-release-1.8.1.zip
+unzip -q googletest-release-1.8.1.zip
 
 echo "Installing googletest"
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

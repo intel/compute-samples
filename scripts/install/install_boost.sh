@@ -26,7 +26,7 @@ echo "Downloading Boost"
 wget https://prdownloads.sourceforge.net/boost/boost/1.64.0/boost_1_64_0.tar.gz -O boost_1_64_0.tar.gz
 
 echo "Extracting Boost"
-tar xvf boost_1_64_0.tar.gz
+tar xf boost_1_64_0.tar.gz
 
 echo "Installing Boost"
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

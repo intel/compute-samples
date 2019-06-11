@@ -27,7 +27,7 @@ OPENCL_HEADERS_HASH="de26592167b9fdea503885e40e8755393c56523d"
 wget "https://github.com/KhronosGroup/OpenCL-Headers/archive/$OPENCL_HEADERS_HASH.zip" -O "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
 
 echo "Extracting OpenCL Headers"
-unzip "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
+unzip -q "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
 
 echo "Installing OpenCL Headers"
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -49,7 +49,7 @@ OPENCL_ICD_HASH="b342ff7b7f70a4b3f2cfc53215af8fa20adc3d86"
 wget "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/$OPENCL_ICD_HASH.zip" -O "OpenCL-ICD-Loader-$OPENCL_ICD_HASH.zip"
 
 echo "Extracting OpenCL ICD"
-unzip "OpenCL-ICD-Loader-$OPENCL_ICD_HASH.zip"
+unzip -q "OpenCL-ICD-Loader-$OPENCL_ICD_HASH.zip"
 
 echo "Installing OpenCL ICD"
 pushd .

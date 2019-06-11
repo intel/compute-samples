@@ -28,6 +28,7 @@ $SCRIPT_PATH/install_opencl.sh
 $SCRIPT_PATH/install_googletest.sh
 $SCRIPT_PATH/install_boost.sh
 $SCRIPT_PATH/download_mediadata.sh
+echo
 echo "Please install remaining packages using the following command line:"
 echo "apt-get install libpng-dev"
 
