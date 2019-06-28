@@ -20,15 +20,12 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(vme_search)
-
-add_application_library(${PROJECT_NAME}
+add_application_library(vme_search
     SOURCE
     "include/vme_search/vme_search.hpp"
     "src/vme_search.cpp"
 )
-target_link_libraries(${PROJECT_NAME}_lib
+target_link_libraries(vme_search_lib
     PUBLIC
     compute_samples::timer
     compute_samples::logging
@@ -37,35 +34,35 @@ target_link_libraries(${PROJECT_NAME}_lib
     compute_samples::align_utils
     compute_samples::ocl_utils
 )
-add_kernels(${PROJECT_NAME}_lib
+add_kernels(vme_search_lib
     "vme_basic_search.cl"
     "vme_cost_heuristics_search.cl"
     "vme_larger_search.cl"
 )
 
-add_application(${PROJECT_NAME}
+add_application(vme_search
     SOURCE
     "src/main.cpp"
 )
-install_kernels(${PROJECT_NAME}
+install_kernels(vme_search
     "vme_basic_search.cl"
     "vme_cost_heuristics_search.cl"
     "vme_larger_search.cl"
 )
-install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv")
+install_resources(vme_search FILES "${MEDIA_DIRECTORY}/yuv/goal_1280x720.yuv")
 
-add_application_test(${PROJECT_NAME}
+add_application_test(vme_search
     SOURCE
     "test/main.cpp"
     "test/vme_search_integration_tests.cpp"
     "test/vme_search_system_tests.cpp"
 )
-install_kernels(${PROJECT_NAME}_tests
+install_kernels(vme_search_tests
     "vme_basic_search.cl"
     "vme_cost_heuristics_search.cl"
     "vme_larger_search.cl"
 )
-install_resources(${PROJECT_NAME}_tests
+install_resources(vme_search_tests
     FILES
     "${MEDIA_DIRECTORY}/yuv/foreman_176x144.yuv"
     "${MEDIA_DIRECTORY}/yuv/basic_search_foreman_176x144.yuv"

@@ -20,12 +20,9 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(boost_intel)
-
-add_library(${PROJECT_NAME} INTERFACE)
-add_library(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-target_include_directories(${PROJECT_NAME}
+add_library(boost_intel INTERFACE)
+add_library(compute_samples::boost_intel ALIAS boost_intel)
+target_include_directories(boost_intel
     INTERFACE
     include
 )

@@ -20,12 +20,9 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(align_utils)
-
-add_library(${PROJECT_NAME} INTERFACE)
-add_library(compute_samples::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-target_include_directories(${PROJECT_NAME}
+add_library(align_utils INTERFACE)
+add_library(compute_samples::align_utils ALIAS align_utils)
+target_include_directories(align_utils
     INTERFACE
     include
 )

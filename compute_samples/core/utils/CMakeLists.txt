@@ -20,26 +20,23 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(utils)
-
-add_core_library(${PROJECT_NAME}
+add_core_library(utils
     SOURCE
     "include/utils/utils.hpp"
     "src/utils.cpp"
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(utils
     PUBLIC
     compute_samples::logging
 )
 
-add_core_library_test(${PROJECT_NAME}
+add_core_library_test(utils
     SOURCE
     "test/main.cpp"
     "test/utils_unit_tests.cpp"
     "test/utils_integration_tests.cpp"
 )
-install_resources(${PROJECT_NAME}_tests
+install_resources(utils_tests
     FILES
     "test/binary_file.bin"
 )

@@ -20,17 +20,13 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(application)
-
-add_core_library(${PROJECT_NAME}
+add_core_library(application
     SOURCE
     "include/application/application.hpp"
     "src/application.cpp"
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(application
     PUBLIC
     compute_samples::logging
-    OpenCL::OpenCL
     compute_samples::version
 )

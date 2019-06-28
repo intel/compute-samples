@@ -88,37 +88,34 @@ If you want to manually prepare an application from scratch then please follow t
         # SOFTWARE.
         #
 
-        cmake_minimum_required(VERSION 3.8)
-        project(your_app)
-
-        add_application_library(${PROJECT_NAME}
+        add_application_library(your_app
             SOURCE
             "include/your_app/your_app.hpp"
             "src/your_app.cpp"
         )
-        target_link_libraries(${PROJECT_NAME}_lib
+        target_link_libraries(your_app_lib
             PUBLIC
             compute_samples::image
             Boost::program_options
         )
-        add_kernels(${PROJECT_NAME}_lib "your_app_kernel.cl")
+        add_kernels(your_app_lib "your_app_kernel.cl")
 
-        add_application(${PROJECT_NAME}
+        add_application(your_app
             SOURCE
             "src/main.cpp"
         )
-        install_kernels(${PROJECT_NAME} "your_app_kernel.cl")
-        install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/png/your_app_media.png")
+        install_kernels(your_app "your_app_kernel.cl")
+        install_resources(your_app FILES "${MEDIA_DIRECTORY}/png/your_app_media.png")
 
-        add_application_test(${PROJECT_NAME}
+        add_application_test(your_app
             SOURCE
             "test/main.cpp"
             "test/your_app_unit_tests.cpp"
             "test/your_app_integration_tests.cpp"
             "test/your_app_system_tests.cpp"
         )
-        install_kernels(${PROJECT_NAME}_tests "your_app_kernel.cl")
-        install_resources(${PROJECT_NAME}_tests
+        install_kernels(your_app_tests "your_app_kernel.cl")
+        install_resources(your_app_tests
             FILES
             "${MEDIA_DIRECTORY}/png/test_input.png"
             "${MEDIA_DIRECTORY}/png/test_reference.png"

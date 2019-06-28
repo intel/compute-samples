@@ -20,15 +20,12 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(timer)
-
-add_core_library(${PROJECT_NAME}
+add_core_library(timer
     SOURCE
     "include/timer/timer.hpp"
     "src/timer.cpp"
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(timer
     PUBLIC
     Boost::timer
     compute_samples::logging

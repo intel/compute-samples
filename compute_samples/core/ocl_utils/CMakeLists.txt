@@ -20,27 +20,24 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(ocl_utils)
-
-add_core_library(${PROJECT_NAME}
+add_core_library(ocl_utils
     SOURCE
     "include/ocl_utils/ocl_utils.hpp"
     "src/ocl_utils-impl.hpp"
     "src/ocl_utils.cpp"
 )
-target_include_directories(${PROJECT_NAME}
+target_include_directories(ocl_utils
     PUBLIC
     "src"
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(ocl_utils
     PUBLIC
     compute_samples::logging
     compute_samples::utils
     OpenCL::OpenCL
 )
 
-add_core_library_test(${PROJECT_NAME}
+add_core_library_test(ocl_utils
     SOURCE
     "test/main.cpp"
     "test/ocl_utils_unit_tests.cpp"

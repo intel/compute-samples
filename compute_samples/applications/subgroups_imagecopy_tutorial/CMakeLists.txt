@@ -20,15 +20,12 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(subgroups_imagecopy)
-
-add_application_library(${PROJECT_NAME}
+add_application_library(subgroups_imagecopy
     SOURCE
     "include/subgroups_imagecopy/subgroups_imagecopy.hpp"
     "src/subgroups_imagecopy.cpp"
 )
-target_link_libraries(${PROJECT_NAME}_lib
+target_link_libraries(subgroups_imagecopy_lib
     PUBLIC
     compute_samples::timer
     compute_samples::logging
@@ -36,29 +33,29 @@ target_link_libraries(${PROJECT_NAME}_lib
     compute_samples::image
     compute_samples::ocl_utils
 )
-add_kernels(${PROJECT_NAME}_lib
+add_kernels(subgroups_imagecopy_lib
     "subgroups_imagecopy_kernel.cl"
     "subgroups_imagecopy_solution.cl"
 )
 
-add_application(${PROJECT_NAME}
+add_application(subgroups_imagecopy
     SOURCE
     "src/main.cpp"
 )
-install_kernels(${PROJECT_NAME}
+install_kernels(subgroups_imagecopy
     "subgroups_imagecopy_kernel.cl"
     "subgroups_imagecopy_solution.cl"
 )
-install_resources(${PROJECT_NAME} FILES "${MEDIA_DIRECTORY}/bmp/input.bmp")
+install_resources(subgroups_imagecopy FILES "${MEDIA_DIRECTORY}/bmp/input.bmp")
 
-add_application_test(${PROJECT_NAME}
+add_application_test(subgroups_imagecopy
     SOURCE
     "test/main.cpp"
     "test/subgroups_imagecopy_integration_tests.cpp"
     "test/subgroups_imagecopy_system_tests.cpp"
 )
-install_kernels(${PROJECT_NAME}_tests
+install_kernels(subgroups_imagecopy_tests
     "subgroups_imagecopy_kernel.cl"
     "subgroups_imagecopy_solution.cl"
 )
-install_resources(${PROJECT_NAME}_tests FILES "${MEDIA_DIRECTORY}/bmp/input.bmp")
+install_resources(subgroups_imagecopy_tests FILES "${MEDIA_DIRECTORY}/bmp/input.bmp")

@@ -20,20 +20,17 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(random)
-
-add_core_library(${PROJECT_NAME}
+add_core_library(random
     SOURCE
     "include/random/random.hpp"
     "src/random.cpp"
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(random
     PUBLIC
     compute_samples::logging
 )
 
-add_core_library_test(${PROJECT_NAME}
+add_core_library_test(random
     SOURCE
     "test/main.cpp"
     "test/random_unit_tests.cpp"

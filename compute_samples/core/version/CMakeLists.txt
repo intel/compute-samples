@@ -20,18 +20,15 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(version)
-
 configure_file("src/version_config.cpp.in" "${PROJECT_BINARY_DIR}/generated/version_config.cpp")
-add_core_library(${PROJECT_NAME}
+add_core_library(version
     SOURCE
     "include/version/version.hpp"
     "src/version.cpp"
     "src/version_config.hpp"
     "${PROJECT_BINARY_DIR}/generated/version_config.cpp"
 )
-target_include_directories(${PROJECT_NAME}
+target_include_directories(version
     PRIVATE
     src
 )

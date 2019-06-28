@@ -20,25 +20,22 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(logging)
-
-add_core_library(${PROJECT_NAME}
+add_core_library(logging
     SOURCE
     "include/logging/logging.hpp"
     "src/logging.cpp"
 )
-target_include_directories(${PROJECT_NAME}
+target_include_directories(logging
     PUBLIC
     "src"
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(logging
     PUBLIC
     Boost::log
     Boost::program_options
 )
 
-add_core_library_test(${PROJECT_NAME}
+add_core_library_test(logging
     SOURCE
     "test/main.cpp"
     "test/logging_unit_tests.cpp"

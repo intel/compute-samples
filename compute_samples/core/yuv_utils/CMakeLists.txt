@@ -20,15 +20,12 @@
 # SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.8)
-project(yuv_utils)
-
-add_core_library(${PROJECT_NAME}
+add_core_library(yuv_utils
     SOURCE
     "include/yuv_utils/yuv_utils.hpp"
     "src/yuv_utils.cpp"
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(yuv_utils
     PUBLIC
     compute_samples::image
 )
