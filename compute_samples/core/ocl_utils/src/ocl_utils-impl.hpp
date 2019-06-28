@@ -73,7 +73,8 @@ template <typename T> std::string cl_vector_to_string(const T &x) {
     if (i != 0) {
       ss << ", ";
     }
-    ss << x.s[i];
+    // + converts cl_char and cl_uchar to integers instead of ASCII characters
+    ss << +x.s[i];
   }
   ss << "]";
   return ss.str();
