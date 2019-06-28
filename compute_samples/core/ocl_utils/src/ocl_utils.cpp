@@ -115,6 +115,10 @@ template <> std::string to_cl_c_string<cl_float>() { return "float"; }
 template <> std::string to_cl_c_string<cl_float2>() { return "float2"; }
 template <> std::string to_cl_c_string<cl_float4>() { return "float4"; }
 template <> std::string to_cl_c_string<cl_float8>() { return "float8"; }
+template <> std::string to_cl_c_string<cl_double>() { return "double"; }
+template <> std::string to_cl_c_string<cl_double2>() { return "double2"; }
+template <> std::string to_cl_c_string<cl_double4>() { return "double4"; }
+template <> std::string to_cl_c_string<cl_double8>() { return "double8"; }
 
 } // namespace compute_samples
 
