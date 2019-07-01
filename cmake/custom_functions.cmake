@@ -132,6 +132,18 @@ function(add_core_library name)
 
     install(DIRECTORY include/${name} DESTINATION include)
 
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(cmake/${name}-config.cmake.in
+        ${PROJECT_BINARY_DIR}/${name}-config.cmake
+        INSTALL_DESTINATION lib/cmake/${PROJECT_NAME})
+    install(FILES ${PROJECT_BINARY_DIR}/${name}-config.cmake
+        DESTINATION lib/cmake/${PROJECT_NAME})
+    install(EXPORT ${name}-targets
+        FILE ${name}-targets.cmake
+        NAMESPACE compute_samples::
+        DESTINATION lib/cmake/${PROJECT_NAME}
+        COMPONENT ${name})
+
     set_target_properties(${name} PROPERTIES FOLDER core/${name})
 endfunction()
 
