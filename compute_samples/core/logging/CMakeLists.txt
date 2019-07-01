@@ -25,10 +25,6 @@ add_core_library(logging
     "include/logging/logging.hpp"
     "src/logging.cpp"
 )
-target_include_directories(logging
-    PUBLIC
-    "src"
-)
 target_link_libraries(logging
     PUBLIC
     Boost::log

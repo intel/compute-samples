@@ -35,11 +35,63 @@ compute::program build_program(const compute::context &context,
 compute::program build_program_il(const compute::context &context,
                                   const std::string &file,
                                   const std::string &options = "");
-template <typename T> struct cl_scalar_type {};
-template <typename T> bool compare_cl_vectors(const T &lhs, const T &rhs);
-template <typename T> std::string cl_vector_to_string(const T &x);
+
 template <typename T> std::string to_cl_c_string();
 
+template <typename T> struct cl_scalar_type {};
+template <> struct cl_scalar_type<cl_int8> { using type = cl_int; };
+template <> struct cl_scalar_type<cl_uint8> { using type = cl_uint; };
+template <> struct cl_scalar_type<cl_int4> { using type = cl_int; };
+template <> struct cl_scalar_type<cl_uint4> { using type = cl_uint; };
+template <> struct cl_scalar_type<cl_int2> { using type = cl_int; };
+template <> struct cl_scalar_type<cl_uint2> { using type = cl_uint; };
+template <> struct cl_scalar_type<cl_int> { using type = cl_int; };
+template <> struct cl_scalar_type<cl_uint> { using type = cl_uint; };
+template <> struct cl_scalar_type<cl_short8> { using type = cl_short; };
+template <> struct cl_scalar_type<cl_ushort8> { using type = cl_ushort; };
+template <> struct cl_scalar_type<cl_short4> { using type = cl_short; };
+template <> struct cl_scalar_type<cl_ushort4> { using type = cl_ushort; };
+template <> struct cl_scalar_type<cl_short2> { using type = cl_short; };
+template <> struct cl_scalar_type<cl_ushort2> { using type = cl_ushort; };
+template <> struct cl_scalar_type<cl_short> { using type = cl_short; };
+template <> struct cl_scalar_type<cl_ushort> { using type = cl_ushort; };
+template <> struct cl_scalar_type<cl_char8> { using type = cl_char; };
+template <> struct cl_scalar_type<cl_uchar8> { using type = cl_uchar; };
+template <> struct cl_scalar_type<cl_char4> { using type = cl_char; };
+template <> struct cl_scalar_type<cl_uchar4> { using type = cl_uchar; };
+template <> struct cl_scalar_type<cl_char2> { using type = cl_char; };
+template <> struct cl_scalar_type<cl_uchar2> { using type = cl_uchar; };
+template <> struct cl_scalar_type<cl_char> { using type = cl_char; };
+template <> struct cl_scalar_type<cl_uchar> { using type = cl_uchar; };
+template <> struct cl_scalar_type<cl_float8> { using type = cl_float; };
+template <> struct cl_scalar_type<cl_float4> { using type = cl_float; };
+template <> struct cl_scalar_type<cl_float2> { using type = cl_float; };
+template <> struct cl_scalar_type<cl_float> { using type = cl_float; };
+
+template <typename T> bool compare_cl_vectors(const T &lhs, const T &rhs) {
+  const int size = sizeof(T) / sizeof(typename cl_scalar_type<T>::type);
+  for (auto i = 0; i < size; ++i) {
+    if (lhs.s[i] != rhs.s[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename T> std::string cl_vector_to_string(const T &x) {
+  const int size = sizeof(T) / sizeof(typename cl_scalar_type<T>::type);
+  std::stringstream ss;
+  ss << "[";
+  for (auto i = 0; i < size; ++i) {
+    if (i != 0) {
+      ss << ", ";
+    }
+    // + converts cl_char and cl_uchar to integers instead of ASCII characters
+    ss << +x.s[i];
+  }
+  ss << "]";
+  return ss.str();
+}
 } // namespace compute_samples
 
 // Global namespace
@@ -68,8 +120,5 @@ std::ostream &operator<<(std::ostream &os, const cl_char8 &x);
 std::ostream &operator<<(std::ostream &os, const cl_uchar2 &x);
 std::ostream &operator<<(std::ostream &os, const cl_uchar4 &x);
 std::ostream &operator<<(std::ostream &os, const cl_uchar8 &x);
-
-// Include template implementation
-#include "ocl_utils-impl.hpp"
 
 #endif

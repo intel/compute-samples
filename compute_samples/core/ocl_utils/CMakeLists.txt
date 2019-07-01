@@ -23,12 +23,7 @@
 add_core_library(ocl_utils
     SOURCE
     "include/ocl_utils/ocl_utils.hpp"
-    "src/ocl_utils-impl.hpp"
     "src/ocl_utils.cpp"
-)
-target_include_directories(ocl_utils
-    PUBLIC
-    "src"
 )
 target_link_libraries(ocl_utils
     PUBLIC
