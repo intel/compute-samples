@@ -122,6 +122,16 @@ function(add_core_library name)
         $<INSTALL_INTERFACE:include>
     )
 
+    install(TARGETS ${name}
+        EXPORT ${name}-targets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
+    )
+
+    install(DIRECTORY include/${name} DESTINATION include)
+
     set_target_properties(${name} PROPERTIES FOLDER core/${name})
 endfunction()
 
