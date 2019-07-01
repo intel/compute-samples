@@ -28,7 +28,8 @@ function(add_application_library project_name)
 
     target_include_directories(${name}
         PUBLIC
-        include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
     )
 
     target_link_libraries(${name}
@@ -117,7 +118,8 @@ function(add_core_library name)
 
     target_include_directories(${name}
         PUBLIC
-        include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
     )
 
     set_target_properties(${name} PROPERTIES FOLDER core/${name})
@@ -148,7 +150,8 @@ function(add_test_suite name)
 
     target_include_directories(${name}
         PUBLIC
-        include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
     )
 
     target_link_libraries(${name}

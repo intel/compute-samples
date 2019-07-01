@@ -24,5 +24,6 @@ add_library(boost_intel INTERFACE)
 add_library(compute_samples::boost_intel ALIAS boost_intel)
 target_include_directories(boost_intel
     INTERFACE
-    include
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
