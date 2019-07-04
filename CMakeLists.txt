@@ -37,22 +37,7 @@ include(import_mediadata)
 include(import_opencl)
 
 enable_testing()
-add_subdirectory(compute_samples)
-
-if(WIN32)
-    set(CPACK_GENERATOR "ZIP")
-else()
-    set(CPACK_GENERATOR "TGZ")
-endif()
-
-set(CPACK_PACKAGE_NAME "compute-samples")
-set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}+${BUILD_NUMBER}.${GIT_COMMIT}")
-
-if(WIN32)
-    set(CPACK_SOURCE_GENERATOR "ZIP")
-else()
-    set(CPACK_SOURCE_GENERATOR "TGZ")
-endif()
+add_subdirectory(${PROJECT_NAME})
 
 list(APPEND IGNORE_SAMPLE_SOURCE "/\.git/")
 list(APPEND IGNORE_SAMPLE_SOURCE ".travis.yml")
@@ -62,7 +47,4 @@ list(APPEND IGNORE_SAMPLE_SOURCE ".gitignore")
 list(APPEND IGNORE_SAMPLE_SOURCE "/docker/")
 list(APPEND IGNORE_SAMPLE_SOURCE "/build/")
 
-set(CPACK_SOURCE_PACKAGE_NAME "compute-samples")
-set(CPACK_SOURCE_IGNORE_FILES ${IGNORE_SAMPLE_SOURCE})
-set(CPACK_SOURCE_PACKAGE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}+${BUILD_NUMBER}.${GIT_COMMIT}")
-include(CPack)
+generate_packages(${PROJECT_NAME} ${IGNORE_SAMPLE_SOURCE})

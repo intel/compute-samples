@@ -188,3 +188,23 @@ function(add_test_suite name)
 
     add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 endfunction()
+
+function(generate_packages name)
+    cmake_parse_arguments(F "" "" "IGNORE_FILES" ${ARGN})
+
+    if(WIN32)
+        set(CPACK_GENERATOR "ZIP")
+        set(CPACK_SOURCE_GENERATOR "ZIP")
+    else()
+        set(CPACK_GENERATOR "TGZ")
+        set(CPACK_SOURCE_GENERATOR "TGZ")
+    endif()
+
+    set(FULL_VERSION "${PROJECT_VERSION}+${BUILD_NUMBER}.${GIT_COMMIT}")
+    set(CPACK_PACKAGE_VERSION ${FULL_VERSION})
+    set(CPACK_SOURCE_PACKAGE_VERSION ${FULL_VERSION})
+
+    set(CPACK_SOURCE_IGNORE_FILES ${F_IGNORE_FILES})
+
+    include(CPack)
+endfunction()
