@@ -23,9 +23,6 @@ List of all available samples and their description can be found in the [Samples
   * [Microsoft Visual Studio 2015](https://www.visualstudio.com/) or newer
   * [Clang 3.8](https://clang.llvm.org/) or newer
 * [CMake 3.8](https://cmake.org/) or newer
-* VAAPI Interoperability on Linux
-  * [libva, libva-drm, libva-x11 (VAAPI runtime libraries for Linux)](https://01.org/linuxgraphics/community/vaapi)
-  * [libX11 (X Windows client library)](https://www.x.org)
 
 ### Clone repository
 

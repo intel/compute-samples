@@ -3,6 +3,9 @@ The following packages are required to build the project:
 * [Boost 1.64](http://www.boost.org/)
 * [libpng 1.6.37](http://www.libpng.org/pub/png/libpng.html)
 * [Google Test 1.8.1](https://github.com/google/googletest)
+* VAAPI Interoperability on Linux
+  * [libva, libva-drm, libva-x11 (VAAPI runtime libraries for Linux)](https://01.org/linuxgraphics/community/vaapi)
+  * [libX11 (X Windows client library)](https://www.x.org)
 
 There are utility scripts available that help with installation of all dependencies on Windows and Linux. Examples below:
 
