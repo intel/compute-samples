@@ -28,7 +28,7 @@ echo "Extracting googletest"
 . "C:\Program Files\7-Zip\7z.exe" x googletest-release-1.8.1.zip
 
 echo "Installing googletest"
-$rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
+$rootPath = (Resolve-Path ".").ToString()
 $installPath = $rootPath + "/third_party"
 mkdir $installPath -Force
 $googletestPath = $installPath + "/googletest"

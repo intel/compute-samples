@@ -28,7 +28,7 @@ echo "Extracting libpng"
 . "C:\Program Files\7-Zip\7z.exe" x lpng1637.zip
 
 echo "Installing libpng"
-$rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
+$rootPath = (Resolve-Path ".").ToString()
 $installPath = $rootPath + "/third_party"
 mkdir $installPath -Force
 $libpngPath = $installPath + "/libpng"

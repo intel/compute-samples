@@ -29,8 +29,8 @@ echo "Extracting googletest"
 unzip -q googletest-release-1.8.1.zip
 
 echo "Installing googletest"
-SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-INSTALL_PATH="$SCRIPT_PATH/../../third_party"
+ROOT_PATH=`pwd`
+INSTALL_PATH="$ROOT_PATH/third_party"
 GOOGLETEST_PATH="$INSTALL_PATH/googletest"
 
 mkdir -p $GOOGLETEST_PATH

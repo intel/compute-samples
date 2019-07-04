@@ -27,7 +27,7 @@ echo "Extracting zlib"
 . "C:\Program Files\7-Zip\7z.exe" x zlib1211.zip
 
 echo "Installing zlib"
-$rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
+$rootPath = (Resolve-Path ".").ToString()
 $installPath = $rootPath + "/third_party"
 mkdir $installPath -Force
 $zlibPath = $installPath + "/zlib"

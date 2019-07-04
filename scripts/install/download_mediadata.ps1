@@ -28,7 +28,7 @@ echo "Extracting mediadata"
 . "C:\Program Files\7-Zip\7z.exe" x yuv_samples.tar
 
 echo "Installing mediadata"
-$rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
+$rootPath = (Resolve-Path ".").ToString()
 $installPath = $rootPath + "/mediadata"
 $externalPath = $installPath + "/external"
 $yuvPath = $externalPath + "/yuv"

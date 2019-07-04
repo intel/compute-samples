@@ -29,7 +29,7 @@ echo "Extracting OpenCL Headers"
 . "C:\Program Files\7-Zip\7z.exe" x "OpenCL-Headers-$openclHeadersHash.zip"
 
 echo "Installing OpenCL Headers"
-$rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
+$rootPath = (Resolve-Path ".").ToString()
 $installPath = $rootPath + "/third_party"
 mkdir $installPath -Force
 $openclPath = $installPath + "/opencl"

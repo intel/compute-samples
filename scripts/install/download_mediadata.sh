@@ -29,8 +29,8 @@ echo "Extracting mediadata"
 tar xf yuv_samples.tgz
 
 echo "Installing mediadata"
-CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-INSTALL_PATH="$CURRENT_PATH/../../mediadata"
+ROOT_PATH=`pwd`
+INSTALL_PATH="$ROOT_PATH/mediadata"
 YUV_PATH="$INSTALL_PATH/external/yuv"
 
 mkdir -p $YUV_PATH

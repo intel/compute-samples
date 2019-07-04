@@ -30,8 +30,8 @@ echo "Extracting OpenCL Headers"
 unzip -q "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
 
 echo "Installing OpenCL Headers"
-SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-INSTALL_PATH="$SCRIPT_PATH/../../third_party"
+ROOT_PATH=`pwd`
+INSTALL_PATH="$ROOT_PATH/third_party"
 OPENCL_PATH="$INSTALL_PATH/opencl"
 OPENCL_INCLUDE_PATH="$OPENCL_PATH/include"
 OPENCL_LIB_PATH="$OPENCL_PATH/lib"

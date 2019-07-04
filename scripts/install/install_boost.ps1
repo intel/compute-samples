@@ -28,7 +28,7 @@ echo "Extracting boost"
 . "C:\Program Files\7-Zip\7z.exe" x boost_1_64_0.zip
 
 echo "Installing Boost"
-$rootPath = (Resolve-Path "$PSScriptRoot/../..").ToString()
+$rootPath = (Resolve-Path ".").ToString()
 $installPath = $rootPath + "/third_party"
 mkdir $installPath -Force
 $boostPath = $installPath + "/boost"

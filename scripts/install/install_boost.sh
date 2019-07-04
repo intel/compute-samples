@@ -29,8 +29,8 @@ echo "Extracting Boost"
 tar xf boost_1_64_0.tar.gz
 
 echo "Installing Boost"
-SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-INSTALL_PATH="$SCRIPT_PATH/../../third_party"
+ROOT_PATH=`pwd`
+INSTALL_PATH="$ROOT_PATH/third_party"
 BOOST_PATH="$INSTALL_PATH/boost"
 JOBS="${JOBS:-4}"
 
