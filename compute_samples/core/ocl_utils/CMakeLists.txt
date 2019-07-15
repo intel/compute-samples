@@ -29,6 +29,7 @@ target_link_libraries(ocl_utils
     PUBLIC
     compute_samples::logging
     compute_samples::utils
+    compute_samples::ocl_entrypoints
     OpenCL::OpenCL
 )
 

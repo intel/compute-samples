@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2018 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +20,12 @@
 # SOFTWARE.
 #
 
-add_subdirectory(align_utils)
-add_subdirectory(application)
-add_subdirectory(boost_intel)
-add_subdirectory(image)
-add_subdirectory(timer)
-add_subdirectory(version)
-add_subdirectory(yuv_utils)
-add_subdirectory(ocl_utils)
-add_subdirectory(ocl_entrypoints)
-add_subdirectory(logging)
-add_subdirectory(random)
-add_subdirectory(utils)
+add_core_library(ocl_entrypoints
+    SOURCE
+    "include/ocl_entrypoints/loader.hpp"
+    "src/loader.cpp"
+)
+target_link_libraries(ocl_entrypoints
+    PUBLIC
+    OpenCL::OpenCL
+)
