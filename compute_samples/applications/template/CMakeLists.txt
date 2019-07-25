@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2018 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,30 @@
 # SOFTWARE.
 #
 
-add_subdirectory(align_utils)
-add_subdirectory(application)
-add_subdirectory(boost_intel)
-add_subdirectory(image)
-add_subdirectory(timer)
-add_subdirectory(version)
-add_subdirectory(yuv_utils)
-add_subdirectory(ocl_utils)
-add_subdirectory(ocl_entrypoints)
-add_subdirectory(logging)
-add_subdirectory(random)
-add_subdirectory(utils)
-add_subdirectory(core_template)
+add_application_library(template
+    SOURCE
+    "include/template/template.hpp"
+    "src/template.cpp"
+)
+target_link_libraries(template_lib
+    PUBLIC
+    compute_samples::logging
+    Boost::program_options
+    compute_samples::ocl_utils
+)
+add_kernels(template_lib "template.cl")
+
+add_application(template
+    SOURCE
+    "src/main.cpp"
+)
+install_kernels(template "template.cl")
+
+add_application_test(template
+    SOURCE
+    "test/main.cpp"
+    "test/template_unit_tests.cpp"
+    "test/template_integration_tests.cpp"
+    "test/template_system_tests.cpp"
+)
+install_kernels(template_tests "template.cl")
