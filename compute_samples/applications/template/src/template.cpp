@@ -94,8 +94,4 @@ TemplateApplication::Arguments TemplateApplication::parse_command_line(
   return args;
 }
 
-std::string ascii_to_string(const std::vector<cl_char> &output) {
-  return std::string(output.begin(), output.end());
-}
-
 } // namespace compute_samples

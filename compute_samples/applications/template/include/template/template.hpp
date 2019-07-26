@@ -40,7 +40,6 @@ private:
   Arguments
   parse_command_line(const std::vector<std::string> &command_line) const;
 };
-std::string ascii_to_string(const std::vector<cl_char> &output);
 } // namespace compute_samples
 
 #endif

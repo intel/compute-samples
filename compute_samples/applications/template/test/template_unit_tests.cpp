@@ -23,14 +23,4 @@
 #include "gtest/gtest.h"
 #include "template/template.hpp"
 
-TEST(TemplateUnitTests,
-     AsciiToStringReturnsEmptyStringGivenNoAsciiCodesArePassed) {
-  const std::vector<cl_char> input = {};
-  EXPECT_EQ("", compute_samples::ascii_to_string(input));
-}
-
-TEST(TemplateUnitTests,
-     AsciiToStringReturnsProperStringGivenValidAsciiCodesArePassed) {
-  const std::vector<cl_char> input = {65, 98, 67, 100};
-  EXPECT_EQ("AbCd", compute_samples::ascii_to_string(input));
-}
+TEST(TemplateUnitTests, Dummy) {}
