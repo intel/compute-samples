@@ -21,6 +21,7 @@
  */
 
 #include "ocl_utils/ocl_utils.hpp"
+#include "ocl_utils/unified_shared_memory.hpp"
 #include "gtest/gtest.h"
 #include "utils/utils.hpp"
 
@@ -97,4 +98,22 @@ TEST(CLVectorToString, cl_int4) {
 TEST(CLVectorToString, cl_int2) {
   const cl_int2 x = {0, 1};
   EXPECT_EQ("[0, 1]", compute_samples::cl_vector_to_string(x));
+}
+
+TEST(ToStringTest, UsmTypeHost) {
+  const compute::usm_type t = compute::usm_type::host;
+  const std::string expected = "host";
+  EXPECT_EQ(expected, cs::to_string(t));
+}
+
+TEST(ToStringTest, UsmTypeDevice) {
+  const compute::usm_type t = compute::usm_type::device;
+  const std::string expected = "device";
+  EXPECT_EQ(expected, cs::to_string(t));
+}
+
+TEST(ToStringTest, UsmTypeShared) {
+  const compute::usm_type t = compute::usm_type::shared;
+  const std::string expected = "shared";
+  EXPECT_EQ(expected, cs::to_string(t));
 }

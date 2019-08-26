@@ -143,3 +143,64 @@ To show help message run `commands_aggregation -h`.
     commands_aggregation --in-order
 
 _______
+
+## V. Unified Shared Memory Samples
+____________
+
+## 1. Queries
+
+### Overview
+
+Basic sample showing how to query device for supported USM capabilities. For more information, see the [sample README](../compute_samples/applications/usm_queries/README.md).
+
+### Help
+To show help message run `usm_queries -h`.
+
+### Example
+    usm_queries
+
+## 2. Hello World
+
+### Overview
+
+Sample demonstrating essential operations on USM allocations. For more information, see the [sample README](../compute_samples/applications/usm_hello_world/README.md).
+
+### Help
+To show help message run `usm_hello_world -h`.
+
+### Example
+    usm_hello_world host
+    usm_hello_world device
+    usm_hello_world shared
+    usm_hello_world host --size 1024
+
+## 3. Linked List
+
+### Overview
+
+Sample implementing a linked list using USM. For more information, see the [sample README](../compute_samples/applications/usm_linked_list/README.md).
+
+### Help
+To show help message run `usm_linked_list -h`.
+
+### Example
+    usm_linked_list host
+    usm_linked_list device
+    usm_linked_list shared
+    usm_linked_list host --size 1024
+
+## 4. Mem Info
+
+### Overview
+
+Sample about querying USM allocations. For more information, see the [sample README](../compute_samples/applications/usm_mem_info/README.md).
+
+### Help
+To show help message run `usm_mem_info -h`.
+
+### Example
+    usm_mem_info host
+    usm_mem_info device
+    usm_mem_info shared
+
+_______

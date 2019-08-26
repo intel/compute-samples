@@ -20,16 +20,27 @@
 # SOFTWARE.
 #
 
-add_core_library(ocl_entrypoints
+add_application_library(usm_queries
     SOURCE
-    "include/ocl_entrypoints/loader.hpp"
-    "include/ocl_entrypoints/cl_intel_unified_shared_memory.h"
-    "include/ocl_entrypoints/cl_intel_aubs.h"
-    "src/loader.cpp"
-    "src/cl_intel_unified_shared_memory.cpp"
-    "src/cl_intel_aubs.cpp"
+    "include/usm_queries/usm_queries.hpp"
+    "src/usm_queries.cpp"
 )
-target_link_libraries(ocl_entrypoints
+target_link_libraries(usm_queries_lib
     PUBLIC
-    OpenCL::OpenCL
+    compute_samples::logging
+    Boost::program_options
+    compute_samples::ocl_utils
+    compute_samples::boost_intel
+)
+
+add_application(usm_queries
+    SOURCE
+    "src/main.cpp"
+)
+
+add_application_test(usm_queries
+    SOURCE
+    "test/main.cpp"
+    "test/usm_queries_unit_tests.cpp"
+    "test/usm_queries_system_tests.cpp"
 )

@@ -20,16 +20,26 @@
 # SOFTWARE.
 #
 
-add_core_library(ocl_entrypoints
+add_application_library(usm_mem_info
     SOURCE
-    "include/ocl_entrypoints/loader.hpp"
-    "include/ocl_entrypoints/cl_intel_unified_shared_memory.h"
-    "include/ocl_entrypoints/cl_intel_aubs.h"
-    "src/loader.cpp"
-    "src/cl_intel_unified_shared_memory.cpp"
-    "src/cl_intel_aubs.cpp"
+    "include/usm_mem_info/usm_mem_info.hpp"
+    "src/usm_mem_info.cpp"
 )
-target_link_libraries(ocl_entrypoints
+target_link_libraries(usm_mem_info_lib
     PUBLIC
-    OpenCL::OpenCL
+    compute_samples::logging
+    Boost::program_options
+    compute_samples::ocl_utils
+    compute_samples::boost_intel
+)
+
+add_application(usm_mem_info
+    SOURCE
+    "src/main.cpp"
+)
+
+add_application_test(usm_mem_info
+    SOURCE
+    "test/main.cpp"
+    "test/usm_mem_info_system_tests.cpp"
 )

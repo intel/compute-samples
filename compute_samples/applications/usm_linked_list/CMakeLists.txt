@@ -20,16 +20,31 @@
 # SOFTWARE.
 #
 
-add_core_library(ocl_entrypoints
+add_application_library(usm_linked_list
     SOURCE
-    "include/ocl_entrypoints/loader.hpp"
-    "include/ocl_entrypoints/cl_intel_unified_shared_memory.h"
-    "include/ocl_entrypoints/cl_intel_aubs.h"
-    "src/loader.cpp"
-    "src/cl_intel_unified_shared_memory.cpp"
-    "src/cl_intel_aubs.cpp"
+    "include/usm_linked_list/usm_linked_list.hpp"
+    "src/usm_linked_list.cpp"
 )
-target_link_libraries(ocl_entrypoints
+target_link_libraries(usm_linked_list_lib
     PUBLIC
-    OpenCL::OpenCL
+    compute_samples::timer
+    compute_samples::logging
+    Boost::program_options
+    compute_samples::ocl_utils
+    compute_samples::boost_intel
 )
+add_kernels(usm_linked_list_lib "usm_linked_list.cl")
+
+add_application(usm_linked_list
+    SOURCE
+    "src/main.cpp"
+)
+install_kernels(usm_linked_list "usm_linked_list.cl")
+
+add_application_test(usm_linked_list
+    SOURCE
+    "test/main.cpp"
+    "test/usm_linked_list_integration_tests.cpp"
+    "test/usm_linked_list_system_tests.cpp"
+)
+install_kernels(usm_linked_list_tests "usm_linked_list.cl")
