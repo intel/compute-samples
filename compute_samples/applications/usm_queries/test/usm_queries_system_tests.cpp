@@ -22,8 +22,9 @@
 
 #include "gtest/gtest.h"
 #include "usm_queries/usm_queries.hpp"
+#include "test_harness/test_harness.hpp"
 
-TEST(UsmQueriesSystemTests, ApplicationReturnsOKStatus) {
+HWTEST(UsmQueriesSystemTests, ApplicationReturnsOKStatus) {
   compute_samples::UsmQueriesApplication application;
   std::vector<std::string> command_line = {};
   EXPECT_EQ(compute_samples::Application::Status::OK,

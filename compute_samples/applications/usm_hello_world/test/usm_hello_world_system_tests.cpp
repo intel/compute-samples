@@ -22,6 +22,7 @@
 
 #include "gtest/gtest.h"
 #include "usm_hello_world/usm_hello_world.hpp"
+#include "test_harness/test_harness.hpp"
 
 TEST(UsmHelloWorldSystemTests,
      ApplicationReturnsSkipStatusGivenHelpMessageIsRequested) {
@@ -31,29 +32,29 @@ TEST(UsmHelloWorldSystemTests,
             application.run(command_line));
 }
 
-TEST(UsmHelloWorldSystemTests, GivenHostUsmThenApplicationReturnsOKStatus) {
+HWTEST(UsmHelloWorldSystemTests, GivenHostUsmThenApplicationReturnsOKStatus) {
   compute_samples::UsmHelloWorldApplication application;
   std::vector<std::string> command_line = {"host"};
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(command_line));
 }
 
-TEST(UsmHelloWorldSystemTests, GivenDeviceUsmThenApplicationReturnsOKStatus) {
+HWTEST(UsmHelloWorldSystemTests, GivenDeviceUsmThenApplicationReturnsOKStatus) {
   compute_samples::UsmHelloWorldApplication application;
   std::vector<std::string> command_line = {"device"};
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(command_line));
 }
 
-TEST(UsmHelloWorldSystemTests, GivenSharedUsmThenApplicationReturnsOKStatus) {
+HWTEST(UsmHelloWorldSystemTests, GivenSharedUsmThenApplicationReturnsOKStatus) {
   compute_samples::UsmHelloWorldApplication application;
   std::vector<std::string> command_line = {"shared"};
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(command_line));
 }
 
-TEST(UsmHelloWorldSystemTests,
-     GivenCustomAllocationSizeThenApplicationReturnsOKStatus) {
+HWTEST(UsmHelloWorldSystemTests,
+       GivenCustomAllocationSizeThenApplicationReturnsOKStatus) {
   compute_samples::UsmHelloWorldApplication application;
   std::vector<std::string> command_line = {"host", "--size", "1024"};
   EXPECT_EQ(compute_samples::Application::Status::OK,

@@ -23,8 +23,9 @@
 #include "vme_interop/vme_interop.hpp"
 #include "vme_interop/vme_interop_linux.hpp"
 #include "vme_interop_system_tests_common.hpp"
+#include "test_harness/test_harness.hpp"
 
-TEST_F(VmeInteropSystemTests, ReturnsReferenceImage) {
+HWTEST_F(VmeInteropSystemTests, ReturnsReferenceImage) {
   std::vector<std::string> command_line = {input_file_, output_file_, "--width",
                                            "176",       "--height",   "144",
                                            "-f",        "50"};

@@ -1,5 +1,5 @@
 #
-# Copyright(c) 2018 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +20,18 @@
 # SOFTWARE.
 #
 
-add_subdirectory(align_utils)
-add_subdirectory(application)
-add_subdirectory(boost_intel)
-add_subdirectory(image)
-add_subdirectory(timer)
-add_subdirectory(version)
-add_subdirectory(yuv_utils)
-add_subdirectory(ocl_utils)
-add_subdirectory(ocl_entrypoints)
-add_subdirectory(logging)
-add_subdirectory(random)
-add_subdirectory(utils)
-add_subdirectory(core_template)
-add_subdirectory(test_harness)
+add_core_library(test_harness
+    SOURCE
+    "include/test_harness/test_harness.hpp"
+    "src/test_harness.cpp"
+)
+target_link_libraries(test_harness
+    PUBLIC
+    compute_samples::logging
+)
+
+add_core_library_test(test_harness
+    SOURCE
+    "test/main.cpp"
+    "test/test_harness_unit_tests.cpp"
+)

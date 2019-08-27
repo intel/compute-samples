@@ -26,6 +26,7 @@
 
 #include "image/image.hpp"
 #include "subgroups_imagecopy/subgroups_imagecopy.hpp"
+#include "test_harness/test_harness.hpp"
 
 class SubgroupsImageCopySystemTests : public testing::Test {
 protected:
@@ -35,7 +36,7 @@ protected:
   const std::string output_file_ = "output.bmp";
 };
 
-TEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
+HWTEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
   compute_samples::SubgroupsImageCopyApplication application;
   std::vector<std::string> command_line = {"-k",
                                            "subgroups_imagecopy_kernel.cl"};
@@ -51,7 +52,7 @@ TEST_F(SubgroupsImageCopySystemTests, BasicCopy) {
   EXPECT_EQ(output_image, reference_image);
 }
 
-TEST_F(SubgroupsImageCopySystemTests, OptimizedCopy) {
+HWTEST_F(SubgroupsImageCopySystemTests, OptimizedCopy) {
   compute_samples::SubgroupsImageCopyApplication application;
   std::vector<std::string> command_line = {"-k",
                                            "subgroups_imagecopy_solution.cl"};

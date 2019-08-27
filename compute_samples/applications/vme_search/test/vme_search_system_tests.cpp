@@ -28,6 +28,7 @@
 #include <iterator>
 
 #include "vme_search/vme_search.hpp"
+#include "test_harness/test_harness.hpp"
 
 class VmeSearchSystemTests : public testing::Test {
 protected:
@@ -64,10 +65,10 @@ protected:
   const std::string output_file_ = "output_foreman_176x144.yuv";
 };
 
-TEST_F(VmeSearchSystemTests, BasicSearch) { Verify("basic_search"); }
+HWTEST_F(VmeSearchSystemTests, BasicSearch) { Verify("basic_search"); }
 
-TEST_F(VmeSearchSystemTests, CostHeuristicsSearch) {
+HWTEST_F(VmeSearchSystemTests, CostHeuristicsSearch) {
   Verify("cost_heuristics_search");
 }
 
-TEST_F(VmeSearchSystemTests, LargerSearch) { Verify("larger_search"); }
+HWTEST_F(VmeSearchSystemTests, LargerSearch) { Verify("larger_search"); }

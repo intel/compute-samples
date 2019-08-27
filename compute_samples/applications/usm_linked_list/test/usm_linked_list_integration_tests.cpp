@@ -23,23 +23,24 @@
 #include "gtest/gtest.h"
 #include "usm_linked_list/usm_linked_list.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "test_harness/test_harness.hpp"
 namespace cs = compute_samples;
 
 class UsmLinkedListIntegrationTests
     : public ::testing::TestWithParam<compute::usm_type> {};
 
-TEST(UsmLinkedListIntegrationTests, ProgramCanBeBuilt) {
+HWTEST(UsmLinkedListIntegrationTests, ProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
   EXPECT_NE(compute::program(),
             compute_samples::build_program(context, "usm_linked_list.cl"));
 }
 
-TEST_P(UsmLinkedListIntegrationTests, PrepareKernel) {
+HWTEST_P(UsmLinkedListIntegrationTests, PrepareKernel) {
   EXPECT_NO_THROW(cs::prepare_kernel(GetParam()));
 }
 
-TEST_P(UsmLinkedListIntegrationTests, AllocateMemory) {
+HWTEST_P(UsmLinkedListIntegrationTests, AllocateMemory) {
   cs::Node *p = cs::allocate_memory<cs::Node>(GetParam());
   EXPECT_NE(nullptr, p);
 
@@ -47,7 +48,7 @@ TEST_P(UsmLinkedListIntegrationTests, AllocateMemory) {
   compute::mem_free(context, p);
 }
 
-TEST_P(UsmLinkedListIntegrationTests, AllocateLinkedList) {
+HWTEST_P(UsmLinkedListIntegrationTests, AllocateLinkedList) {
   const int size = 10;
   cs::Node *head = cs::allocate_linked_list(size, GetParam());
 
@@ -62,13 +63,13 @@ TEST_P(UsmLinkedListIntegrationTests, AllocateLinkedList) {
   cs::free_linked_list(head);
 }
 
-TEST_P(UsmLinkedListIntegrationTests, FreeLinkedList) {
+HWTEST_P(UsmLinkedListIntegrationTests, FreeLinkedList) {
   const int size = 10;
   cs::Node *head = cs::allocate_linked_list(size, GetParam());
   EXPECT_NO_THROW(cs::free_linked_list(head));
 }
 
-TEST_P(UsmLinkedListIntegrationTests, WalkLinkedList) {
+HWTEST_P(UsmLinkedListIntegrationTests, WalkLinkedList) {
   const int size = 10;
   cs::Node *head = cs::allocate_linked_list(size, GetParam());
   compute::kernel_intel kernel = cs::prepare_kernel(GetParam());

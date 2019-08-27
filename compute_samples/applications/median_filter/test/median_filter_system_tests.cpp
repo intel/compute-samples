@@ -26,6 +26,7 @@
 
 #include "image/image.hpp"
 #include "median_filter/median_filter.hpp"
+#include "test_harness/test_harness.hpp"
 
 class MedianFilterSystemTests : public testing::Test {
 protected:
@@ -36,7 +37,7 @@ protected:
   const std::string reference_file_ = "test_reference.png";
 };
 
-TEST_F(MedianFilterSystemTests, ReturnsReferenceImage) {
+HWTEST_F(MedianFilterSystemTests, ReturnsReferenceImage) {
   compute_samples::MedianFilterApplication application;
   std::vector<std::string> command_line = {input_file_, output_file_};
 

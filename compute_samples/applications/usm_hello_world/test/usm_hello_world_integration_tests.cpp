@@ -23,16 +23,17 @@
 #include "gtest/gtest.h"
 #include "usm_hello_world/usm_hello_world.hpp"
 #include "ocl_utils/ocl_utils.hpp"
+#include "test_harness/test_harness.hpp"
 namespace cs = compute_samples;
 
-TEST(UsmHelloWorldIntegrationTests, ProgramCanBeBuilt) {
+HWTEST(UsmHelloWorldIntegrationTests, ProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();
   const compute::context context(device);
   EXPECT_NE(compute::program(),
             compute_samples::build_program(context, "usm_hello_world.cl"));
 }
 
-TEST(UsmHelloWorldIntegrationTests, CopyBufferWithHostUsm) {
+HWTEST(UsmHelloWorldIntegrationTests, CopyBufferWithHostUsm) {
   std::vector<cl_uint> input(1024);
   std::iota(input.begin(), input.end(), 0u);
   const std::vector<cl_uint> output =
@@ -40,7 +41,7 @@ TEST(UsmHelloWorldIntegrationTests, CopyBufferWithHostUsm) {
   EXPECT_EQ(input, output);
 }
 
-TEST(UsmHelloWorldIntegrationTests, CopyBufferWithDeviceUsm) {
+HWTEST(UsmHelloWorldIntegrationTests, CopyBufferWithDeviceUsm) {
   std::vector<cl_uint> input(1024);
   std::iota(input.begin(), input.end(), 0u);
   const std::vector<cl_uint> output =
@@ -48,7 +49,7 @@ TEST(UsmHelloWorldIntegrationTests, CopyBufferWithDeviceUsm) {
   EXPECT_EQ(input, output);
 }
 
-TEST(UsmHelloWorldIntegrationTests, CopyBufferWithSharedUsm) {
+HWTEST(UsmHelloWorldIntegrationTests, CopyBufferWithSharedUsm) {
   std::vector<cl_uint> input(1024);
   std::iota(input.begin(), input.end(), 0u);
   const std::vector<cl_uint> output =

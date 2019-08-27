@@ -28,6 +28,7 @@
 #include <iterator>
 
 #include "vme_hme/vme_hme.hpp"
+#include "test_harness/test_harness.hpp"
 
 class VmeHmeSystemTests : public testing::Test {
 protected:
@@ -37,7 +38,7 @@ protected:
   const std::string output_file_ = "output_foreman_176x144.yuv";
 };
 
-TEST_F(VmeHmeSystemTests, ReturnsReferenceImage) {
+HWTEST_F(VmeHmeSystemTests, ReturnsReferenceImage) {
   std::vector<std::string> command_line = {
       input_file_, output_file_, "--width", "176", "--height",
       "144",       "--qp",       "45",      "-f",  "50"};

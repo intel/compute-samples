@@ -27,6 +27,7 @@
 #include <fstream>
 
 #include <boost/compute/utility/source.hpp>
+#include "test_harness/test_harness.hpp"
 
 namespace cs = compute_samples;
 
@@ -52,21 +53,21 @@ protected:
   compute::context context;
 };
 
-TEST_F(BuildProgram, ValidProgram) {
+HWTEST_F(BuildProgram, ValidProgram) {
   const char source[] =
       BOOST_COMPUTE_STRINGIZE_SOURCE(kernel void my_kernel(){});
   write_source_to_file(source, cl_file);
   EXPECT_NE(compute::program(), cs::build_program(context, cl_file));
 }
 
-TEST_F(BuildProgram, InvalidProgram) {
+HWTEST_F(BuildProgram, InvalidProgram) {
   const char source[] =
       BOOST_COMPUTE_STRINGIZE_SOURCE(kernel invalid_type my_kernel(){});
   write_source_to_file(source, cl_file);
   EXPECT_THROW(cs::build_program(context, cl_file), compute::opencl_error);
 }
 
-TEST_F(BuildProgram, BuildOptions) {
+HWTEST_F(BuildProgram, BuildOptions) {
   const char source[] =
       BOOST_COMPUTE_STRINGIZE_SOURCE(kernel MY_TYPE my_kernel(){});
   write_source_to_file(source, cl_file);
@@ -74,7 +75,7 @@ TEST_F(BuildProgram, BuildOptions) {
             cs::build_program(context, cl_file, "-DMY_TYPE=void"));
 }
 
-TEST_F(BuildProgram, ValidProgramSpirV) {
+HWTEST_F(BuildProgram, ValidProgramSpirV) {
   std::vector<uint8_t> spriv_file_source = {
       0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x03, 0x00, 0x0b, 0x00,
       0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00,
@@ -88,7 +89,7 @@ TEST_F(BuildProgram, ValidProgramSpirV) {
             cs::build_program_il(context, spv_file, "-cl-std=CL2.0"));
 }
 
-TEST_F(BuildProgram, InvalidProgramSpirV) {
+HWTEST_F(BuildProgram, InvalidProgramSpirV) {
   std::vector<uint8_t> spriv_file_source = {
       0x0A, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x03, 0x00, 0x0b, 0x00,
       0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00,

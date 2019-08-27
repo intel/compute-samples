@@ -28,6 +28,7 @@
 #include <iterator>
 
 #include "vme_wpp/vme_wpp.hpp"
+#include "test_harness/test_harness.hpp"
 
 class VmeWppSystemTests : public testing::Test {
 protected:
@@ -37,7 +38,7 @@ protected:
   const std::string output_file_ = "output_foreman_176x144.yuv";
 };
 
-TEST_F(VmeWppSystemTests, ReturnsReferenceImage) {
+HWTEST_F(VmeWppSystemTests, ReturnsReferenceImage) {
   std::vector<std::string> command_line = {
       input_file_, output_file_, "--width", "176", "--height",
       "144",       "--qp",       "45",      "-f",  "50"};

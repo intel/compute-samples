@@ -25,6 +25,7 @@
 
 #include "image/image.hpp"
 #include "subgroups_visualization/subgroups_visualization.hpp"
+#include "test_harness/test_harness.hpp"
 
 class SubgroupsVisualizationSystemTests : public testing::Test {
 protected:
@@ -36,7 +37,7 @@ protected:
       "test_subgroups_visualization_reference.bmp";
 };
 
-TEST_F(SubgroupsVisualizationSystemTests, GeneratesOutputImage) {
+HWTEST_F(SubgroupsVisualizationSystemTests, GeneratesOutputImage) {
   compute_samples::SubgroupsVisualizationApplication application;
   std::vector<std::string> command_line = {"-k", solution_cl_file};
 

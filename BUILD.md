@@ -60,10 +60,17 @@ CMake can be configured using the following parameters:
 Example command line with custom options: `cmake .. -DBOOST_ROOT=/home/boost_1_64_0`
 
 # Test
-There are 3 ways to run tests depending on the use case:
+There are 2 ways to run tests depending on the use case:
 
-* To run all registered tests from all modules run `ctest` from the `build` directory.
-* To run all tests from a specific module find module's tester and run it.
-* To run specific tests from a specific module find module's tester and run it with `--gtest_filter` option or use the `ctest -R *test_pattern*` option.
+1. Using [CTest](https://cmake.org/cmake/help/v3.8/manual/ctest.1.html):
+    * To run all registered tests from all modules run `ctest` from the `build` directory.
+    * To run all tests requiring specific HW run `ctest -R .*hw`.
+    * To run all tests not requiring specific HW run `ctest -E .*hw`.
 
-If you want to run `ctest` on a different configuration like `Debug` or `Release` please use `-C` option according to the [CTest documentation](https://cmake.org/cmake/help/v3.8/manual/ctest.1.html).
+    If you want to run `ctest` on a different configuration like `Debug` or `Release` please use `-C` option according to the [CTest documentation](https://cmake.org/cmake/help/v3.8/manual/ctest.1.html).
+
+1. Using [Google Test](https://github.com/google/googletest/tree/release-1.8.1):
+    * To run all tests from a specific module find module's tester and run it.
+    * To run specific tests from a specific module find module's tester and run it with `--gtest_filter` option.
+
+Tests that require specific hardware to run should be marked as `HWTEST` using defines available in [test_harness](./compute_samples/core/test_harness/include/test_harness/test_harness.hpp).

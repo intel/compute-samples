@@ -23,15 +23,17 @@
 #include "gtest/gtest.h"
 
 #include "commands_aggregation/commands_aggregation.hpp"
+#include "test_harness/test_harness.hpp"
 
-TEST(CommandsAggregationApplication, ReturnsOkStatus) {
+HWTEST(CommandsAggregationApplication, ReturnsOkStatus) {
   compute_samples::CommandsAggregationApplication application;
   std::vector<std::string> command_line = {};
   EXPECT_EQ(compute_samples::Application::Status::OK,
             application.run(command_line));
 }
 
-TEST(CommandsAggregationApplication, ComputesExpectedResultsUsingSingleQueue) {
+HWTEST(CommandsAggregationApplication,
+       ComputesExpectedResultsUsingSingleQueue) {
   compute_samples::CommandsAggregationApplication app;
   const int global_work_size = 128;
 
@@ -45,8 +47,8 @@ TEST(CommandsAggregationApplication, ComputesExpectedResultsUsingSingleQueue) {
   EXPECT_EQ(output, reference);
 }
 
-TEST(CommandsAggregationApplication,
-     ComputesExpectedResultsUsingMultipleQueues) {
+HWTEST(CommandsAggregationApplication,
+       ComputesExpectedResultsUsingMultipleQueues) {
   compute_samples::CommandsAggregationApplication app;
   const int global_work_size = 128;
 

@@ -28,6 +28,7 @@
 #include <iterator>
 
 #include "vme_interlaced/vme_interlaced.hpp"
+#include "test_harness/test_harness.hpp"
 
 class VmeInterlacedSystemTests : public testing::Test {
 protected:
@@ -47,7 +48,7 @@ protected:
   const std::string reference_bot_file_ = "bot_football_interlaced_720x480.yuv";
 };
 
-TEST_F(VmeInterlacedSystemTests, ReturnsReferenceImage) {
+HWTEST_F(VmeInterlacedSystemTests, ReturnsReferenceImage) {
   std::vector<std::string> command_line = {input_file_,
                                            output_top_file_,
                                            output_bot_file_,

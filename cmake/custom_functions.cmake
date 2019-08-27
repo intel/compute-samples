@@ -67,13 +67,15 @@ function(add_application_test project_name)
         PUBLIC
         compute_samples::${project_name}_lib
         GTest::GTest
+        compute_samples::test_harness
     )
 
     install(TARGETS ${name} DESTINATION ".")
 
     set_target_properties(${name} PROPERTIES FOLDER applications/${project_name})
 
-    add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME ${name} COMMAND ${name} --gtest_filter=-*HWTEST* WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME ${name}_hw COMMAND ${name} --gtest_filter=*HWTEST* WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 endfunction()
 
 function(add_kernels target)
@@ -157,13 +159,15 @@ function(add_core_library_test project_name)
         PUBLIC
         compute_samples::${project_name}
         GTest::GTest
+        compute_samples::test_harness
     )
 
     install(TARGETS ${name} DESTINATION ".")
 
     set_target_properties(${name} PROPERTIES FOLDER core/${project_name})
 
-    add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME ${name} COMMAND ${name} --gtest_filter=-*HWTEST* WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME ${name}_hw COMMAND ${name} --gtest_filter=*HWTEST* WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 endfunction()
 
 function(add_test_suite name)
@@ -180,13 +184,15 @@ function(add_test_suite name)
         PUBLIC
         GMock::GMock
         GTest::GTest
+        compute_samples::test_harness
     )
 
     install(TARGETS ${name} DESTINATION ".")
 
     set_target_properties(${name} PROPERTIES FOLDER tests/${name})
 
-    add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME ${name} COMMAND ${name} --gtest_filter=-*HWTEST* WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME ${name}_hw COMMAND ${name} --gtest_filter=*HWTEST* WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 endfunction()
 
 function(generate_packages name)

@@ -22,8 +22,9 @@
 
 #include "gtest/gtest.h"
 #include "template/template.hpp"
+#include "test_harness/test_harness.hpp"
 
-TEST(TemplateSystemTests, ApplicationReturnsOKStatus) {
+HWTEST(TemplateSystemTests, ApplicationReturnsOKStatus) {
   compute_samples::TemplateApplication application;
   std::vector<std::string> command_line = {};
   EXPECT_EQ(compute_samples::Application::Status::OK,
