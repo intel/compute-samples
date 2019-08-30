@@ -137,6 +137,8 @@ compute::kernel_intel prepare_kernel(const compute::usm_type type) {
     kernel.set_exec_info(CL_KERNEL_EXEC_INFO_INDIRECT_SHARED_ACCESS_INTEL,
                          sizeof(value), &value);
   } else {
+    throw std::runtime_error("Unknown USM type: " +
+                             std::to_string(static_cast<int>(type)));
   }
 
   return kernel;

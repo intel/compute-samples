@@ -64,6 +64,9 @@ T *allocate_memory(const compute::usm_type type, const int size = 1) {
     p = compute::device_mem_alloc<T>(context, device, nullptr, size, 0);
   } else if (type == compute::usm_type::shared) {
     p = compute::shared_mem_alloc<T>(context, device, nullptr, size, 0);
+  } else {
+    throw std::runtime_error("Unknown USM type: " +
+                             std::to_string(static_cast<int>(type)));
   }
 
   return p;
