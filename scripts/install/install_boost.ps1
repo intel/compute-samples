@@ -22,7 +22,7 @@
 
 echo "Downloading Boost"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-wget -Uri https://prdownloads.sourceforge.net/boost/boost/1.64.0/boost_1_64_0.zip -OutFile boost_1_64_0.zip -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer
+wget -Uri https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.zip -OutFile boost_1_64_0.zip -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer
 
 echo "Extracting boost"
 . "C:\Program Files\7-Zip\7z.exe" x boost_1_64_0.zip

@@ -23,7 +23,7 @@
 #
 
 echo "Downloading Boost"
-wget https://prdownloads.sourceforge.net/boost/boost/1.64.0/boost_1_64_0.tar.gz -O boost_1_64_0.tar.gz
+wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz -O boost_1_64_0.tar.gz
 
 echo "Extracting Boost"
 tar xf boost_1_64_0.tar.gz
