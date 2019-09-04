@@ -23,7 +23,7 @@
 #
 
 echo "Downloading OpenCL Headers"
-OPENCL_HEADERS_HASH="de26592167b9fdea503885e40e8755393c56523d"
+OPENCL_HEADERS_HASH="0d5f18c6e7196863bc1557a693f1509adfcee056"
 wget "https://github.com/KhronosGroup/OpenCL-Headers/archive/$OPENCL_HEADERS_HASH.zip" -O "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
 
 echo "Extracting OpenCL Headers"

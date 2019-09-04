@@ -21,7 +21,7 @@
 #
 
 echo "Downloading OpenCL Headers"
-$openclHeadersHash = "de26592167b9fdea503885e40e8755393c56523d"
+$openclHeadersHash = "0d5f18c6e7196863bc1557a693f1509adfcee056"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 wget -Uri "https://github.com/KhronosGroup/OpenCL-Headers/archive/$openclHeadersHash.zip" -OutFile "OpenCL-Headers-$openclHeadersHash.zip"
 
