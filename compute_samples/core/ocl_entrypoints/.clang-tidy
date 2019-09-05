@@ -1,6 +1,6 @@
 ---
 Checks:          '-*, modernize-use-nullptr, modernize-avoid-c-arrays, modernize-redundant-void-arg, modernize-replace-auto-ptr, cppcoreguidelines-no-malloc, readability-magic-numbers'
 WarningsAsErrors: ''
-HeaderFilterRegex: ''
+HeaderFilterRegex: 'compute_samples/'
 AnalyzeTemporaryDtors: false
 FormatStyle:     file
