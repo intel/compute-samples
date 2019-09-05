@@ -121,13 +121,13 @@ void SubgroupsVisualizationApplication::run_subgroups_visualization(
   // the kernel was compiled as an OpenCL 2.0 kernel and hence supports
   // non-uniform work groups, so the local work size need not evenly divide
   // the global work size.
-  compute::extents<2> globalSize{image.width(), image.height()};
-  compute::extents<2> localSize{static_cast<size_t>(args.local_size), 1};
-  queue.enqueue_nd_range_kernel(kernel, compute::dim(0, 0), globalSize,
-                                localSize);
+  compute::extents<2> global_size{image.width(), image.height()};
+  compute::extents<2> local_size{static_cast<size_t>(args.local_size), 1};
+  queue.enqueue_nd_range_kernel(kernel, compute::dim(0, 0), global_size,
+                                local_size);
 
-  LOG_INFO << "Global size is: " << globalSize[0] << "x" << globalSize[1];
-  LOG_INFO << "Local size is: " << localSize[0] << "x" << localSize[1];
+  LOG_INFO << "Global size is: " << global_size[0] << "x" << global_size[1];
+  LOG_INFO << "Local size is: " << local_size[0] << "x" << local_size[1];
   LOG_INFO << "Subgroup size is: "
            << kernel.get_work_group_info<size_t>(
                   queue.get_device(),

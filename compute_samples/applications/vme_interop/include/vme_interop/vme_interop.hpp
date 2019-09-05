@@ -19,8 +19,8 @@ namespace compute = boost::compute;
 namespace compute_samples {
 class VmeInteropApplication : public Application {
 public:
-  static const char *vme_extension_msg;
-  static const char *vaapi_extension_msg;
+  static const char *vme_extension_msg_;
+  static const char *vaapi_extension_msg_;
 
   struct Arguments {
     bool output_bmp = false;

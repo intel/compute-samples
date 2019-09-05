@@ -24,9 +24,9 @@ namespace po = boost::program_options;
 
 namespace compute_samples {
 
-const char *VmeInteropApplication::vme_extension_msg =
+const char *VmeInteropApplication::vme_extension_msg_ =
     "The selected device doesn't support device-side motion estimation.";
-const char *VmeInteropApplication::vaapi_extension_msg =
+const char *VmeInteropApplication::vaapi_extension_msg_ =
     "The selected device doesn't support VA API media sharing.";
 
 VmeInteropApplication::Arguments VmeInteropApplication::parse_command_line(
@@ -89,12 +89,12 @@ Application::Status VmeInteropApplication::run_implementation(
 
   if (!device.supports_extension(
           "cl_intel_device_side_avc_motion_estimation")) {
-    LOG_ERROR << vme_extension_msg;
+    LOG_ERROR << vme_extension_msg_;
     return Status::SKIP;
   }
 
   if (!device.supports_extension("cl_intel_va_api_media_sharing")) {
-    LOG_ERROR << vaapi_extension_msg;
+    LOG_ERROR << vaapi_extension_msg_;
     return Status::SKIP;
   }
 

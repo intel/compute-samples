@@ -19,7 +19,7 @@ class VmeSearchSystemTests : public testing::Test {
 protected:
   virtual void TearDown() { std::remove(output_file_.c_str()); }
 
-  void Verify(std::string sub_test) {
+  void verify(std::string sub_test) {
     std::vector<std::string> command_line = {
         input_file_, output_file_, "--width", "176",    "--height", "144",
         "--qp",      "45",         "-s",      sub_test, "-f",       "50"};
@@ -50,10 +50,10 @@ protected:
   const std::string output_file_ = "output_foreman_176x144.yuv";
 };
 
-HWTEST_F(VmeSearchSystemTests, BasicSearch) { Verify("basic_search"); }
+HWTEST_F(VmeSearchSystemTests, BasicSearch) { verify("basic_search"); }
 
 HWTEST_F(VmeSearchSystemTests, CostHeuristicsSearch) {
-  Verify("cost_heuristics_search");
+  verify("cost_heuristics_search");
 }
 
-HWTEST_F(VmeSearchSystemTests, LargerSearch) { Verify("larger_search"); }
+HWTEST_F(VmeSearchSystemTests, LargerSearch) { verify("larger_search"); }

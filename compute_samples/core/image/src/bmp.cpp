@@ -50,7 +50,7 @@ struct BMPRGBQUAD_t {
 
 #pragma pack(pop)
 
-const uint32_t BI_RGB = 0;
+const uint32_t bi_rgb = 0;
 
 bool BmpUtils::save_image_as_bmp(uint32_t *ptr, int width, int height,
                                  const char *file_name) {
@@ -69,11 +69,11 @@ bool BmpUtils::save_image_as_bmp(uint32_t *ptr, int width, int height,
   align_size++;
   align_size &= 0x03;
 
-  int rowLength = width * 4 + align_size;
+  int row_length = width * 4 + align_size;
 
   file_header.bf_type_ = 0x4D42; // 'BM'
   file_header.bf_size_ =
-      sizeof(file_header) + sizeof(info_header) + rowLength * height;
+      sizeof(file_header) + sizeof(info_header) + row_length * height;
   file_header.bf_off_bits_ = sizeof(file_header) + sizeof(info_header);
   file_header.bf_reserved1_ = 0;
   file_header.bf_reserved2_ = 0;
@@ -83,8 +83,8 @@ bool BmpUtils::save_image_as_bmp(uint32_t *ptr, int width, int height,
   info_header.bi_height_ = height;
   info_header.bi_planes_ = 1;
   info_header.bi_bit_count_ = 32;
-  info_header.bi_compression_ = BI_RGB;
-  info_header.bi_size_image_ = rowLength * height;
+  info_header.bi_compression_ = bi_rgb;
+  info_header.bi_size_image_ = row_length * height;
   info_header.bi_x_pels_per_meter_ = 0;
   info_header.bi_y_pels_per_meter_ = 0;
   info_header.bi_clr_used_ = 0;

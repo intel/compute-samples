@@ -108,21 +108,21 @@ void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
   compute::kernel kernel = program.create_kernel("ImageCopy");
 
   compute::image_format format(CL_R, CL_UNSIGNED_INT8);
-  compute::image2d outputImage(context, image.width(), image.height(), format,
-                               CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR);
-  compute::image2d inputImage(context, image.width(), image.height(), format,
-                              CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                              image.raw_data());
+  compute::image2d output_image(context, image.width(), image.height(), format,
+                                CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR);
+  compute::image2d input_image(context, image.width(), image.height(), format,
+                               CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                               image.raw_data());
 
-  kernel.set_args(outputImage, inputImage);
+  kernel.set_args(output_image, input_image);
 
-  compute::extents<2> globalSize{static_cast<size_t>(image.width() / 4),
-                                 static_cast<size_t>(image.height())};
-  compute::extents<2> localSize{32, 1};
+  compute::extents<2> global_size{static_cast<size_t>(image.width() / 4),
+                                  static_cast<size_t>(image.height())};
+  compute::extents<2> local_size{32, 1};
 
   LOG_INFO << "Executing " << args.iterations << " iterations.";
-  LOG_INFO << "Global size is: " << globalSize[0] << "x" << globalSize[1];
-  LOG_INFO << "Local size is: " << localSize[0] << "x" << localSize[1];
+  LOG_INFO << "Global size is: " << global_size[0] << "x" << global_size[1];
+  LOG_INFO << "Local size is: " << local_size[0] << "x" << local_size[1];
   LOG_INFO << "Subgroup size is: "
            << kernel.get_work_group_info<size_t>(
                   queue.get_device(),
@@ -136,8 +136,8 @@ void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
     // describe a one-dimensional 32x1 work group.  It may be possible to
     // improve performance by processing even more than four image elements
     // per work item!
-    queue.enqueue_nd_range_kernel(kernel, compute::dim(0, 0), globalSize,
-                                  localSize);
+    queue.enqueue_nd_range_kernel(kernel, compute::dim(0, 0), global_size,
+                                  local_size);
   }
 
   queue.finish();
@@ -147,13 +147,13 @@ void SubgroupsImageCopyApplication::run_subgroups_imagecopy(
   size_t row_pitch = 0;
   size_t slice_pitch = 0;
   uint8_t *data = static_cast<uint8_t *>(queue.enqueue_map_image(
-      outputImage, CL_MAP_READ, compute::dim(0, 0),
-      compute::dim(outputImage.width(), outputImage.height()), row_pitch,
+      output_image, CL_MAP_READ, compute::dim(0, 0),
+      compute::dim(output_image.width(), output_image.height()), row_pitch,
       slice_pitch));
 
   image.write(args.output, data);
 
-  queue.enqueue_unmap_image(outputImage, data);
+  queue.enqueue_unmap_image(output_image, data);
 
   timer_total.print("Total");
 }

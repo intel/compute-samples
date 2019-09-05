@@ -507,9 +507,9 @@ void YuvWriter::write_to_file(const char *fn) {
     }
     const int uv_width = width_ / 2;
     const int uv_height = height_ / 2;
-    for (int y = 0; y < curr_frame_; ++y) {
+    for (int k = 0; k < curr_frame_; ++k) {
       // Y (a value per pixel)
-      const uint8_t *p_img_y = &data_[y * width_ * height_ * 3 / 2];
+      const uint8_t *p_img_y = &data_[k * width_ * height_ * 3 / 2];
       // U (a value per 4 pixels) and V (a value per 4 pixels)
       const uint8_t *p_img_u =
           p_img_y +
@@ -523,33 +523,33 @@ void YuvWriter::write_to_file(const char *fn) {
       for (int i = 0; i < height_; ++i) {
         for (int j = 0; j < width_; ++j) {
           // Y value
-          uint8_t Y = p_img_y[j + width_ * (height_ - 1 - i)];
+          uint8_t y = p_img_y[j + width_ * (height_ - 1 - i)];
           // the same U value 4 times, thus both i and j are divided by 2
-          uint8_t U = p_img_u[j / 2 + uv_width * (uv_height - 1 - i / 2)];
-          uint8_t V = p_img_v[j / 2 + uv_width * (uv_height - 1 - i / 2)];
+          uint8_t u = p_img_u[j / 2 + uv_width * (uv_height - 1 - i / 2)];
+          uint8_t v = p_img_v[j / 2 + uv_width * (uv_height - 1 - i / 2)];
 
           using namespace std;
           // R is the 3rd component in the bitmap (which is actualy stored as
           // BGRA)
-          const int32_t R =
-              (int32_t)(1.164f * (float(Y) - 16) + 1.596f * (float(V) - 128));
+          const int32_t r =
+              (int32_t)(1.164f * (float(y) - 16) + 1.596f * (float(v) - 128));
           frame[j + width_ * i].s[2] =
-              static_cast<uint8_t>(std::min(255, std::max(R, 0)));
+              static_cast<uint8_t>(std::min(255, std::max(r, 0)));
           // G
-          const int32_t G =
-              (int32_t)(1.164f * (float(Y) - 16) - 0.813f * (float(V) - 128) -
-                        0.391f * (float(U) - 128));
+          const int32_t g =
+              (int32_t)(1.164f * (float(y) - 16) - 0.813f * (float(v) - 128) -
+                        0.391f * (float(u) - 128));
           frame[j + width_ * i].s[1] =
-              static_cast<uint8_t>(std::min(255, std::max(G, 0)));
+              static_cast<uint8_t>(std::min(255, std::max(g, 0)));
           // B
-          const int32_t B =
-              (int32_t)(1.164f * (float(Y) - 16) + 2.018f * (float(U) - 128));
+          const int32_t b =
+              (int32_t)(1.164f * (float(y) - 16) + 2.018f * (float(u) - 128));
           frame[j + width_ * i].s[0] =
-              static_cast<uint8_t>(std::min(255, std::max(B, 0)));
+              static_cast<uint8_t>(std::min(255, std::max(b, 0)));
         }
       }
       std::stringstream number;
-      number << y;
+      number << k;
       std::string filename = out_file + number.str() + std::string(".bmp");
       ImageBMP32Bit image(width_, height_);
       if (image.write(filename, reinterpret_cast<uint32_t *>(frame))) {
