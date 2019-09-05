@@ -278,7 +278,7 @@ void VmeIntraApplication::run_vme_intra(
   if (frame_idx > 0) {
     hme_n_kernel.set_arg(0, src_8x_image);
     hme_n_kernel.set_arg(1, ref_8x_image);
-    hme_n_kernel.set_arg(2, sizeof(cl_mem), NULL);
+    hme_n_kernel.set_arg(2, sizeof(cl_mem), nullptr);
     hme_n_kernel.set_arg(3, pred_4x_buffer);
     queue.enqueue_nd_range_kernel(
         hme_n_kernel, 2, nullptr,

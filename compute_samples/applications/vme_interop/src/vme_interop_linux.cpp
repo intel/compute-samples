@@ -61,24 +61,24 @@ VAManager::VAManager() {
     throw std::runtime_error("Loading libvax11.so failed");
   }
 
-  char *error = NULL;
+  char *error = nullptr;
 
   vaGetDisplay = (vaGetDisplayFPTR)dlsym(libVaX11Handle, "vaGetDisplay");
   error = dlerror();
-  if (!vaGetDisplay && error != NULL) {
+  if (!vaGetDisplay && error != nullptr) {
     LOG_ERROR << "dlsym error vaGetDisplay: " << error;
   }
 
   XOpenDisplay = (XOpenDisplayFPTR)dlsym(libVaX11Handle, "XOpenDisplay");
   error = dlerror();
-  if (!XOpenDisplay && error != NULL) {
+  if (!XOpenDisplay && error != nullptr) {
     LOG_ERROR << "dlsym error XOpenDisplay: " << error;
   }
 
   vaGetDisplayDRM =
       (vaGetDisplayDRMFPTR)dlsym(libVaDRMHandle, "vaGetDisplayDRM");
   error = dlerror();
-  if (!vaGetDisplayDRM && error != NULL) {
+  if (!vaGetDisplayDRM && error != nullptr) {
     LOG_ERROR << "dlsym error vaGetDisplayDRM: " << error;
   }
 
@@ -127,7 +127,7 @@ static VADisplay get_va_display() {
     status = manager.vaInitialize(va_display, &major_version, &minor_version);
   }
 
-  if ((va_display == NULL) || (status != VA_STATUS_SUCCESS)) {
+  if ((va_display == nullptr) || (status != VA_STATUS_SUCCESS)) {
     throw std::runtime_error("get_va_display failed");
   }
 
@@ -143,32 +143,33 @@ compute::device get_va_device(const compute::platform &platform,
   if (!cl_get_va_device_ids) {
     throw std::runtime_error("clGetExtensionFunctionAddressForPlatform("
                              "clGetDeviceIDsFromVA_APIMediaAdapterINTEL) "
-                             "returned NULL.");
+                             "returned nullptr.");
   }
 
   cl_int error;
-  cl_device_id va_devices[1] = {0};
   cl_uint num_va_devices = 0;
   error = cl_get_va_device_ids(platform.id(), CL_VA_API_DISPLAY_INTEL,
                                va_display, CL_ALL_DEVICES_FOR_VA_API_INTEL, 0,
-                               NULL, &num_va_devices);
+                               nullptr, &num_va_devices);
 
+  cl_device_id va_device;
   error = cl_get_va_device_ids(
       platform.id(), CL_VA_API_DISPLAY_INTEL, va_display,
-      CL_PREFERRED_DEVICES_FOR_VA_API_INTEL, 1, va_devices, &num_va_devices);
+      CL_PREFERRED_DEVICES_FOR_VA_API_INTEL, 1, &va_device, nullptr);
 
   if (error != CL_SUCCESS && error != CL_DEVICE_NOT_FOUND) {
     throw std::runtime_error("get_va_device failed");
   }
 
-  return compute::device(va_devices[0]);
+  return compute::device(va_device);
 }
 
 static void create_va_surface(uint32_t width, uint32_t height,
                               const VADisplay va_display,
                               VASurfaceID &va_surface) {
   if (manager.vaCreateSurfaces(va_display, VA_FOURCC_NV12, width, height,
-                               &va_surface, 1, NULL, 0) != VA_STATUS_SUCCESS) {
+                               &va_surface, 1, nullptr,
+                               0) != VA_STATUS_SUCCESS) {
     throw std::runtime_error("vaCreateSurfaces() failed!");
   }
 }
@@ -185,7 +186,7 @@ static void acquire_va_surfaces(const compute::platform &platform,
   if (!cl_acquire_va_surface) {
     throw std::runtime_error("acquire_va_surface failed");
   }
-  cl_acquire_va_surface(queue.get(), 2, images_shared, 0, NULL, NULL);
+  cl_acquire_va_surface(queue.get(), 2, images_shared, 0, nullptr, nullptr);
 }
 
 static void release_va_surfaces(const compute::platform &platform,
@@ -200,7 +201,7 @@ static void release_va_surfaces(const compute::platform &platform,
   if (!cl_release_va_surface) {
     throw std::runtime_error("release_va_surface failed");
   }
-  cl_release_va_surface(queue.get(), 2, images_shared, 0, NULL, NULL);
+  cl_release_va_surface(queue.get(), 2, images_shared, 0, nullptr, nullptr);
 }
 
 static void write_va_surface(const VADisplay va_display,

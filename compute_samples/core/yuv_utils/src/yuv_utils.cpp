@@ -468,10 +468,10 @@ void YuvCapture::get_sample(int frame_num, PlanarImage &im, bool interlaced,
 
 Capture *Capture::create_file_capture(const std::string &fn, int width,
                                       int height, int frames) {
-  Capture *cap = NULL;
+  Capture *cap = nullptr;
 
-  if ((strstr(fn.c_str(), ".yuv") != NULL) ||
-      (strstr(fn.c_str(), ".yv12") != NULL)) {
+  if ((strstr(fn.c_str(), ".yuv") != nullptr) ||
+      (strstr(fn.c_str(), ".yv12") != nullptr)) {
     cap = new YuvCapture(fn, width, height, frames);
   } else {
     throw std::runtime_error("Unsupported capture file format.");
