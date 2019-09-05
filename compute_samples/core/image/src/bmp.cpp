@@ -124,12 +124,7 @@ bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, int width,
                                        int height, const char *file_name) {
   // save results in bitmap files
   float tmp_f_val = 0.0f;
-  uint32_t *out_u_int_buf =
-      (uint32_t *)malloc(width * height * sizeof(uint32_t));
-  if (!out_u_int_buf) {
-    LOG_ERROR << "Failed to allocate memory for output BMP image!";
-    return false;
-  }
+  std::vector<uint32_t> out_u_int_buf(width * height);
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
@@ -162,19 +157,12 @@ bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, int width,
     }
   }
 
-  bool res = save_image_as_bmp(out_u_int_buf, width, height, file_name);
-  free(out_u_int_buf);
-  return res;
+  return save_image_as_bmp(out_u_int_buf.data(), width, height, file_name);
 }
 
 bool BmpUtils::save_image_as_bmp_8u(uint8_t *ptr, int width, int height,
                                     const char *file_name) {
-  uint32_t *out_u_int_buf =
-      (uint32_t *)malloc(width * height * sizeof(uint32_t));
-  if (!out_u_int_buf) {
-    LOG_ERROR << "Failed to allocate memory for output BMP image!";
-    return false;
-  }
+  std::vector<uint32_t> out_u_int_buf(width * height);
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
@@ -187,9 +175,7 @@ bool BmpUtils::save_image_as_bmp_8u(uint8_t *ptr, int width, int height,
     }
   }
 
-  bool res = save_image_as_bmp(out_u_int_buf, width, height, file_name);
-  free(out_u_int_buf);
-  return res;
+  return save_image_as_bmp(out_u_int_buf.data(), width, height, file_name);
 }
 
 bool BmpUtils::load_bmp_image(uint8_t *&data, int &width, int &height,

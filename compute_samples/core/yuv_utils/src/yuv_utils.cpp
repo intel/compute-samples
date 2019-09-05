@@ -501,10 +501,7 @@ void YuvWriter::write_to_file(const char *fn) {
     int found = static_cast<int>(out_file.find('.'));
     // crop the name
     out_file = out_file.substr(0, found);
-    uchar4_t *frame = (uchar4_t *)malloc(width_ * height_ * sizeof(uchar4_t));
-    if (!frame) {
-      throw std::runtime_error("Failed to allocate a buffer for the bitmap.");
-    }
+    std::vector<uchar4_t> frame(width_ * height_);
     const int uv_width = width_ / 2;
     const int uv_height = height_ / 2;
     for (int k = 0; k < curr_frame_; ++k) {
@@ -519,7 +516,7 @@ void YuvWriter::write_to_file(const char *fn) {
           p_img_u + uv_width * uv_height; // V plane is after U plane (which is
                                           // uv_width * uv_height)
 
-      memset(frame, 0, width_ * height_ * sizeof(uchar4_t));
+      std::fill(frame.begin(), frame.end(), uchar4_t{0});
       for (int i = 0; i < height_; ++i) {
         for (int j = 0; j < width_; ++j) {
           // Y value
@@ -552,12 +549,10 @@ void YuvWriter::write_to_file(const char *fn) {
       number << k;
       std::string filename = out_file + number.str() + std::string(".bmp");
       ImageBMP32Bit image(width_, height_);
-      if (image.write(filename, reinterpret_cast<uint32_t *>(frame))) {
-        free(frame);
+      if (image.write(filename, reinterpret_cast<uint32_t *>(frame.data()))) {
         throw std::runtime_error("Failed to write output bitmap file.");
       }
     }
-    free(frame);
   }
 
   // YUV file
