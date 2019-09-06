@@ -14,6 +14,9 @@
 #include <cstring>
 
 namespace compute_samples {
+std::string load_text_file(const std::string &file_path);
+void save_text_file(const std::string data, const std::string &file_path);
+
 std::vector<uint8_t> load_binary_file(const std::string &file_path);
 void save_binary_file(const std::vector<uint8_t> &data,
                       const std::string &file_path);

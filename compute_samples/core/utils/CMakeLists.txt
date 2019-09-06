@@ -23,4 +23,5 @@ add_core_library_test(utils
 install_resources(utils_tests
     FILES
     "test/binary_file.bin"
+    "test/text_file.txt"
 )

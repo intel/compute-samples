@@ -27,6 +27,12 @@ void try_build(compute::program &program, const std::string &options) {
   LOG_EXIT_FUNCTION
 }
 
+compute::program create_with_source_file(const std::string &file,
+                                         const compute::context &context) {
+  std::string text_file = load_text_file(file);
+  return compute::program::create_with_source(text_file, context);
+}
+
 compute::program build_program(const compute::context &context,
                                const std::string &file,
                                const std::string &options) {
@@ -34,8 +40,7 @@ compute::program build_program(const compute::context &context,
   LOG_DEBUG << "Program file: " << file;
   LOG_DEBUG << "Build options: " << options;
 
-  compute::program program =
-      compute::program::create_with_source_file(file, context);
+  compute::program program = create_with_source_file(file, context);
   LOG_DEBUG << "Program successfully created with source file";
   try_build(program, options);
 

@@ -9,6 +9,29 @@
 #include "gtest/gtest.h"
 #include <cstdio>
 
+TEST(LoadTextFile, ValidFile) {
+  const std::string text = compute_samples::load_text_file("text_file.txt");
+  const std::string reference = "abc";
+  EXPECT_EQ(reference, text);
+}
+
+TEST(LoadTextFile, NotExistingFile) {
+  const std::string text = compute_samples::load_text_file("invalid/path");
+  const std::string reference = "";
+  EXPECT_EQ(reference, text);
+}
+
+TEST(SaveTextFile, ValidFile) {
+  const std::string text = "xyz";
+  const std::string path = "output.txt";
+
+  compute_samples::save_text_file(text, path);
+  const std::string output = compute_samples::load_text_file(path);
+  std::remove(path.c_str());
+
+  EXPECT_EQ(text, output);
+}
+
 TEST(LoadBinaryFile, ValidFile) {
   const std::vector<uint8_t> bytes =
       compute_samples::load_binary_file("binary_file.bin");

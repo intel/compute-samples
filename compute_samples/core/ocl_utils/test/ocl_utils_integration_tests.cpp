@@ -25,13 +25,6 @@ protected:
 
   virtual void TearDown() { std::remove(cl_file.c_str()); }
 
-  void write_source_to_file(const std::string &source,
-                            const std::string &file) {
-    std::ofstream ofs(file);
-    ofs << source;
-    ofs.close();
-  }
-
   const std::string cl_file = "kernel.cl";
   const std::string spv_file = "kernel.spv";
   compute::device device;
@@ -41,21 +34,21 @@ protected:
 HWTEST_F(BuildProgram, ValidProgram) {
   const char source[] =
       BOOST_COMPUTE_STRINGIZE_SOURCE(kernel void my_kernel(){});
-  write_source_to_file(source, cl_file);
+  cs::save_text_file(source, cl_file);
   EXPECT_NE(compute::program(), cs::build_program(context, cl_file));
 }
 
 HWTEST_F(BuildProgram, InvalidProgram) {
   const char source[] =
       BOOST_COMPUTE_STRINGIZE_SOURCE(kernel invalid_type my_kernel(){});
-  write_source_to_file(source, cl_file);
+  cs::save_text_file(source, cl_file);
   EXPECT_THROW(cs::build_program(context, cl_file), compute::opencl_error);
 }
 
 HWTEST_F(BuildProgram, BuildOptions) {
   const char source[] =
       BOOST_COMPUTE_STRINGIZE_SOURCE(kernel MY_TYPE my_kernel(){});
-  write_source_to_file(source, cl_file);
+  cs::save_text_file(source, cl_file);
   EXPECT_NE(compute::program(),
             cs::build_program(context, cl_file, "-DMY_TYPE=void"));
 }
