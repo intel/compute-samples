@@ -9,8 +9,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <fstream>
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string.h>
@@ -19,49 +17,23 @@
 #include "image/image.hpp"
 
 namespace compute_samples {
-PlanarImage *PlanarImage::create_planar_image(int width, int height,
-                                              int pitch_y) {
-  PlanarImage *im = new PlanarImage;
-
+PlanarImage::PlanarImage(int width, int height, int pitch_y) {
   if (pitch_y == 0) {
     pitch_y = width;
   }
 
   const int num_pixels = pitch_y * height + width * height / 2;
-#ifdef __linux__
-  int ret = 0;
-  ret = posix_memalign((void **)(&(im->y_)), 0x1000, num_pixels);
-  if (ret) {
-    delete im;
-    throw std::runtime_error("Allocation failed");
-  }
-#else
-  im->y_ = (uint8_t *)_aligned_malloc(num_pixels, 0x1000);
-  if (!im->y_) {
-    delete im;
-    throw std::runtime_error("Allocation failed");
-  }
-#endif
+  data_.resize(num_pixels);
 
-  im->u_ = im->y_ + pitch_y * height;
-  im->v_ = im->u_ + width * height / 4;
+  y_ = data_.data();
+  u_ = y_ + pitch_y * height;
+  v_ = u_ + width * height / 4;
 
-  im->width_ = width;
-  im->height_ = height;
-  im->pitch_y_ = pitch_y;
-  im->pitch_u_ = width / 2;
-  im->pitch_v_ = width / 2;
-
-  return im;
-}
-
-void PlanarImage::release_image(PlanarImage *im) {
-#ifdef __linux__
-  free(im->y_);
-#else
-  _aligned_free(im->y_);
-#endif
-  delete im;
+  width_ = width;
+  height_ = height;
+  pitch_y_ = pitch_y;
+  pitch_u_ = width / 2;
+  pitch_v_ = width / 2;
 }
 
 void PlanarImage::draw_pixel(int32_t x, int32_t y, uint8_t *pic, int pic_width,
@@ -344,20 +316,10 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
   }
 }
 
-class YuvCapture : public Capture {
-public:
-  YuvCapture(const std::string &fn, int width, int height, int frames = 0);
-  virtual void get_sample(int frame_num, PlanarImage &im);
-  virtual void get_sample(int frame_num, PlanarImage &im, bool interlaced,
-                          int polarity);
+YuvCapture::YuvCapture(const std::string &fn, int width, int height,
+                       int frames) {
 
-protected:
-  std::ifstream file_;
-};
-
-YuvCapture::YuvCapture(const std::string &fn, int width, int height, int frames)
-    : file_(fn.c_str(), std::ios::binary | std::ios::ate) {
-
+  file_ = std::ifstream(fn.c_str(), std::ios::binary | std::ios::ate);
   if (!file_.good()) {
     std::stringstream ss;
     ss << "Unable to load YUV file: " << fn;
@@ -465,35 +427,6 @@ void YuvCapture::get_sample(int frame_num, PlanarImage &im, bool interlaced,
     out_ptr += out_row_size;
   }
 }
-
-Capture *Capture::create_file_capture(const std::string &fn, int width,
-                                      int height, int frames) {
-  Capture *cap = nullptr;
-
-  if ((strstr(fn.c_str(), ".yuv") != nullptr) ||
-      (strstr(fn.c_str(), ".yv12") != nullptr)) {
-    cap = new YuvCapture(fn, width, height, frames);
-  } else {
-    throw std::runtime_error("Unsupported capture file format.");
-  }
-
-  return cap;
-}
-
-void Capture::release(Capture *cap) { delete cap; }
-
-class YuvWriter : public FrameWriter {
-public:
-  YuvWriter(int width, int height, int frame_num_hint, bool b_to_bmps = false);
-  virtual ~YuvWriter() {}
-
-  void append_frame(const PlanarImage &im);
-  void write_to_file(const char *fn);
-
-private:
-  std::vector<uint8_t> data_;
-  bool b_to_bmps_;
-};
 
 void YuvWriter::write_to_file(const char *fn) {
   if (b_to_bmps_) {
@@ -609,18 +542,10 @@ void YuvWriter::append_frame(const PlanarImage &im) {
 }
 
 YuvWriter::YuvWriter(int width, int height, int frame_num_hint, bool b_to_bmps)
-    : FrameWriter(width, height), b_to_bmps_(b_to_bmps) {
+    : width_(width), height_(height), curr_frame_(0), b_to_bmps_(b_to_bmps) {
   if (frame_num_hint > 0) {
     data_.reserve(frame_num_hint * width_ * height_ * 3 / 2);
   }
 }
-
-FrameWriter *FrameWriter::create_frame_writer(int width, int height,
-                                              int frame_num_hint,
-                                              bool b_format_bmp_hint) {
-  return new YuvWriter(width, height, frame_num_hint, b_format_bmp_hint);
-}
-
-void FrameWriter::release(FrameWriter *writer) { delete writer; }
 
 } // namespace compute_samples

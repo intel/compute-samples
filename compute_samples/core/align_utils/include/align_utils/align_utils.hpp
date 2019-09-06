@@ -14,12 +14,16 @@
 namespace compute_samples {
 
 namespace align_utils {
-template <typename T>
-using PageAlignedAllocator = boost::alignment::aligned_allocator<T, 4096>;
+template <typename T, std::size_t Alignment>
+using AlignedAllocator = boost::alignment::aligned_allocator<T, Alignment>;
+
+template <typename T, std::size_t Alignment>
+using AlignedVector = std::vector<T, AlignedAllocator<T, Alignment>>;
+
+template <typename T> using PageAlignedAllocator = AlignedAllocator<T, 4096>;
 
 template <typename T>
-using PageAlignedVector =
-    std::vector<T, boost::alignment::aligned_allocator<T, 4096>>;
+using PageAlignedVector = std::vector<T, PageAlignedAllocator<T>>;
 
 inline uint32_t align(uint32_t value, uint32_t alignment) {
   return ((value + alignment - 1) / alignment) * alignment;

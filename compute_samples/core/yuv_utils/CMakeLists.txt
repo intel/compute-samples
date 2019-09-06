@@ -12,4 +12,5 @@ add_core_library(yuv_utils
 target_link_libraries(yuv_utils
     PUBLIC
     compute_samples::image
+    compute_samples::align_utils
 )

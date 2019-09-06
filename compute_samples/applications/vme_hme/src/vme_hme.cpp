@@ -123,19 +123,16 @@ VmeHmeApplication::run_implementation(std::vector<std::string> &command_line) {
   compute::kernel hme_kernel = program.create_kernel("vme_hme");
   timer.print("Kernels created");
 
-  Capture *capture = Capture::create_file_capture(
-      args.input_yuv_path, args.width, args.height, args.frames);
+  YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const int frame_count =
-      (args.frames) ? args.frames : capture->get_num_frames();
-  FrameWriter *writer = FrameWriter::create_frame_writer(
-      args.width, args.height, frame_count, args.output_bmp);
+      (args.frames) ? args.frames : capture.get_num_frames();
+  YuvWriter writer(args.width, args.height, frame_count, args.output_bmp);
 
-  PlanarImage *planar_image =
-      PlanarImage::create_planar_image(args.width, args.height);
-  capture->get_sample(0, *planar_image);
+  PlanarImage planar_image(args.width, args.height);
+  capture.get_sample(0, planar_image);
   timer.print("Read YUV frame 0 from disk to CPU linear memory.");
 
-  writer->append_frame(*planar_image);
+  writer.append_frame(planar_image);
 
   compute::image_format format(CL_R, CL_UNORM_INT8);
   compute::image2d ref_image(context, args.width, args.height, format);
@@ -157,8 +154,8 @@ VmeHmeApplication::run_implementation(std::vector<std::string> &command_line) {
   size_t origin[] = {0, 0, 0};
   size_t region[] = {static_cast<size_t>(args.width),
                      static_cast<size_t>(args.height), 1};
-  queue.enqueue_write_image(src_image, origin, region, planar_image->get_y(),
-                            planar_image->get_pitch_y());
+  queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
+                            planar_image.get_pitch_y());
   timer.print("Copied frame 0 to tiled memory.");
 
   ds_kernel.set_args(src_image, src_image_2x, src_image_4x, src_image_8x);
@@ -173,19 +170,15 @@ VmeHmeApplication::run_implementation(std::vector<std::string> &command_line) {
   for (int k = 1; k < frame_count; k++) {
     LOG_INFO << "Processing frame " << k << "...";
     run_vme_hme(args, context, queue, ds_kernel, hme_n_kernel, hme_kernel,
-                *capture, *planar_image, src_image, ref_image, src_image_2x,
+                capture, planar_image, src_image, ref_image, src_image_2x,
                 ref_image_2x, src_image_4x, ref_image_4x, src_image_8x,
                 ref_image_8x, k);
-    writer->append_frame(*planar_image);
+    writer.append_frame(planar_image);
   }
 
   LOG_INFO << "Wrote " << frame_count << " frames with overlaid "
            << "motion vectors to " << args.output_yuv_path << " .";
-  writer->write_to_file(args.output_yuv_path.c_str());
-
-  FrameWriter::release(writer);
-  Capture::release(capture);
-  PlanarImage::release_image(planar_image);
+  writer.write_to_file(args.output_yuv_path.c_str());
 
   timer_total.print("Total");
   return Status::OK;
@@ -195,7 +188,7 @@ void VmeHmeApplication::run_vme_hme(
     const VmeHmeApplication::Arguments &args, compute::context &context,
     compute::command_queue &queue, compute::kernel &ds_kernel,
     compute::kernel &hme_n_kernel, compute::kernel &hme_kernel,
-    Capture &capture, PlanarImage &planar_image, compute::image2d &src_image,
+    YuvCapture &capture, PlanarImage &planar_image, compute::image2d &src_image,
     compute::image2d &ref_image, compute::image2d &src_2x_image,
     compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
     compute::image2d &ref_4x_image, compute::image2d &src_8x_image,

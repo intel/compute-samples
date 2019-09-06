@@ -34,7 +34,7 @@ private:
 
   void run_vme_search(const VmeSearchApplication::Arguments &args,
                       compute::context &context, compute::command_queue &queue,
-                      compute::kernel &kernel, Capture &capture,
+                      compute::kernel &kernel, YuvCapture &capture,
                       PlanarImage &src_planar_image,
                       compute::image2d &src_image, compute::image2d &ref_image,
                       int frame_idx) const;

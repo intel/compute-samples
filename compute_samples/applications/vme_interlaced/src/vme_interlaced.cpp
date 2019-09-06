@@ -125,67 +125,59 @@ Application::Status VmeInterlacedApplication::run_implementation(
   compute::kernel kernel = program.create_kernel("vme_interlaced");
   timer.print("Kernel created");
 
-  Capture *capture = Capture::create_file_capture(
-      args.input_yuv_path, args.width, args.height, args.frames);
+  YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const int frame_count =
-      (args.frames) ? args.frames : capture->get_num_frames();
+      (args.frames) ? args.frames : capture.get_num_frames();
   const int field_height = args.height / 2;
 
-  FrameWriter *top_writer = FrameWriter::create_frame_writer(
-      args.width, field_height, frame_count, args.output_bmp);
-  FrameWriter *bot_writer = FrameWriter::create_frame_writer(
-      args.width, field_height, frame_count, args.output_bmp);
+  YuvWriter top_writer(args.width, field_height, frame_count, args.output_bmp);
+  YuvWriter bot_writer(args.width, field_height, frame_count, args.output_bmp);
 
-  PlanarImage *top_planar_image =
-      PlanarImage::create_planar_image(args.width, field_height);
-  PlanarImage *bot_planar_image =
-      PlanarImage::create_planar_image(args.width, field_height);
+  PlanarImage top_planar_image(args.width, field_height);
+  PlanarImage bot_planar_image(args.width, field_height);
 
   if (args.native) {
     compute::image_format format(CL_R, CL_UNORM_INT8);
     compute::image2d ref_image(context, args.width, args.height, format);
     compute::image2d src_image(context, args.width, args.height, format);
 
-    PlanarImage *planar_image =
-        PlanarImage::create_planar_image(args.width, args.height);
-    capture->get_sample(0, *planar_image);
+    PlanarImage planar_image(args.width, args.height);
+    capture.get_sample(0, planar_image);
     timer.print("Read YUV frame 0 from disk to CPU linear memory.");
 
     size_t origin[] = {0, 0, 0};
     size_t region[] = {static_cast<size_t>(args.width),
                        static_cast<size_t>(args.height), 1};
-    queue.enqueue_write_image(src_image, origin, region, planar_image->get_y(),
-                              planar_image->get_pitch_y());
+    queue.enqueue_write_image(src_image, origin, region, planar_image.get_y(),
+                              planar_image.get_pitch_y());
     timer.print("Copied interlaced frame 0 to tiled memory.");
 
-    capture->get_sample(0, *top_planar_image, true, 0);
-    capture->get_sample(0, *bot_planar_image, true, 1);
+    capture.get_sample(0, top_planar_image, true, 0);
+    capture.get_sample(0, bot_planar_image, true, 1);
     timer.print("Read YUV field frames 0 from disk to CPU linear memory.");
 
-    top_writer->append_frame(*top_planar_image);
-    bot_writer->append_frame(*bot_planar_image);
+    top_writer.append_frame(top_planar_image);
+    bot_writer.append_frame(bot_planar_image);
 
     for (int k = 1; k < frame_count; k++) {
       LOG_INFO << "Processing frame " << k << "...";
-      run_vme_interlaced_native(args, context, queue, kernel, *capture,
-                                *planar_image, *top_planar_image,
-                                *bot_planar_image, src_image, ref_image, k);
-      top_writer->append_frame(*top_planar_image);
-      bot_writer->append_frame(*bot_planar_image);
+      run_vme_interlaced_native(args, context, queue, kernel, capture,
+                                planar_image, top_planar_image,
+                                bot_planar_image, src_image, ref_image, k);
+      top_writer.append_frame(top_planar_image);
+      bot_writer.append_frame(bot_planar_image);
     }
-
-    PlanarImage::release_image(planar_image);
   } else {
     compute::image_format format(CL_R, CL_UNORM_INT8);
     compute::image2d ref_image(context, args.width, field_height, format);
     compute::image2d src_image(context, args.width, field_height, format);
 
-    FrameWriter *field_writer[] = {top_writer, bot_writer};
-    PlanarImage *field_planar_image[] = {top_planar_image, bot_planar_image};
+    YuvWriter *field_writer[] = {&top_writer, &bot_writer};
+    PlanarImage *field_planar_image[] = {&top_planar_image, &bot_planar_image};
 
     for (int j = 0; j < 2; j++) {
       LOG_INFO << "Processing field polarity " << j;
-      capture->get_sample(0, *field_planar_image[j], true, j);
+      capture.get_sample(0, *field_planar_image[j], true, j);
       timer.print("Read YUV field frame 0 from disk to CPU linear memory.");
 
       field_writer[j]->append_frame(*field_planar_image[j]);
@@ -200,7 +192,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
 
       for (int k = 1; k < frame_count; k++) {
         LOG_INFO << "Processing field frame " << k << "...";
-        run_vme_interlaced_split(args, context, queue, kernel, *capture,
+        run_vme_interlaced_split(args, context, queue, kernel, capture,
                                  *field_planar_image[j], src_image, ref_image,
                                  j, k);
         field_writer[j]->append_frame(*field_planar_image[j]);
@@ -210,17 +202,11 @@ Application::Status VmeInterlacedApplication::run_implementation(
 
   LOG_INFO << "Wrote " << frame_count << " top frames with overlaid "
            << "motion vectors to " << args.output_top_yuv_path << " .";
-  top_writer->write_to_file(args.output_top_yuv_path.c_str());
+  top_writer.write_to_file(args.output_top_yuv_path.c_str());
 
   LOG_INFO << "Wrote " << frame_count << " bot frames with overlaid "
            << "motion vectors to " << args.output_bot_yuv_path << " .";
-  bot_writer->write_to_file(args.output_bot_yuv_path.c_str());
-
-  PlanarImage::release_image(top_planar_image);
-  PlanarImage::release_image(bot_planar_image);
-  FrameWriter::release(top_writer);
-  FrameWriter::release(bot_writer);
-  Capture::release(capture);
+  bot_writer.write_to_file(args.output_bot_yuv_path.c_str());
 
   timer_total.print("Total");
   return Status::OK;
@@ -228,7 +214,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
 
 void VmeInterlacedApplication::run_vme_interlaced_native(
     const VmeInterlacedApplication::Arguments &args, compute::context &context,
-    compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
+    compute::command_queue &queue, compute::kernel &kernel, YuvCapture &capture,
     PlanarImage &planar_image, PlanarImage &top_planar_image,
     PlanarImage &bot_planar_image, compute::image2d &src_image,
     compute::image2d &ref_image, int frame_idx) const {
@@ -264,7 +250,8 @@ void VmeInterlacedApplication::run_vme_interlaced_native(
   au::PageAlignedVector<cl_short2> predictors(au::align64(mb_count),
                                               default_predictor);
   std::thread thread(&VmeInterlacedApplication::get_field_capture_samples, this,
-                     &capture, &top_planar_image, &bot_planar_image, frame_idx);
+                     std::ref(capture), std::ref(top_planar_image),
+                     std::ref(bot_planar_image), frame_idx);
 
   run_vme_interlaced(context, queue, kernel, src_image, ref_image, top_mvs,
                      top_shapes, residuals, predictors, width, mb_count,
@@ -291,7 +278,7 @@ void VmeInterlacedApplication::run_vme_interlaced_native(
 
 void VmeInterlacedApplication::run_vme_interlaced_split(
     const VmeInterlacedApplication::Arguments &args, compute::context &context,
-    compute::command_queue &queue, compute::kernel &kernel, Capture &capture,
+    compute::command_queue &queue, compute::kernel &kernel, YuvCapture &capture,
     PlanarImage &field_planar_image, compute::image2d &src_image,
     compute::image2d &ref_image, int polarity, int frame_idx) const {
   Timer timer;
@@ -371,12 +358,12 @@ void VmeInterlacedApplication::run_vme_interlaced(
 }
 
 void VmeInterlacedApplication::get_field_capture_samples(
-    Capture *capture, PlanarImage *top_planar_image,
-    PlanarImage *bot_planar_image, int frame_idx) const {
+    YuvCapture &capture, PlanarImage &top_planar_image,
+    PlanarImage &bot_planar_image, int frame_idx) const {
   Timer timer;
-  capture->get_sample(frame_idx, *top_planar_image, true, 0);
+  capture.get_sample(frame_idx, top_planar_image, true, 0);
   timer.print("Read YUV next top frame from disk to CPU linear memory");
-  capture->get_sample(frame_idx, *bot_planar_image, true, 1);
+  capture.get_sample(frame_idx, bot_planar_image, true, 1);
   timer.print("Read YUV next bot frame from disk to CPU linear memory");
 }
 } // namespace compute_samples

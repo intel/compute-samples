@@ -169,16 +169,13 @@ Application::Status VmeIntraApplication::run_implementation(
   compute::kernel intra_kernel = program.create_kernel("vme_intra");
   timer.print("Kernels created");
 
-  Capture *capture = Capture::create_file_capture(
-      args.input_yuv_path, args.width, args.height, args.frames);
+  YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const int frame_count =
-      (args.frames) ? args.frames : capture->get_num_frames();
-  FrameWriter *writer = FrameWriter::create_frame_writer(
-      args.width, args.height, frame_count, args.output_bmp);
+      (args.frames) ? args.frames : capture.get_num_frames();
+  YuvWriter writer(args.width, args.height, frame_count, args.output_bmp);
 
-  PlanarImage *planar_image =
-      PlanarImage::create_planar_image(args.width, args.height);
-  capture->get_sample(0, *planar_image);
+  PlanarImage planar_image(args.width, args.height);
+  capture.get_sample(0, planar_image);
   timer.print("Read YUV frame 0 from disk to CPU linear memory.");
 
   compute::image_format format(CL_R, CL_UNORM_INT8);
@@ -201,19 +198,15 @@ Application::Status VmeIntraApplication::run_implementation(
   for (int k = 0; k < frame_count; k++) {
     LOG_INFO << "Processing frame " << k << "...";
     run_vme_intra(args, context, queue, ds_kernel, hme_n_kernel, intra_kernel,
-                  *capture, *planar_image, src_image, ref_image, src_image_2x,
+                  capture, planar_image, src_image, ref_image, src_image_2x,
                   ref_image_2x, src_image_4x, ref_image_4x, src_image_8x,
                   ref_image_8x, k);
-    writer->append_frame(*planar_image);
+    writer.append_frame(planar_image);
   }
 
   LOG_INFO << "Wrote " << frame_count << " frames with overlaid "
            << "motion vectors to " << args.output_yuv_path << " .";
-  writer->write_to_file(args.output_yuv_path.c_str());
-
-  FrameWriter::release(writer);
-  Capture::release(capture);
-  PlanarImage::release_image(planar_image);
+  writer.write_to_file(args.output_yuv_path.c_str());
 
   timer_total.print("Total");
   return Status::OK;
@@ -223,7 +216,7 @@ void VmeIntraApplication::run_vme_intra(
     const VmeIntraApplication::Arguments &args, compute::context &context,
     compute::command_queue &queue, compute::kernel &ds_kernel,
     compute::kernel &hme_n_kernel, compute::kernel &intra_kernel,
-    Capture &capture, PlanarImage &planar_image, compute::image2d &src_image,
+    YuvCapture &capture, PlanarImage &planar_image, compute::image2d &src_image,
     compute::image2d &ref_image, compute::image2d &src_2x_image,
     compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
     compute::image2d &ref_4x_image, compute::image2d &src_8x_image,

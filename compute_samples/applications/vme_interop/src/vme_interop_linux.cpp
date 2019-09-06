@@ -291,7 +291,7 @@ static void write_va_surface(const VADisplay va_display,
 static void
 run_vme_interop(const VmeInteropApplication::Arguments &args,
                 compute::context &context, compute::command_queue &queue,
-                compute::kernel &kernel, Capture &capture,
+                compute::kernel &kernel, YuvCapture &capture,
                 PlanarImage &planar_image, const VADisplay va_display,
                 VASurfaceID &src_va_surface, VASurfaceID &ref_va_surface,
                 compute::image2d &src_image, compute::image2d &ref_image,
@@ -396,42 +396,35 @@ void VmeInteropApplication::run_os_specific_implementation(
   compute::kernel kernel = program.create_kernel("vme_interop");
   timer.print("Kernel created");
 
-  Capture *capture = Capture::create_file_capture(
-      args.input_yuv_path, args.width, args.height, args.frames);
+  YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const size_t frame_count =
-      (args.frames) ? args.frames : capture->get_num_frames();
-  FrameWriter *writer = FrameWriter::create_frame_writer(
-      args.width, args.height, frame_count, args.output_bmp);
+      (args.frames) ? args.frames : capture.get_num_frames();
+  YuvWriter writer(args.width, args.height, frame_count, args.output_bmp);
 
-  PlanarImage *planar_image =
-      PlanarImage::create_planar_image(args.width, args.height);
-  capture->get_sample(0, *planar_image);
+  PlanarImage planar_image(args.width, args.height);
+  capture.get_sample(0, planar_image);
   timer.print("Read YUV frame 0 from disk to CPU linear memory.");
 
-  writer->append_frame(*planar_image);
+  writer.append_frame(planar_image);
 
   VASurfaceID src_va_surface, ref_va_surface;
   create_va_surface(args.width, args.height, va_display, src_va_surface);
   create_va_surface(args.width, args.height, va_display, ref_va_surface);
-  write_va_surface(va_display, src_va_surface, *planar_image);
+  write_va_surface(va_display, src_va_surface, planar_image);
   timer.print("Copied frame 0 to GPU tiled memory using VAAPI.");
   compute::image2d_va src_image(context, &src_va_surface, 0);
   compute::image2d_va ref_image(context, &ref_va_surface, 0);
 
   for (size_t k = 1; k < frame_count; k++) {
     LOG_INFO << "Processing frame " << k << "...";
-    run_vme_interop(args, context, queue, kernel, *capture, *planar_image,
+    run_vme_interop(args, context, queue, kernel, capture, planar_image,
                     va_display, src_va_surface, ref_va_surface, src_image,
                     ref_image, k);
-    writer->append_frame(*planar_image);
+    writer.append_frame(planar_image);
   }
 
   LOG_INFO << "Wrote " << frame_count << " frames with overlaid "
            << "motion vectors to " << args.output_yuv_path << " .";
-  writer->write_to_file(args.output_yuv_path.c_str());
-
-  FrameWriter::release(writer);
-  Capture::release(capture);
-  PlanarImage::release_image(planar_image);
+  writer.write_to_file(args.output_yuv_path.c_str());
 }
 } // namespace compute_samples

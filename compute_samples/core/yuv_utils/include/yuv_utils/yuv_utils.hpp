@@ -9,6 +9,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <fstream>
+
+#include "align_utils/align_utils.hpp"
 
 namespace compute_samples {
 
@@ -23,9 +26,11 @@ typedef uint8_t intra_shape;
 
 class PlanarImage {
 public:
-  static PlanarImage *create_planar_image(int width, int height,
-                                          int pitch_y = 0);
-  static void release_image(PlanarImage *im);
+  PlanarImage()
+      : y_(nullptr), u_(nullptr), v_(nullptr), width_(0), height_(0),
+        pitch_y_(0), pitch_u_(0), pitch_v_(0) {}
+  PlanarImage(int width, int height, int pitch_y = 0);
+  ~PlanarImage() = default;
 
   void overlay_vectors(const motion_vector *mvs, const inter_shape *shapes);
   void overlay_vectors(const motion_vector *mvs,
@@ -46,10 +51,6 @@ public:
   int get_height() const { return height_; }
 
 private:
-  PlanarImage()
-      : y_(NULL), u_(NULL), v_(NULL), width_(0), height_(0), pitch_y_(0),
-        pitch_u_(0), pitch_v_(0) {}
-  ~PlanarImage() {}
   void draw_pixel(int32_t x, int32_t y, uint8_t *pic, int pic_width,
                   int pic_height, uint8_t u8_pixel);
   void draw_line(int32_t x0, int32_t y0, int32_t dx, int32_t dy, uint8_t *pic,
@@ -59,6 +60,7 @@ private:
                        int &mv_image_height, int &mb_image_width,
                        int &mb_image_height) const;
 
+  align_utils::AlignedVector<uint8_t, 0x1000> data_;
   uint8_t *y_;
   uint8_t *u_;
   uint8_t *v_;
@@ -69,56 +71,45 @@ private:
   int pitch_v_;
 };
 
-class Capture {
+class YuvCapture {
 public:
-  static Capture *create_file_capture(const std::string &fn, int width,
-                                      int height, int frames);
-  static void release(Capture *cap);
+  YuvCapture() = default;
+  YuvCapture(const std::string &fn, int width, int height, int frames = 0);
+  ~YuvCapture() = default;
 
-  virtual ~Capture() {}
-  virtual void get_sample(int frameNum, PlanarImage &im) = 0;
-  virtual void get_sample(int frameNum, PlanarImage &im, bool interlaced,
-                          int polarity) = 0;
+  void get_sample(int frame_num, PlanarImage &im);
+  void get_sample(int frame_num, PlanarImage &im, bool interlaced,
+                  int polarity);
 
   int get_width() const { return width_; }
   int get_height() const { return height_; }
   int get_num_frames() const { return num_frames_; }
 
-protected:
-  Capture() : width_(0), height_(0), num_frames_(0){};
-
+private:
+  std::ifstream file_;
   int width_;
   int height_;
   int num_frames_;
-
-private:
-  Capture(const Capture &);
 };
 
-class FrameWriter {
+class YuvWriter {
 public:
-  static FrameWriter *create_frame_writer(int width, int height,
-                                          int frameNumHint = 0,
-                                          bool bFormatBMPHint = false);
-  static void release(FrameWriter *cap);
+  YuvWriter() = default;
+  YuvWriter(int width, int height, int frame_num_hint, bool b_to_bmps = false);
+  ~YuvWriter() = default;
 
-  virtual void append_frame(const PlanarImage &im) = 0;
-  virtual void write_to_file(const char *fn) = 0;
+  void append_frame(const PlanarImage &im);
+  void write_to_file(const char *fn);
 
   int get_width() const { return width_; }
   int get_height() const { return height_; }
 
-protected:
-  FrameWriter(int width, int height)
-      : width_(width), height_(height), curr_frame_(0) {}
-  virtual ~FrameWriter() {}
-
+private:
   int width_;
   int height_;
-
   int curr_frame_;
-
-private:
-  FrameWriter(const FrameWriter &);
+  bool b_to_bmps_;
+  std::vector<uint8_t> data_;
 };
+
 } // namespace compute_samples

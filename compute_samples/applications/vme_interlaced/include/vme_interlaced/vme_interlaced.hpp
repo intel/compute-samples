@@ -42,14 +42,14 @@ private:
   void run_vme_interlaced_native(
       const VmeInterlacedApplication::Arguments &args,
       compute::context &context, compute::command_queue &queue,
-      compute::kernel &kernel, Capture &capture, PlanarImage &planar_image,
+      compute::kernel &kernel, YuvCapture &capture, PlanarImage &planar_image,
       PlanarImage &top_planar_image, PlanarImage &bot_planar_image,
       compute::image2d &src_image, compute::image2d &ref_image,
       int frame_idx) const;
   void run_vme_interlaced_split(const VmeInterlacedApplication::Arguments &args,
                                 compute::context &context,
                                 compute::command_queue &queue,
-                                compute::kernel &kernel, Capture &capture,
+                                compute::kernel &kernel, YuvCapture &capture,
                                 PlanarImage &field_planar_image,
                                 compute::image2d &src_image,
                                 compute::image2d &ref_image, int polarity,
@@ -65,9 +65,9 @@ private:
                           int width, int mb_count, int mv_count,
                           uint32_t iterations, uint8_t interlaced, int polarity,
                           Timer &timer) const;
-  void get_field_capture_samples(Capture *capture,
-                                 PlanarImage *top_planar_image,
-                                 PlanarImage *bot_planar_image,
+  void get_field_capture_samples(YuvCapture &capture,
+                                 PlanarImage &top_planar_image,
+                                 PlanarImage &bot_planar_image,
                                  int frame_idx) const;
   Arguments parse_command_line(const std::vector<std::string> &command_line);
 };

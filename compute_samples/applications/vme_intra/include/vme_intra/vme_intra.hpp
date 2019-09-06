@@ -35,7 +35,7 @@ private:
   run_vme_intra(const VmeIntraApplication::Arguments &args,
                 compute::context &context, compute::command_queue &queue,
                 compute::kernel &ds_kernel, compute::kernel &hme_n_kernel,
-                compute::kernel &intra_kernel, Capture &capture,
+                compute::kernel &intra_kernel, YuvCapture &capture,
                 PlanarImage &planar_image, compute::image2d &src_image,
                 compute::image2d &ref_image, compute::image2d &src_2x_image,
                 compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
