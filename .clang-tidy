@@ -1,5 +1,5 @@
 ---
-Checks:          '-*, cppcoreguidelines-no-malloc, readability-*, modernize-*, -modernize-use-using'
+Checks:          '-*, readability-*, modernize-*, -modernize-use-using, cppcoreguidelines-*, -cppcoreguidelines-pro-*, -cppcoreguidelines-special-member-functions, -cppcoreguidelines-owning-memory, -cppcoreguidelines-avoid-goto'
 WarningsAsErrors: '*'
 HeaderFilterRegex: 'compute_samples/'
 AnalyzeTemporaryDtors: false
