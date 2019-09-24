@@ -49,7 +49,7 @@ template <> bool ImagePNG<uint32_t>::read(const std::string &image_path) {
 template <> bool ImagePNG<uint32_t>::write(const std::string &image_path) {
   gil::rgba8_image_t image(width(), height());
   std::vector<gil::rgba8_pixel_t> channels;
-  gil::rgba8_view_t view = gil::view(image);
+  const gil::rgba8_view_t &view = gil::view(image);
   for (int id = 0; id < static_cast<int>(pixels_.size()); ++id) {
     uint32_t raw_pixel = pixels_[id];
     gil::rgba8_pixel_t pixel;
