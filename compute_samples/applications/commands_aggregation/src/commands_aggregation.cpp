@@ -38,8 +38,9 @@ compute::buffer create_buffer(const compute::context &context,
 Application::Status CommandsAggregationApplication::run_implementation(
     std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
-  if (args.help)
+  if (args.help) {
     return Status::SKIP;
+  }
 
   Timer timer;
   if (args.in_order) {
@@ -71,13 +72,13 @@ CommandsAggregationApplication::parse_command_line(
       po::command_line_parser(command_line).options(desc).positional(p).run(),
       vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help") != 0u) {
     std::cout << desc;
     args.help = true;
     return args;
   }
 
-  if (vm.count("in-order")) {
+  if (vm.count("in-order") != 0u) {
     args.in_order = true;
   }
 

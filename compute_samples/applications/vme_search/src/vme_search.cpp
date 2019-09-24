@@ -75,7 +75,7 @@ VmeSearchApplication::Arguments VmeSearchApplication::parse_command_line(
       po::command_line_parser(command_line).options(desc).positional(p).run(),
       vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help") != 0u) {
     std::cout << desc;
     args.help = true;
     return args;
@@ -87,9 +87,9 @@ VmeSearchApplication::Arguments VmeSearchApplication::parse_command_line(
     throw std::invalid_argument("Invalid argument for qp. Valid range (0-51).");
   }
 
-  if (args.sub_test.compare("basic_search") &&
-      args.sub_test.compare("cost_heuristics_search") &&
-      args.sub_test.compare("larger_search")) {
+  if ((args.sub_test != "basic_search") &&
+      (args.sub_test != "cost_heuristics_search") &&
+      (args.sub_test != "larger_search")) {
     throw std::invalid_argument("Invalid sub-test");
   }
 
@@ -99,8 +99,9 @@ VmeSearchApplication::Arguments VmeSearchApplication::parse_command_line(
 Application::Status VmeSearchApplication::run_implementation(
     std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
-  if (args.help)
+  if (args.help) {
     return Status::SKIP;
+  }
 
   const compute::device device = compute::system::default_device();
   LOG_INFO << "OpenCL device: " << device.name();
@@ -139,7 +140,7 @@ Application::Status VmeSearchApplication::run_implementation(
 
   YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const int frame_count =
-      (args.frames) ? args.frames : capture.get_num_frames();
+      (args.frames) != 0 ? args.frames : capture.get_num_frames();
   YuvWriter writer(args.width, args.height, frame_count, args.output_bmp);
 
   PlanarImage planar_image(args.width, args.height);

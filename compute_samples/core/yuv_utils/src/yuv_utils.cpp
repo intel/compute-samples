@@ -70,16 +70,18 @@ void PlanarImage::draw_line(int32_t x0, int32_t y0, int32_t dx, int32_t dy,
   int32_t delta_y = abs(y1 - y0);
   int32_t error = delta_x / 2;
   int32_t y_step;
-  if (y0 < y1)
+  if (y0 < y1) {
     y_step = 1;
-  else
+  } else {
     y_step = -1;
+  }
 
   for (; x0 <= x1; x0++) {
-    if (b_steep)
+    if (b_steep) {
       draw_pixel(y0, x0, pic, pic_width, pic_height, u8_pixel);
-    else
+    } else {
       draw_pixel(x0, y0, pic, pic_width, pic_height, u8_pixel);
+    }
 
     error -= delta_y;
     if (error < 0) {
@@ -329,7 +331,7 @@ YuvCapture::YuvCapture(const std::string &fn, int width, int height,
   const int file_size = static_cast<int>(file_.tellg());
   const int frame_size = width * height * 3 / 2 * sizeof(uint8_t);
 
-  if (file_size % frame_size) {
+  if ((file_size % frame_size) != 0) {
     throw std::invalid_argument("YUV file file size error. Wrong dimensions?");
   }
 

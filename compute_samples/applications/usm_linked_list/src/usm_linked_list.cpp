@@ -27,8 +27,9 @@ namespace compute_samples {
 Application::Status UsmLinkedListApplication::run_implementation(
     std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
-  if (args.help)
+  if (args.help) {
     return Status::SKIP;
+  }
 
   const compute::device_intel device(compute::system::default_device());
   LOG_INFO << "OpenCL device: " << device.name();
@@ -47,7 +48,7 @@ Application::Status UsmLinkedListApplication::run_implementation(
     capabilities = device.single_device_shared_mem_capabilities();
   }
 
-  if (!(capabilities & CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL)) {
+  if ((capabilities & CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL) == 0u) {
     LOG_ERROR << "CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL capability is required";
     return Status::SKIP;
   }
@@ -96,7 +97,7 @@ UsmLinkedListApplication::parse_command_line(
       po::command_line_parser(command_line).options(desc).positional(p).run(),
       vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help") != 0u) {
     std::cout << desc;
     args.help = true;
     return args;
@@ -111,7 +112,7 @@ compute::kernel_intel prepare_kernel(const compute::usm_type type) {
   compute::program program = build_program(context, "usm_linked_list.cl");
   compute::kernel_intel kernel(program.create_kernel("usm_linked_list_kernel"));
 
-  const cl_bool value = true;
+  const cl_bool value = CL_TRUE;
   if (type == compute::usm_type::host) {
     kernel.set_exec_info(CL_KERNEL_EXEC_INFO_INDIRECT_HOST_ACCESS_INTEL,
                          sizeof(value), &value);

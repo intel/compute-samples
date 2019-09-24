@@ -11,13 +11,14 @@ namespace compute_samples {
 std::string to_string(const compute::usm_type &x) {
   if (x == compute::usm_type::host) {
     return "host";
-  } else if (x == compute::usm_type::device) {
-    return "device";
-  } else if (x == compute::usm_type::shared) {
-    return "shared";
-  } else {
-    return "unknown";
   }
+  if (x == compute::usm_type::device) {
+    return "device";
+  }
+  if (x == compute::usm_type::shared) {
+    return "shared";
+  }
+  return "unknown";
 }
 } // namespace compute_samples
 
@@ -28,7 +29,7 @@ std::ostream &operator<<(std::ostream &os, const compute::usm_type &x) {
 }
 
 std::istream &operator>>(std::istream &is, compute::usm_type &x) {
-  std::string s = "";
+  std::string s;
   is >> s;
   if (s == "host") {
     x = compute::usm_type::host;

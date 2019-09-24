@@ -57,9 +57,9 @@ std::vector<uint8_t> load_binary_file(const std::string &file_path) {
   }
 
   size_t length = 0;
-  stream.seekg(0, stream.end);
+  stream.seekg(0, std::ifstream::end);
   length = static_cast<size_t>(stream.tellg());
-  stream.seekg(0, stream.beg);
+  stream.seekg(0, std::ifstream::beg);
   LOG_DEBUG << "Binary file length: " << length;
 
   binary_file.resize(length);

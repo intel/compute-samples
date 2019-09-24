@@ -71,7 +71,7 @@ VmeHmeApplication::Arguments VmeHmeApplication::parse_command_line(
       po::command_line_parser(command_line).options(desc).positional(p).run(),
       vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help") != 0u) {
     std::cout << desc;
     args.help = true;
     return args;
@@ -93,8 +93,9 @@ VmeHmeApplication::Arguments VmeHmeApplication::parse_command_line(
 Application::Status
 VmeHmeApplication::run_implementation(std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
-  if (args.help)
+  if (args.help) {
     return Status::SKIP;
+  }
 
   const compute::device device = compute::system::default_device();
   LOG_INFO << "OpenCL device: " << device.name();
@@ -125,7 +126,7 @@ VmeHmeApplication::run_implementation(std::vector<std::string> &command_line) {
 
   YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const int frame_count =
-      (args.frames) ? args.frames : capture.get_num_frames();
+      (args.frames) != 0 ? args.frames : capture.get_num_frames();
   YuvWriter writer(args.width, args.height, frame_count, args.output_bmp);
 
   PlanarImage planar_image(args.width, args.height);

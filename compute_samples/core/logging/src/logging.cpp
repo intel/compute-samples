@@ -86,7 +86,7 @@ std::ostream &operator<<(std::ostream &os, const logging_format &f) {
 }
 
 std::istream &operator>>(std::istream &is, logging_format &f) {
-  std::string s = "";
+  std::string s;
   is >> s;
   if (s == "simple") {
     f = logging_format::simple;

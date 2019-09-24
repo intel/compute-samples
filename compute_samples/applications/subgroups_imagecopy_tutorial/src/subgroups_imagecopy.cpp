@@ -33,8 +33,9 @@ namespace compute_samples {
 Application::Status SubgroupsImageCopyApplication::run_implementation(
     std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
-  if (args.help)
+  if (args.help) {
     return Status::SKIP;
+  }
 
   const compute::device device = compute::system::default_device();
   LOG_INFO << "OpenCL device: " << device.name();
@@ -84,7 +85,7 @@ SubgroupsImageCopyApplication::parse_command_line(
       po::command_line_parser(command_line).options(desc).positional(p).run(),
       vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help") != 0u) {
     std::cout << desc;
     args.help = true;
     return args;

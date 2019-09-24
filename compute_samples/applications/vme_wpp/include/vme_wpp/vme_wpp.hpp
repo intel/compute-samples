@@ -34,7 +34,7 @@ private:
   void
   run_vme_wpp(const VmeWppApplication::Arguments &args, compute::device &device,
               compute::context &context, compute::command_queue &queue,
-              compute::kernel &ds_kernel, compute::kernel &wpp_n_kernel,
+              compute::kernel &ds_kernel, compute::kernel &hme_n_kernel,
               compute::kernel &wpp_kernel, YuvCapture &capture,
               PlanarImage &planar_image, compute::image2d &src_image,
               compute::image2d &ref_image, compute::image2d &src_2x_image,

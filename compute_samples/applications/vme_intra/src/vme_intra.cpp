@@ -70,7 +70,7 @@ VmeIntraApplication::Arguments VmeIntraApplication::parse_command_line(
       po::command_line_parser(command_line).options(desc).positional(p).run(),
       vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help") != 0u) {
     std::cout << desc;
     args.help = true;
     return args;
@@ -139,8 +139,9 @@ void VmeIntraApplication::write_results_to_file(
 Application::Status VmeIntraApplication::run_implementation(
     std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
-  if (args.help)
+  if (args.help) {
     return Status::SKIP;
+  }
 
   const compute::device device = compute::system::default_device();
   LOG_INFO << "OpenCL device: " << device.name();
@@ -171,7 +172,7 @@ Application::Status VmeIntraApplication::run_implementation(
 
   YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const int frame_count =
-      (args.frames) ? args.frames : capture.get_num_frames();
+      (args.frames) != 0 ? args.frames : capture.get_num_frames();
   YuvWriter writer(args.width, args.height, frame_count, args.output_bmp);
 
   PlanarImage planar_image(args.width, args.height);
@@ -350,7 +351,7 @@ void VmeIntraApplication::run_vme_intra(
   cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
   cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
   cl_int iterations = static_cast<cl_int>(mb_image_height);
-  cl_uchar intra_only = (frame_idx == 0);
+  cl_uchar intra_only = static_cast<cl_uchar>(frame_idx == 0);
   intra_kernel.set_args(src_image, ref_image, src_image, pred_buffer, mv_buffer,
                         inter_shape_buffer, inter_residual_buffer,
                         inter_best_residual_buffer, intra_shape_buffer,

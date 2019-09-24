@@ -28,8 +28,9 @@ namespace compute_samples {
 Application::Status UsmHelloWorldApplication::run_implementation(
     std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
-  if (args.help)
+  if (args.help) {
     return Status::SKIP;
+  }
 
   const compute::device_intel device(compute::system::default_device());
   LOG_INFO << "OpenCL device: " << device.name();
@@ -48,7 +49,7 @@ Application::Status UsmHelloWorldApplication::run_implementation(
     capabilities = device.single_device_shared_mem_capabilities();
   }
 
-  if (!(capabilities & CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL)) {
+  if ((capabilities & CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL) == 0u) {
     LOG_ERROR << "CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL capability is required";
     return Status::SKIP;
   }
@@ -87,7 +88,7 @@ UsmHelloWorldApplication::parse_command_line(
       po::command_line_parser(command_line).options(desc).positional(p).run(),
       vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help") != 0u) {
     std::cout << desc;
     args.help = true;
     return args;

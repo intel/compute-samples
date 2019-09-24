@@ -17,9 +17,9 @@ class BmpUtils {
 public:
   static bool save_image_as_bmp(uint32_t *ptr, int width, int height,
                                 const char *file_name);
-  static bool save_image_as_bmp_32fc4(float *ptr, float scale, int width,
+  static bool save_image_as_bmp_32fc4(const float *ptr, float scale, int width,
                                       int height, const char *file_name);
-  static bool save_image_as_bmp_8u(uint8_t *ptr, int width, int height,
+  static bool save_image_as_bmp_8u(const uint8_t *ptr, int width, int height,
                                    const char *file_name);
 
   static bool load_bmp_image(uint8_t *&data, int &width, int &height,

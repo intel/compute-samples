@@ -65,20 +65,20 @@ VAManager::VAManager() {
 
   vaGetDisplay = (vaGetDisplayFPTR)dlsym(libVaX11Handle, "vaGetDisplay");
   error = dlerror();
-  if (!vaGetDisplay && error != nullptr) {
+  if ((vaGetDisplay == nullptr) && error != nullptr) {
     LOG_ERROR << "dlsym error vaGetDisplay: " << error;
   }
 
   XOpenDisplay = (XOpenDisplayFPTR)dlsym(libVaX11Handle, "XOpenDisplay");
   error = dlerror();
-  if (!XOpenDisplay && error != nullptr) {
+  if ((XOpenDisplay == nullptr) && error != nullptr) {
     LOG_ERROR << "dlsym error XOpenDisplay: " << error;
   }
 
   vaGetDisplayDRM =
       (vaGetDisplayDRMFPTR)dlsym(libVaDRMHandle, "vaGetDisplayDRM");
   error = dlerror();
-  if (!vaGetDisplayDRM && error != nullptr) {
+  if ((vaGetDisplayDRM == nullptr) && error != nullptr) {
     LOG_ERROR << "dlsym error vaGetDisplayDRM: " << error;
   }
 
@@ -105,7 +105,7 @@ static VADisplay get_va_display() {
   VAStatus status = -1;
 
   VADisplay display = manager.XOpenDisplay(nullptr);
-  if (display) {
+  if (display != nullptr) {
     va_display = manager.vaGetDisplay(display);
     status = manager.vaInitialize(va_display, &major_version, &minor_version);
   }
@@ -140,7 +140,7 @@ compute::device get_va_device(const compute::platform &platform,
       (clGetDeviceIDsFromVA_APIMediaAdapterINTEL_fn)
           platform.get_extension_function_address(
               "clGetDeviceIDsFromVA_APIMediaAdapterINTEL");
-  if (!cl_get_va_device_ids) {
+  if (cl_get_va_device_ids == nullptr) {
     throw std::runtime_error("clGetExtensionFunctionAddressForPlatform("
                              "clGetDeviceIDsFromVA_APIMediaAdapterINTEL) "
                              "returned nullptr.");
@@ -183,7 +183,7 @@ static void acquire_va_surfaces(const compute::platform &platform,
       (clEnqueueAcquireVA_APIMediaSurfacesINTEL_fn)
           platform.get_extension_function_address(
               "clEnqueueAcquireVA_APIMediaSurfacesINTEL");
-  if (!cl_acquire_va_surface) {
+  if (cl_acquire_va_surface == nullptr) {
     throw std::runtime_error("acquire_va_surface failed");
   }
   cl_acquire_va_surface(queue.get(), 2, images_shared, 0, nullptr, nullptr);
@@ -198,7 +198,7 @@ static void release_va_surfaces(const compute::platform &platform,
       (clEnqueueReleaseVA_APIMediaSurfacesINTEL_fn)
           platform.get_extension_function_address(
               "clEnqueueReleaseVA_APIMediaSurfacesINTEL");
-  if (!cl_release_va_surface) {
+  if (cl_release_va_surface == nullptr) {
     throw std::runtime_error("release_va_surface failed");
   }
   cl_release_va_surface(queue.get(), 2, images_shared, 0, nullptr, nullptr);
@@ -398,7 +398,7 @@ void VmeInteropApplication::run_os_specific_implementation(
 
   YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const size_t frame_count =
-      (args.frames) ? args.frames : capture.get_num_frames();
+      (args.frames) != 0 ? args.frames : capture.get_num_frames();
   YuvWriter writer(args.width, args.height, frame_count, args.output_bmp);
 
   PlanarImage planar_image(args.width, args.height);

@@ -75,7 +75,7 @@ VmeInterlacedApplication::parse_command_line(
       po::command_line_parser(command_line).options(desc).positional(p).run(),
       vm);
 
-  if (vm.count("help")) {
+  if (vm.count("help") != 0u) {
     std::cout << desc;
     args.help = true;
     return args;
@@ -83,9 +83,9 @@ VmeInterlacedApplication::parse_command_line(
 
   po::notify(vm);
 
-  if (!args.sub_test.compare("native")) {
+  if (args.sub_test == "native") {
     args.native = 1;
-  } else if (!args.sub_test.compare("split")) {
+  } else if (args.sub_test == "split") {
     args.native = 0;
   } else {
     throw std::invalid_argument("Invalid sub-test");
@@ -97,8 +97,9 @@ VmeInterlacedApplication::parse_command_line(
 Application::Status VmeInterlacedApplication::run_implementation(
     std::vector<std::string> &command_line) {
   const Arguments args = parse_command_line(command_line);
-  if (args.help)
+  if (args.help) {
     return Status::SKIP;
+  }
 
   const compute::device device = compute::system::default_device();
   LOG_INFO << "OpenCL device: " << device.name();
@@ -127,7 +128,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
 
   YuvCapture capture(args.input_yuv_path, args.width, args.height, args.frames);
   const int frame_count =
-      (args.frames) ? args.frames : capture.get_num_frames();
+      (args.frames) != 0 ? args.frames : capture.get_num_frames();
   const int field_height = args.height / 2;
 
   YuvWriter top_writer(args.width, field_height, frame_count, args.output_bmp);
@@ -136,7 +137,7 @@ Application::Status VmeInterlacedApplication::run_implementation(
   PlanarImage top_planar_image(args.width, field_height);
   PlanarImage bot_planar_image(args.width, field_height);
 
-  if (args.native) {
+  if (args.native != 0) {
     compute::image_format format(CL_R, CL_UNORM_INT8);
     compute::image2d ref_image(context, args.width, args.height, format);
     compute::image2d src_image(context, args.width, args.height, format);

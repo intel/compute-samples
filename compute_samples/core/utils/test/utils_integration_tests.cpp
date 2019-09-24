@@ -17,7 +17,7 @@ TEST(LoadTextFile, ValidFile) {
 
 TEST(LoadTextFile, NotExistingFile) {
   const std::string text = compute_samples::load_text_file("invalid/path");
-  const std::string reference = "";
+  const std::string reference;
   EXPECT_EQ(reference, text);
 }
 

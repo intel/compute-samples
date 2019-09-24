@@ -55,7 +55,7 @@ compute::program create_with_il_file(const std::string &file,
   cl_int error = 0;
   cl_program clprogram = clCreateProgramWithIL(context, binary_spv_file.data(),
                                                binary_spv_file.size(), &error);
-  if (error) {
+  if (error != 0) {
     BOOST_THROW_EXCEPTION(compute::opencl_error(error));
   }
 

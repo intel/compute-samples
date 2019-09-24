@@ -58,8 +58,9 @@ bool BmpUtils::save_image_as_bmp(uint32_t *ptr, int width, int height,
   uint32_t *ppix = ptr;
   stream = fopen(file_name, "wb");
 
-  if (nullptr == stream)
+  if (nullptr == stream) {
     return false;
+  }
 
   BMPFileHeader file_header;
   BMPInfoHeader info_header;
@@ -120,7 +121,7 @@ error_exit:
   return false;
 }
 
-bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, int width,
+bool BmpUtils::save_image_as_bmp_32fc4(const float *ptr, float scale, int width,
                                        int height, const char *file_name) {
   // save results in bitmap files
   float tmp_f_val = 0.0f;
@@ -131,23 +132,27 @@ bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, int width,
       // Ensure that no value is greater than 255.0
       uint32_t ui_tmp[4];
       tmp_f_val = (scale * ptr[(y * width + x) * 4 + 0]);
-      if (tmp_f_val > 255.0f)
+      if (tmp_f_val > 255.0f) {
         tmp_f_val = 255.0f;
+      }
       ui_tmp[0] = (uint32_t)(tmp_f_val);
 
       tmp_f_val = (scale * ptr[(y * width + x) * 4 + 1]);
-      if (tmp_f_val > 255.0f)
+      if (tmp_f_val > 255.0f) {
         tmp_f_val = 255.0f;
+      }
       ui_tmp[1] = (uint32_t)(tmp_f_val);
 
       tmp_f_val = (scale * ptr[(y * width + x) * 4 + 2]);
-      if (tmp_f_val > 255.0f)
+      if (tmp_f_val > 255.0f) {
         tmp_f_val = 255.0f;
+      }
       ui_tmp[2] = (uint32_t)(tmp_f_val);
 
       tmp_f_val = (scale * ptr[(y * width + x) * 4 + 3]);
-      if (tmp_f_val > 255.0f)
+      if (tmp_f_val > 255.0f) {
         tmp_f_val = 255.0f;
+      }
       ui_tmp[3] = 1; // Alfa
 
       out_u_int_buf[y * width + x] = 0x000000FF & ui_tmp[2];
@@ -160,7 +165,7 @@ bool BmpUtils::save_image_as_bmp_32fc4(float *ptr, float scale, int width,
   return save_image_as_bmp(out_u_int_buf.data(), width, height, file_name);
 }
 
-bool BmpUtils::save_image_as_bmp_8u(uint8_t *ptr, int width, int height,
+bool BmpUtils::save_image_as_bmp_8u(const uint8_t *ptr, int width, int height,
                                     const char *file_name) {
   std::vector<uint32_t> out_u_int_buf(width * height);
 
@@ -185,8 +190,9 @@ bool BmpUtils::load_bmp_image(uint8_t *&data, int &width, int &height,
 
   stream = fopen(file_name, "rb");
 
-  if (nullptr == stream)
+  if (nullptr == stream) {
     return false;
+  }
 
   BMPFileHeader file_header;
   BMPInfoHeader info_header;
@@ -214,12 +220,14 @@ bool BmpUtils::load_bmp_image(uint8_t *&data, int &width, int &height,
   // Pitch is a multiple of four bytes:
   pitch = (pitch + (4 - 1)) & ~(4 - 1);
 
-  if ((height > (1 << 16)) || (pitch > (1 << 16)))
+  if ((height > (1 << 16)) || (pitch > (1 << 16))) {
     goto error_exit;
+  }
 
   data = new uint8_t[height * pitch];
-  if (nullptr == data)
+  if (nullptr == data) {
     goto error_exit;
+  }
 
   if (info_header.bi_height_ > 0) {
     for (int h = 0; h < height; h++) {
