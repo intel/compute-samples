@@ -15,7 +15,7 @@
 
 class SubgroupsVisualizationSystemTests : public testing::Test {
 protected:
-  virtual void TearDown() { std::remove(output_file_.c_str()); }
+  void TearDown() override { std::remove(output_file_.c_str()); }
 
   const std::string solution_cl_file = "subgroups_visualization_solution.cl";
   const std::string output_file_ = "output.bmp";

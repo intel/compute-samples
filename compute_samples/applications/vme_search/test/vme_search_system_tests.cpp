@@ -17,7 +17,7 @@
 
 class VmeSearchSystemTests : public testing::Test {
 protected:
-  virtual void TearDown() { std::remove(output_file_.c_str()); }
+  void TearDown() override { std::remove(output_file_.c_str()); }
 
   void verify(std::string sub_test) {
     std::vector<std::string> command_line = {

@@ -26,7 +26,7 @@ HWTEST_P(UsmLinkedListIntegrationTests, PrepareKernel) {
 }
 
 HWTEST_P(UsmLinkedListIntegrationTests, AllocateMemory) {
-  cs::Node *p = cs::allocate_memory<cs::Node>(GetParam());
+  auto *p = cs::allocate_memory<cs::Node>(GetParam());
   EXPECT_NE(nullptr, p);
 
   compute::context context(compute::system::default_context());

@@ -67,7 +67,7 @@ Application::Status UsmMemInfoApplication::run_implementation(
       context, pointer + 4, CL_MEM_ALLOC_BASE_PTR_INTEL);
   LOG_INFO << "Base of offset pointer: " << base;
 
-  const size_t size = compute::get_mem_alloc_info<size_t>(
+  const auto size = compute::get_mem_alloc_info<size_t>(
       context, pointer + 4, CL_MEM_ALLOC_SIZE_INTEL);
   LOG_INFO << "Size of offset pointer: " << size;
 

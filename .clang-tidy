@@ -1,5 +1,5 @@
 ---
-Checks:          '-*, modernize-use-nullptr, modernize-avoid-c-arrays, modernize-redundant-void-arg, modernize-replace-auto-ptr, cppcoreguidelines-no-malloc, readability-*'
+Checks:          '-*, cppcoreguidelines-no-malloc, readability-*, modernize-*, -modernize-use-using'
 WarningsAsErrors: '*'
 HeaderFilterRegex: 'compute_samples/'
 AnalyzeTemporaryDtors: false

@@ -15,7 +15,7 @@
 
 class SubgroupsImageCopySystemTests : public testing::Test {
 protected:
-  virtual void TearDown() { std::remove(output_file_.c_str()); }
+  void TearDown() override { std::remove(output_file_.c_str()); }
 
   const std::string reference_file_ = "input.bmp";
   const std::string output_file_ = "output.bmp";

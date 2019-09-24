@@ -229,14 +229,14 @@ void VmeSearchApplication::run_vme_search(
                             planar_image.get_pitch_y());
   timer.print("Copied frame to GPU tiled memory.");
 
-  cl_uchar qp = static_cast<cl_uchar>(args.qp);
+  auto qp = static_cast<cl_uchar>(args.qp);
   cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
   cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
-  cl_int iterations = static_cast<cl_int>(mb_image_height);
+  auto iterations = static_cast<cl_int>(mb_image_height);
   kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer, residual_buffer,
                   shape_buffer, qp, sad_adjustment, pixel_mode, iterations);
   size_t local_size = 16;
-  size_t global_size = static_cast<size_t>(au::align16(width));
+  auto global_size = static_cast<size_t>(au::align16(width));
   queue.enqueue_nd_range_kernel(kernel, 1, nullptr, &global_size, &local_size);
   timer.print("Kernel queued.");
 

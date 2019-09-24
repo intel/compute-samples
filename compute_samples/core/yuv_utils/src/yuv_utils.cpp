@@ -9,9 +9,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 #include <sstream>
 #include <stdexcept>
-#include <string.h>
 #include <vector>
 
 #include "image/image.hpp"
@@ -463,18 +463,18 @@ void YuvWriter::write_to_file(const char *fn) {
           using namespace std;
           // R is the 3rd component in the bitmap (which is actualy stored as
           // BGRA)
-          const int32_t r =
+          const auto r =
               (int32_t)(1.164f * (float(y) - 16) + 1.596f * (float(v) - 128));
           frame[j + width_ * i].s[2] =
               static_cast<uint8_t>(std::min(255, std::max(r, 0)));
           // G
-          const int32_t g =
+          const auto g =
               (int32_t)(1.164f * (float(y) - 16) - 0.813f * (float(v) - 128) -
                         0.391f * (float(u) - 128));
           frame[j + width_ * i].s[1] =
               static_cast<uint8_t>(std::min(255, std::max(g, 0)));
           // B
-          const int32_t b =
+          const auto b =
               (int32_t)(1.164f * (float(y) - 16) + 2.018f * (float(u) - 128));
           frame[j + width_ * i].s[0] =
               static_cast<uint8_t>(std::min(255, std::max(b, 0)));
@@ -502,7 +502,7 @@ void YuvWriter::write_to_file(const char *fn) {
 void YuvWriter::append_frame(const PlanarImage &im) {
   data_.resize((curr_frame_ + 1) * width_ * height_ * 3 / 2);
 
-  uint8_t *p_src = (uint8_t *)im.get_y();
+  auto *p_src = (uint8_t *)im.get_y();
   uint8_t *p_dst = &data_[curr_frame_ * width_ * height_ * 3 / 2];
   int p_dst_size = width_ * height_ * 3 / 2;
   for (int y = 0; y < im.get_height(); ++y) {

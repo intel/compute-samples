@@ -17,7 +17,7 @@
 
 class VmeInterlacedSystemTests : public testing::Test {
 protected:
-  virtual void TearDown() {
+  void TearDown() override {
     std::remove(output_top_file_.c_str());
     std::remove(output_bot_file_.c_str());
     std::remove(reference_top_file_.c_str());

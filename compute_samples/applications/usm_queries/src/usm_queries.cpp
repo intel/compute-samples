@@ -73,16 +73,16 @@ UsmQueriesApplication::Arguments UsmQueriesApplication::parse_command_line(
 std::string to_string(const cl_unified_shared_memory_capabilities_intel &x) {
   std::vector<std::string> v;
   if ((x & CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL) != 0u) {
-    v.push_back("CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL");
+    v.emplace_back("CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL");
   }
   if ((x & CL_UNIFIED_SHARED_MEMORY_ATOMIC_ACCESS_INTEL) != 0u) {
-    v.push_back("CL_UNIFIED_SHARED_MEMORY_ATOMIC_ACCESS_INTEL");
+    v.emplace_back("CL_UNIFIED_SHARED_MEMORY_ATOMIC_ACCESS_INTEL");
   }
   if ((x & CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ACCESS_INTEL) != 0u) {
-    v.push_back("CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ACCESS_INTEL");
+    v.emplace_back("CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ACCESS_INTEL");
   }
   if ((x & CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ATOMIC_ACCESS_INTEL) != 0u) {
-    v.push_back("CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ATOMIC_ACCESS_INTEL");
+    v.emplace_back("CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ATOMIC_ACCESS_INTEL");
   }
 
   std::ostringstream ss;

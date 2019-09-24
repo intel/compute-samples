@@ -136,7 +136,7 @@ static VADisplay get_va_display() {
 
 compute::device get_va_device(const compute::platform &platform,
                               const VADisplay va_display) {
-  clGetDeviceIDsFromVA_APIMediaAdapterINTEL_fn cl_get_va_device_ids =
+  auto cl_get_va_device_ids =
       (clGetDeviceIDsFromVA_APIMediaAdapterINTEL_fn)
           platform.get_extension_function_address(
               "clGetDeviceIDsFromVA_APIMediaAdapterINTEL");
@@ -179,7 +179,7 @@ static void acquire_va_surfaces(const compute::platform &platform,
                                 compute::image2d &src_image,
                                 compute::image2d &ref_image) {
   cl_mem images_shared[] = {src_image.get(), ref_image.get()};
-  clEnqueueAcquireVA_APIMediaSurfacesINTEL_fn cl_acquire_va_surface =
+  auto cl_acquire_va_surface =
       (clEnqueueAcquireVA_APIMediaSurfacesINTEL_fn)
           platform.get_extension_function_address(
               "clEnqueueAcquireVA_APIMediaSurfacesINTEL");
@@ -194,7 +194,7 @@ static void release_va_surfaces(const compute::platform &platform,
                                 compute::image2d &src_image,
                                 compute::image2d &ref_image) {
   cl_mem images_shared[] = {src_image.get(), ref_image.get()};
-  clEnqueueReleaseVA_APIMediaSurfacesINTEL_fn cl_release_va_surface =
+  auto cl_release_va_surface =
       (clEnqueueReleaseVA_APIMediaSurfacesINTEL_fn)
           platform.get_extension_function_address(
               "clEnqueueReleaseVA_APIMediaSurfacesINTEL");
@@ -343,7 +343,7 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
 
     timer.print("Created opencl mem objects.");
 
-    cl_int iterations = static_cast<cl_int>(mb_image_height);
+    auto iterations = static_cast<cl_int>(mb_image_height);
     kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer,
                     residual_buffer, shape_buffer, iterations);
 

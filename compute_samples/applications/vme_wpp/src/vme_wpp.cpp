@@ -313,7 +313,7 @@ void VmeWppApplication::run_vme_wpp(
       CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, shapes.data());
   timer.print("Created opencl mem objects for tier 0 wpp kernel");
 
-  cl_uchar qp = static_cast<cl_uchar>(args.qp);
+  auto qp = static_cast<cl_uchar>(args.qp);
   cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
   cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
   wpp_kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer,

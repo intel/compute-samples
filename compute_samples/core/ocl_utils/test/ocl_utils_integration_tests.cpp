@@ -18,12 +18,12 @@ namespace cs = compute_samples;
 
 class BuildProgram : public testing::Test {
 protected:
-  virtual void SetUp() {
+  void SetUp() override {
     device = compute::system::default_device();
     context = compute::context(device);
   }
 
-  virtual void TearDown() { std::remove(cl_file.c_str()); }
+  void TearDown() override { std::remove(cl_file.c_str()); }
 
   const std::string cl_file = "kernel.cl";
   const std::string spv_file = "kernel.spv";

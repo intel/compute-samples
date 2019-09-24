@@ -7,10 +7,10 @@
 
 #include "bmp.hpp"
 
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <memory.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "logging/logging.hpp"
 

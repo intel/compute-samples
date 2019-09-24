@@ -295,10 +295,10 @@ void VmeHmeApplication::run_vme_hme(
       CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, shapes.data());
   timer.print("Created opencl mem objects for tier 0 hme kernel");
 
-  cl_uchar qp = static_cast<cl_uchar>(args.qp);
+  auto qp = static_cast<cl_uchar>(args.qp);
   cl_uchar sad_adjustment = CL_AVC_ME_SAD_ADJUST_MODE_NONE_INTEL;
   cl_uchar pixel_mode = CL_AVC_ME_SUBPIXEL_MODE_QPEL_INTEL;
-  cl_int iterations = static_cast<cl_int>(mb_image_height);
+  auto iterations = static_cast<cl_int>(mb_image_height);
   hme_kernel.set_args(src_image, ref_image, pred_buffer, mv_buffer,
                       residual_buffer, shape_buffer, qp, sad_adjustment,
                       pixel_mode, iterations);

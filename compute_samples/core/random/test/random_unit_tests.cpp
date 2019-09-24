@@ -58,7 +58,7 @@ TYPED_TEST(GenerateValue, WithinTypeMinAndMaxValue) {
   const TypeParam min = std::numeric_limits<TypeParam>::min();
   const TypeParam max = std::numeric_limits<TypeParam>::max();
   for (int i = 0; i < this->iterations; ++i) {
-    const TypeParam value = cs::generate_value<TypeParam>(this->seed);
+    const auto value = cs::generate_value<TypeParam>(this->seed);
     EXPECT_GE(value, min);
     EXPECT_LE(value, max);
   }
