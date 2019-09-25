@@ -36,8 +36,7 @@ private:
   Status run_implementation(std::vector<std::string> &command_line) override;
 
   Arguments parse_command_line(const std::vector<std::string> &command_line);
-  void run_os_specific_implementation(std::vector<std::string> &,
-                                      const Arguments &,
+  void run_os_specific_implementation(const Arguments &,
                                       const compute::device &) const;
 };
 } // namespace compute_samples

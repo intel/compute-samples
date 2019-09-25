@@ -102,7 +102,7 @@ Application::Status VmeInteropApplication::run_implementation(
   LOG_INFO << "Input yuv path: " << args.input_yuv_path;
   LOG_INFO << "Frame size: " << args.width << "x" << args.height << " pixels";
 
-  run_os_specific_implementation(command_line, args, device);
+  run_os_specific_implementation(args, device);
 
   timer_total.print("Total");
   return Status::OK;

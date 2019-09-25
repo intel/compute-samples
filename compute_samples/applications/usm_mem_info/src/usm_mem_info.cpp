@@ -10,9 +10,6 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <boost/compute/intel/usm.hpp>
-namespace compute = boost::compute;
-
 #include "logging/logging.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 #include "ocl_utils/unified_shared_memory.hpp"

@@ -15,9 +15,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/program_options.hpp>
-namespace po = boost::program_options;
-
 #include <boost/compute/core.hpp>
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
@@ -374,8 +371,7 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
 }
 
 void VmeInteropApplication::run_os_specific_implementation(
-    std::vector<std::string> &command_line, const Arguments &args,
-    const compute::device &device) const {
+    const Arguments &args, const compute::device &device) const {
   VADisplay va_display = get_va_display();
 
   if (get_va_device(device.platform(), va_display) != device) {

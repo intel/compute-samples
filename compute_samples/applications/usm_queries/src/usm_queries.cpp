@@ -12,8 +12,6 @@ namespace po = boost::program_options;
 
 #include <boost/compute/core.hpp>
 #include <boost/compute/intel/device.hpp>
-namespace compute = boost::compute;
-
 #include "ocl_utils/ocl_utils.hpp"
 #include "logging/logging.hpp"
 

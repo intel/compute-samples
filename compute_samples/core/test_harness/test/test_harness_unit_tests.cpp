@@ -8,8 +8,6 @@
 #include "test_harness/test_harness.hpp"
 #include "gtest/gtest.h"
 
-namespace cs = compute_samples;
-
 HWTEST(Test, TestCaseName) {
   const ::testing::TestInfo *const test_info =
       ::testing::UnitTest::GetInstance()->current_test_info();

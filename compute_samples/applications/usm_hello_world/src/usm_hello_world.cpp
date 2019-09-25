@@ -17,8 +17,6 @@ namespace po = boost::program_options;
 #include <boost/compute/intel/command_queue.hpp>
 #include <boost/compute/intel/device.hpp>
 #include <boost/compute/intel/kernel.hpp>
-namespace compute = boost::compute;
-
 #include "ocl_utils/ocl_utils.hpp"
 #include "ocl_utils/unified_shared_memory.hpp"
 #include "logging/logging.hpp"
