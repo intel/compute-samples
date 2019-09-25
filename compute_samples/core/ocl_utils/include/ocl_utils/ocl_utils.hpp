@@ -11,15 +11,14 @@
 #include <vector>
 
 #include <boost/compute/core.hpp>
-namespace compute = boost::compute;
 
 namespace compute_samples {
-compute::program build_program(const compute::context &context,
-                               const std::string &file,
-                               const std::string &options = std::string());
-compute::program build_program_il(const compute::context &context,
-                                  const std::string &file,
-                                  const std::string &options = "");
+boost::compute::program
+build_program(const boost::compute::context &context, const std::string &file,
+              const std::string &options = std::string());
+boost::compute::program build_program_il(const boost::compute::context &context,
+                                         const std::string &file,
+                                         const std::string &options = "");
 
 template <typename T> std::string to_cl_c_string();
 

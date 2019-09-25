@@ -7,6 +7,8 @@
 
 #include "ocl_utils/unified_shared_memory.hpp"
 
+namespace compute = boost::compute;
+
 namespace compute_samples {
 std::string to_string(const compute::usm_type &x) {
   if (x == compute::usm_type::host) {

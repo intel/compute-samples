@@ -8,11 +8,13 @@
 #include "usm_mem_info/usm_mem_info.hpp"
 
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 
 #include "logging/logging.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 #include "ocl_utils/unified_shared_memory.hpp"
+
+namespace po = boost::program_options;
+namespace compute = boost::compute;
 
 namespace compute_samples {
 Application::Status UsmMemInfoApplication::run_implementation(

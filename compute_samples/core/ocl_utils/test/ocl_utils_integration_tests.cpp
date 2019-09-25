@@ -15,6 +15,7 @@
 #include "test_harness/test_harness.hpp"
 
 namespace cs = compute_samples;
+namespace compute = boost::compute;
 
 class BuildProgram : public testing::Test {
 protected:

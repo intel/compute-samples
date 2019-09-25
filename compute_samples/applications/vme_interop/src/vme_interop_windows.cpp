@@ -11,6 +11,8 @@
 
 #include "logging/logging.hpp"
 
+namespace compute = boost::compute;
+
 namespace compute_samples {
 
 void VmeInteropApplication::run_os_specific_implementation(

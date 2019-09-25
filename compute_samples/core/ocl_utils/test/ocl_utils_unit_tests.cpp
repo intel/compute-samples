@@ -10,6 +10,7 @@
 #include "utils/utils.hpp"
 
 namespace cs = compute_samples;
+namespace compute = boost::compute;
 
 template <typename T> class SizeInBytes : public testing::Test {};
 typedef testing::Types<cl_char, cl_uchar, cl_short, cl_ushort, cl_int, cl_uint,

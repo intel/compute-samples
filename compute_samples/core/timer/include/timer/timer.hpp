@@ -9,7 +9,6 @@
 #define COMPUTE_SAMPLES_TIMER_HPP
 
 #include <boost/timer/timer.hpp>
-namespace timer = boost::timer;
 
 namespace compute_samples {
 class Timer {
@@ -18,7 +17,7 @@ public:
   void print(const std::string &event_name);
 
 private:
-  timer::cpu_timer timer_;
+  boost::timer::cpu_timer timer_;
   const std::string timer_format_ = "%ws";
 };
 } // namespace compute_samples

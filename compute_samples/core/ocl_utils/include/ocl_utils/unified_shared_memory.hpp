@@ -12,16 +12,15 @@
 #include <string>
 
 #include "boost/compute/intel/usm.hpp"
-namespace compute = boost::compute;
 
 namespace compute_samples {
-std::string to_string(const compute::usm_type &x);
+std::string to_string(const boost::compute::usm_type &x);
 } // namespace compute_samples
 
 namespace boost {
 namespace compute {
-std::ostream &operator<<(std::ostream &os, const compute::usm_type &x);
-std::istream &operator>>(std::istream &is, compute::usm_type &x);
+std::ostream &operator<<(std::ostream &os, const boost::compute::usm_type &x);
+std::istream &operator>>(std::istream &is, boost::compute::usm_type &x);
 } // namespace compute
 } // namespace boost
 

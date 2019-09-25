@@ -22,7 +22,6 @@
 #include <CL/cl_ext_intel.h>
 
 #include "align_utils/align_utils.hpp"
-namespace au = compute_samples::align_utils;
 
 #include "boost/compute/intel/image/image2d_va.hpp"
 #include "timer/timer.hpp"
@@ -40,6 +39,9 @@ namespace au = compute_samples::align_utils;
 #ifndef DRM_DEVICE_PATH
 #define DRM_DEVICE_PATH "/dev/dri/card0"
 #endif
+
+namespace au = compute_samples::align_utils;
+namespace compute = boost::compute;
 
 namespace compute_samples {
 

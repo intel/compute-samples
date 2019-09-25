@@ -12,7 +12,6 @@
 #include <numeric>
 
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 
 #include <boost/compute/core.hpp>
 #include <boost/compute/intel/command_queue.hpp>
@@ -20,6 +19,9 @@ namespace po = boost::program_options;
 #include "ocl_utils/ocl_utils.hpp"
 #include "logging/logging.hpp"
 #include "timer/timer.hpp"
+
+namespace po = boost::program_options;
+namespace compute = boost::compute;
 
 namespace compute_samples {
 Application::Status UsmLinkedListApplication::run_implementation(

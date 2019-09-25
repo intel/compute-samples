@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <boost/compute/core.hpp>
-namespace compute = boost::compute;
 
 #include "application/application.hpp"
 
@@ -29,8 +28,9 @@ private:
   };
   Arguments
   parse_command_line(const std::vector<std::string> &command_line) const;
-  void run_subgroups_imagecopy(const Arguments &args, compute::context &context,
-                               compute::command_queue &queue) const;
+  void run_subgroups_imagecopy(const Arguments &args,
+                               boost::compute::context &context,
+                               boost::compute::command_queue &queue) const;
 };
 
 } // namespace compute_samples

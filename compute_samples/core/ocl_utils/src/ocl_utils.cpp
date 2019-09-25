@@ -9,6 +9,8 @@
 #include "utils/utils.hpp"
 #include "logging/logging.hpp"
 
+namespace compute = boost::compute;
+
 namespace compute_samples {
 void try_build(compute::program &program, const std::string &options) {
   LOG_ENTER_FUNCTION

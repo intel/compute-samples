@@ -14,13 +14,15 @@
 #include <stdexcept>
 
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 
 #include <boost/compute/core.hpp>
 #include <boost/compute/utility.hpp>
 
 #include "timer/timer.hpp"
 #include "logging/logging.hpp"
+
+namespace po = boost::program_options;
+namespace compute = boost::compute;
 
 namespace compute_samples {
 

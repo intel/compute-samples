@@ -15,7 +15,6 @@
 #include <vector>
 
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 
 #include <boost/compute/core.hpp>
 #include <boost/compute/image.hpp>
@@ -26,6 +25,10 @@ namespace po = boost::program_options;
 
 #include "ocl_utils/ocl_utils.hpp"
 #include "logging/logging.hpp"
+
+namespace au = compute_samples::align_utils;
+namespace po = boost::program_options;
+namespace compute = boost::compute;
 
 namespace compute_samples {
 

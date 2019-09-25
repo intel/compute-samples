@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <boost/compute/core.hpp>
-namespace compute = boost::compute;
 
 #include "application/application.hpp"
 #include "yuv_utils/yuv_utils.hpp"
@@ -31,16 +30,18 @@ private:
     bool help = false;
   };
 
-  void
-  run_vme_intra(const VmeIntraApplication::Arguments &args,
-                compute::context &context, compute::command_queue &queue,
-                compute::kernel &ds_kernel, compute::kernel &hme_n_kernel,
-                compute::kernel &intra_kernel, YuvCapture &capture,
-                PlanarImage &planar_image, compute::image2d &src_image,
-                compute::image2d &ref_image, compute::image2d &src_2x_image,
-                compute::image2d &ref_2x_image, compute::image2d &src_4x_image,
-                compute::image2d &ref_4x_image, compute::image2d &src_8x_image,
-                compute::image2d &ref_8x_image, int frame_idx) const;
+  void run_vme_intra(
+      const VmeIntraApplication::Arguments &args,
+      boost::compute::context &context, boost::compute::command_queue &queue,
+      boost::compute::kernel &ds_kernel, boost::compute::kernel &hme_n_kernel,
+      boost::compute::kernel &intra_kernel, YuvCapture &capture,
+      PlanarImage &planar_image, boost::compute::image2d &src_image,
+      boost::compute::image2d &ref_image, boost::compute::image2d &src_2x_image,
+      boost::compute::image2d &ref_2x_image,
+      boost::compute::image2d &src_4x_image,
+      boost::compute::image2d &ref_4x_image,
+      boost::compute::image2d &src_8x_image,
+      boost::compute::image2d &ref_8x_image, int frame_idx) const;
   void write_results_to_file(const cl_ulong *intra_modes,
                              const cl_uchar *intra_shapes,
                              const cl_ushort *intra_residuals,

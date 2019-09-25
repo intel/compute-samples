@@ -12,7 +12,6 @@
 #include <vector>
 
 #include <boost/compute/core.hpp>
-namespace compute = boost::compute;
 
 #include "application/application.hpp"
 
@@ -37,7 +36,7 @@ private:
 
   Arguments parse_command_line(const std::vector<std::string> &command_line);
   void run_os_specific_implementation(const Arguments &,
-                                      const compute::device &) const;
+                                      const boost::compute::device &) const;
 };
 } // namespace compute_samples
 

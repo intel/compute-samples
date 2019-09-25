@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 
 #include <boost/compute/memory_object.hpp>
 #include <boost/compute/utility.hpp>
@@ -18,6 +17,9 @@ namespace po = boost::program_options;
 #include "timer/timer.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 #include "logging/logging.hpp"
+
+namespace po = boost::program_options;
+namespace compute = boost::compute;
 
 namespace compute_samples {
 Application::Status MedianFilterApplication::run_implementation(

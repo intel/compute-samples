@@ -9,7 +9,9 @@
 #include "usm_linked_list/usm_linked_list.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 #include "test_harness/test_harness.hpp"
+
 namespace cs = compute_samples;
+namespace compute = boost::compute;
 
 class UsmLinkedListIntegrationTests
     : public ::testing::TestWithParam<compute::usm_type> {};

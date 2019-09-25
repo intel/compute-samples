@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <boost/compute/core.hpp>
-namespace compute = boost::compute;
 
 #include "application/application.hpp"
 #include "image/image.hpp"
@@ -28,13 +27,15 @@ private:
   };
   Arguments
   parse_command_line(const std::vector<std::string> &command_line) const;
-  void run_median_filter(const Arguments &args, compute::context &context,
-                         compute::command_queue &queue) const;
+  void run_median_filter(const Arguments &args,
+                         boost::compute::context &context,
+                         boost::compute::command_queue &queue) const;
   void write_image_to_buffer(const ImagePNG32Bit &image,
-                             compute::buffer &buffer,
-                             compute::command_queue &queue) const;
-  void read_buffer_to_image(compute::buffer &buffer, ImagePNG32Bit &image,
-                            compute::command_queue &queue) const;
+                             boost::compute::buffer &buffer,
+                             boost::compute::command_queue &queue) const;
+  void read_buffer_to_image(boost::compute::buffer &buffer,
+                            ImagePNG32Bit &image,
+                            boost::compute::command_queue &queue) const;
 };
 } // namespace compute_samples
 

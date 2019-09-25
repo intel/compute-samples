@@ -12,7 +12,6 @@
 
 #include <boost/compute/core.hpp>
 #include <boost/compute/intel/usm.hpp>
-namespace compute = boost::compute;
 
 #include "application/application.hpp"
 
@@ -23,7 +22,7 @@ private:
   Status run_implementation(std::vector<std::string> &command_line) override;
   struct Arguments {
     bool help = false;
-    compute::usm_type type = compute::usm_type::host;
+    boost::compute::usm_type type = boost::compute::usm_type::host;
   };
   Arguments
   parse_command_line(const std::vector<std::string> &command_line) const;

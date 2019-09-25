@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 
 #include <boost/compute/memory_object.hpp>
 #include <boost/compute/utility.hpp>
@@ -20,6 +19,9 @@ namespace po = boost::program_options;
 #include "ocl_utils/ocl_utils.hpp"
 #include "utils/utils.hpp"
 #include "logging/logging.hpp"
+
+namespace po = boost::program_options;
+namespace compute = boost::compute;
 
 namespace compute_samples {
 std::vector<uint32_t> create_input_data(const int global_work_size) {

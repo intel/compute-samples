@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <boost/compute/core.hpp>
-namespace compute = boost::compute;
 
 #include "application/application.hpp"
 

@@ -9,7 +9,9 @@
 #include "usm_hello_world/usm_hello_world.hpp"
 #include "ocl_utils/ocl_utils.hpp"
 #include "test_harness/test_harness.hpp"
+
 namespace cs = compute_samples;
+namespace compute = boost::compute;
 
 HWTEST(UsmHelloWorldIntegrationTests, ProgramCanBeBuilt) {
   const compute::device device = compute::system::default_device();

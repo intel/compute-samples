@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <boost/compute/core.hpp>
-namespace compute = boost::compute;
 
 #include "application/application.hpp"
 #include "yuv_utils/yuv_utils.hpp"
@@ -33,11 +32,12 @@ private:
   };
 
   void run_vme_search(const VmeSearchApplication::Arguments &args,
-                      compute::context &context, compute::command_queue &queue,
-                      compute::kernel &kernel, YuvCapture &capture,
+                      boost::compute::context &context,
+                      boost::compute::command_queue &queue,
+                      boost::compute::kernel &kernel, YuvCapture &capture,
                       PlanarImage &src_planar_image,
-                      compute::image2d &src_image, compute::image2d &ref_image,
-                      int frame_idx) const;
+                      boost::compute::image2d &src_image,
+                      boost::compute::image2d &ref_image, int frame_idx) const;
   Arguments parse_command_line(const std::vector<std::string> &command_line);
 };
 } // namespace compute_samples

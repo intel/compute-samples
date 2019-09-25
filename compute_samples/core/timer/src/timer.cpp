@@ -8,6 +8,8 @@
 #include "timer/timer.hpp"
 #include "logging/logging.hpp"
 
+namespace timer = boost::timer;
+
 namespace compute_samples {
 Timer::Timer() { timer_.start(); }
 
