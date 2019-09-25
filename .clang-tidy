@@ -5,7 +5,8 @@ Checks: -*,
         cppcoreguidelines-*, -cppcoreguidelines-pro-*, -cppcoreguidelines-special-member-functions, -cppcoreguidelines-owning-memory, -cppcoreguidelines-avoid-goto,
         performance-*, -performance-unnecessary-value-param,
         misc-*, -misc-misplaced-const,
-        bugprone-*, -bugprone-suspicious-missing-comma, -bugprone-sizeof-expression
+        bugprone-*, -bugprone-suspicious-missing-comma, -bugprone-sizeof-expression,
+        google-*, -google-runtime-references, -google-readability-todo
 WarningsAsErrors: '*'
 HeaderFilterRegex: 'compute_samples/'
 AnalyzeTemporaryDtors: false

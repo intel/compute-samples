@@ -60,32 +60,39 @@ VAManager::VAManager() {
 
   char *error = nullptr;
 
-  vaGetDisplay = (vaGetDisplayFPTR)dlsym(libVaX11Handle, "vaGetDisplay");
+  vaGetDisplay =
+      reinterpret_cast<vaGetDisplayFPTR>(dlsym(libVaX11Handle, "vaGetDisplay"));
   error = dlerror();
   if ((vaGetDisplay == nullptr) && error != nullptr) {
     LOG_ERROR << "dlsym error vaGetDisplay: " << error;
   }
 
-  XOpenDisplay = (XOpenDisplayFPTR)dlsym(libVaX11Handle, "XOpenDisplay");
+  XOpenDisplay =
+      reinterpret_cast<XOpenDisplayFPTR>(dlsym(libVaX11Handle, "XOpenDisplay"));
   error = dlerror();
   if ((XOpenDisplay == nullptr) && error != nullptr) {
     LOG_ERROR << "dlsym error XOpenDisplay: " << error;
   }
 
-  vaGetDisplayDRM =
-      (vaGetDisplayDRMFPTR)dlsym(libVaDRMHandle, "vaGetDisplayDRM");
+  vaGetDisplayDRM = reinterpret_cast<vaGetDisplayDRMFPTR>(
+      dlsym(libVaDRMHandle, "vaGetDisplayDRM"));
   error = dlerror();
   if ((vaGetDisplayDRM == nullptr) && error != nullptr) {
     LOG_ERROR << "dlsym error vaGetDisplayDRM: " << error;
   }
 
-  vaInitialize = (vaInitializeFPTR)dlsym(libVaHandle, "vaInitialize");
-  vaDeriveImage = (vaDeriveImageFPTR)dlsym(libVaHandle, "vaDeriveImage");
-  vaMapBuffer = (vaMapBufferFPTR)dlsym(libVaHandle, "vaMapBuffer");
-  vaUnmapBuffer = (vaUnmapBufferFPTR)dlsym(libVaHandle, "vaUnmapBuffer");
-  vaDestroyImage = (vaDestroyImageFPTR)dlsym(libVaHandle, "vaDestroyImage");
-  vaCreateSurfaces =
-      (vaCreateSurfacesFPTR)dlsym(libVaHandle, "vaCreateSurfaces");
+  vaInitialize =
+      reinterpret_cast<vaInitializeFPTR>(dlsym(libVaHandle, "vaInitialize"));
+  vaDeriveImage =
+      reinterpret_cast<vaDeriveImageFPTR>(dlsym(libVaHandle, "vaDeriveImage"));
+  vaMapBuffer =
+      reinterpret_cast<vaMapBufferFPTR>(dlsym(libVaHandle, "vaMapBuffer"));
+  vaUnmapBuffer =
+      reinterpret_cast<vaUnmapBufferFPTR>(dlsym(libVaHandle, "vaUnmapBuffer"));
+  vaDestroyImage = reinterpret_cast<vaDestroyImageFPTR>(
+      dlsym(libVaHandle, "vaDestroyImage"));
+  vaCreateSurfaces = reinterpret_cast<vaCreateSurfacesFPTR>(
+      dlsym(libVaHandle, "vaCreateSurfaces"));
 }
 
 VAManager::~VAManager() {
@@ -134,9 +141,9 @@ static VADisplay get_va_display() {
 compute::device get_va_device(const compute::platform &platform,
                               const VADisplay va_display) {
   auto cl_get_va_device_ids =
-      (clGetDeviceIDsFromVA_APIMediaAdapterINTEL_fn)
+      reinterpret_cast<clGetDeviceIDsFromVA_APIMediaAdapterINTEL_fn>(
           platform.get_extension_function_address(
-              "clGetDeviceIDsFromVA_APIMediaAdapterINTEL");
+              "clGetDeviceIDsFromVA_APIMediaAdapterINTEL"));
   if (cl_get_va_device_ids == nullptr) {
     throw std::runtime_error("clGetExtensionFunctionAddressForPlatform("
                              "clGetDeviceIDsFromVA_APIMediaAdapterINTEL) "
@@ -177,9 +184,9 @@ static void acquire_va_surfaces(const compute::platform &platform,
                                 compute::image2d &ref_image) {
   cl_mem images_shared[] = {src_image.get(), ref_image.get()};
   auto cl_acquire_va_surface =
-      (clEnqueueAcquireVA_APIMediaSurfacesINTEL_fn)
+      reinterpret_cast<clEnqueueAcquireVA_APIMediaSurfacesINTEL_fn>(
           platform.get_extension_function_address(
-              "clEnqueueAcquireVA_APIMediaSurfacesINTEL");
+              "clEnqueueAcquireVA_APIMediaSurfacesINTEL"));
   if (cl_acquire_va_surface == nullptr) {
     throw std::runtime_error("acquire_va_surface failed");
   }
@@ -192,9 +199,9 @@ static void release_va_surfaces(const compute::platform &platform,
                                 compute::image2d &ref_image) {
   cl_mem images_shared[] = {src_image.get(), ref_image.get()};
   auto cl_release_va_surface =
-      (clEnqueueReleaseVA_APIMediaSurfacesINTEL_fn)
+      reinterpret_cast<clEnqueueReleaseVA_APIMediaSurfacesINTEL_fn>(
           platform.get_extension_function_address(
-              "clEnqueueReleaseVA_APIMediaSurfacesINTEL");
+              "clEnqueueReleaseVA_APIMediaSurfacesINTEL"));
   if (cl_release_va_surface == nullptr) {
     throw std::runtime_error("release_va_surface failed");
   }
@@ -211,7 +218,8 @@ static void write_va_surface(const VADisplay va_display,
   }
 
   uint8_t *ptr;
-  status = manager.vaMapBuffer(va_display, va_image.buf, (void **)&ptr);
+  status = manager.vaMapBuffer(va_display, va_image.buf,
+                               reinterpret_cast<void **>(&ptr));
   if (status != VA_STATUS_SUCCESS) {
     throw std::runtime_error("write_va_surface failed");
   }
@@ -379,8 +387,10 @@ void VmeInteropApplication::run_os_specific_implementation(
   }
 
   cl_context_properties context_properties[] = {
-      CL_CONTEXT_PLATFORM, (cl_context_properties)(device.platform().id()),
-      CL_CONTEXT_VA_API_DISPLAY_INTEL, (cl_context_properties)(va_display), 0};
+      CL_CONTEXT_PLATFORM,
+      reinterpret_cast<cl_context_properties>(device.platform().id()),
+      CL_CONTEXT_VA_API_DISPLAY_INTEL,
+      reinterpret_cast<cl_context_properties>(va_display), 0};
 
   compute::context context(device, context_properties);
   compute::command_queue queue(context, device);

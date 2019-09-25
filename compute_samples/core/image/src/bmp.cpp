@@ -135,19 +135,19 @@ bool BmpUtils::save_image_as_bmp_32fc4(const float *ptr, float scale, int width,
       if (tmp_f_val > 255.0f) {
         tmp_f_val = 255.0f;
       }
-      ui_tmp[0] = (uint32_t)(tmp_f_val);
+      ui_tmp[0] = static_cast<uint32_t>(tmp_f_val);
 
       tmp_f_val = (scale * ptr[(y * width + x) * 4 + 1]);
       if (tmp_f_val > 255.0f) {
         tmp_f_val = 255.0f;
       }
-      ui_tmp[1] = (uint32_t)(tmp_f_val);
+      ui_tmp[1] = static_cast<uint32_t>(tmp_f_val);
 
       tmp_f_val = (scale * ptr[(y * width + x) * 4 + 2]);
       if (tmp_f_val > 255.0f) {
         tmp_f_val = 255.0f;
       }
-      ui_tmp[2] = (uint32_t)(tmp_f_val);
+      ui_tmp[2] = static_cast<uint32_t>(tmp_f_val);
 
       tmp_f_val = (scale * ptr[(y * width + x) * 4 + 3]);
       if (tmp_f_val > 255.0f) {
@@ -301,7 +301,8 @@ bool BmpUtils::load_bmp_image_8u(uint8_t *&data, int &width, int &height,
           break;
         case 24:
         case 32:
-          dst_pixel[0] = (char)(0.21f * src_pixel[0] + 0.72f * src_pixel[1] +
+          dst_pixel[0] =
+              static_cast<char>(0.21f * src_pixel[0] + 0.72f * src_pixel[1] +
                                 0.07f * src_pixel[2]);
           break;
         default:

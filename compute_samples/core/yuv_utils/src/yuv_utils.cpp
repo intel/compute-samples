@@ -460,22 +460,21 @@ void YuvWriter::write_to_file(const char *fn) {
           uint8_t u = p_img_u[j / 2 + uv_width * (uv_height - 1 - i / 2)];
           uint8_t v = p_img_v[j / 2 + uv_width * (uv_height - 1 - i / 2)];
 
-          using namespace std;
           // R is the 3rd component in the bitmap (which is actualy stored as
           // BGRA)
-          const auto r =
-              (int32_t)(1.164f * (float(y) - 16) + 1.596f * (float(v) - 128));
+          const auto r = static_cast<int32_t>(1.164f * (float(y) - 16) +
+                                              1.596f * (float(v) - 128));
           frame[j + width_ * i].s[2] =
               static_cast<uint8_t>(std::min(255, std::max(r, 0)));
           // G
-          const auto g =
-              (int32_t)(1.164f * (float(y) - 16) - 0.813f * (float(v) - 128) -
-                        0.391f * (float(u) - 128));
+          const auto g = static_cast<int32_t>(1.164f * (float(y) - 16) -
+                                              0.813f * (float(v) - 128) -
+                                              0.391f * (float(u) - 128));
           frame[j + width_ * i].s[1] =
               static_cast<uint8_t>(std::min(255, std::max(g, 0)));
           // B
-          const auto b =
-              (int32_t)(1.164f * (float(y) - 16) + 2.018f * (float(u) - 128));
+          const auto b = static_cast<int32_t>(1.164f * (float(y) - 16) +
+                                              2.018f * (float(u) - 128));
           frame[j + width_ * i].s[0] =
               static_cast<uint8_t>(std::min(255, std::max(b, 0)));
         }
@@ -502,7 +501,7 @@ void YuvWriter::write_to_file(const char *fn) {
 void YuvWriter::append_frame(const PlanarImage &im) {
   data_.resize((curr_frame_ + 1) * width_ * height_ * 3 / 2);
 
-  auto *p_src = (uint8_t *)im.get_y();
+  uint8_t *p_src = im.get_y();
   uint8_t *p_dst = &data_[curr_frame_ * width_ * height_ * 3 / 2];
   int p_dst_size = width_ * height_ * 3 / 2;
   for (int y = 0; y < im.get_height(); ++y) {
@@ -516,7 +515,7 @@ void YuvWriter::append_frame(const PlanarImage &im) {
     p_dst_size -= im.get_width();
   }
 
-  p_src = (uint8_t *)im.get_u();
+  p_src = im.get_u();
   for (int y = 0; y < im.get_height() / 2; ++y) {
     if (im.get_width() / 2 <= p_dst_size) {
       std::copy(p_src, p_src + im.get_width() / 2, p_dst);
@@ -528,7 +527,7 @@ void YuvWriter::append_frame(const PlanarImage &im) {
     p_dst_size -= im.get_width() / 2;
   }
 
-  p_src = (uint8_t *)im.get_v();
+  p_src = im.get_v();
   for (int y = 0; y < im.get_height() / 2; ++y) {
     if (im.get_width() / 2 <= p_dst_size) {
       std::copy(p_src, p_src + im.get_width() / 2, p_dst);
