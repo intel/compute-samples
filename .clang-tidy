@@ -1,9 +1,15 @@
 ---
-Checks:          '-*, readability-*, modernize-*, -modernize-use-using, cppcoreguidelines-*, -cppcoreguidelines-pro-*, -cppcoreguidelines-special-member-functions, -cppcoreguidelines-owning-memory, -cppcoreguidelines-avoid-goto, performance-*, -performance-unnecessary-value-param, misc-*, -misc-misplaced-const'
+Checks: -*,
+        readability-*,
+        modernize-*, -modernize-use-using,
+        cppcoreguidelines-*, -cppcoreguidelines-pro-*, -cppcoreguidelines-special-member-functions, -cppcoreguidelines-owning-memory, -cppcoreguidelines-avoid-goto,
+        performance-*, -performance-unnecessary-value-param,
+        misc-*, -misc-misplaced-const,
+        bugprone-*, -bugprone-suspicious-missing-comma, -bugprone-sizeof-expression
 WarningsAsErrors: '*'
 HeaderFilterRegex: 'compute_samples/'
 AnalyzeTemporaryDtors: false
-FormatStyle:     file
+FormatStyle: file
 CheckOptions:
   - key:             readability-identifier-naming.ClassMemberCase
     value:           lower_case

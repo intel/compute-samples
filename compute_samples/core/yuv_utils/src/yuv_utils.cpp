@@ -115,7 +115,7 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
   compute_num_mvs(width_, height_, mv_image_width, mv_image_height,
                   mb_image_width, mb_image_height);
 
-#define OFF(P) (P + 2) >> 2
+#define OFF(P) ((P) + 2) >> 2
 
   for (int i = 0; i < mb_image_height; i++) {
     for (int j = 0; j < mb_image_width; j++) {
@@ -197,7 +197,7 @@ void PlanarImage::overlay_vectors(const motion_vector *mvs,
   compute_num_mvs(width_, height_, mv_image_width, mv_image_height,
                   mb_image_width, mb_image_height);
 
-#define OFF(P) (P + 2) >> 2
+#define OFF(P) ((P) + 2) >> 2
 
   for (int i = 0; i < mb_image_height; i++) {
     for (int j = 0; j < mb_image_width; j++) {
