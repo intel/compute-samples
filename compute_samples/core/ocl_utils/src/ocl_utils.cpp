@@ -119,6 +119,16 @@ template <> std::string to_cl_c_string<cl_double2>() { return "double2"; }
 template <> std::string to_cl_c_string<cl_double4>() { return "double4"; }
 template <> std::string to_cl_c_string<cl_double8>() { return "double8"; }
 template <> std::string to_cl_c_string<cl_double16>() { return "double16"; }
+template <> std::string to_cl_c_string<cl_long>() { return "long"; }
+template <> std::string to_cl_c_string<cl_long2>() { return "long2"; }
+template <> std::string to_cl_c_string<cl_long4>() { return "long4"; }
+template <> std::string to_cl_c_string<cl_long8>() { return "long8"; }
+template <> std::string to_cl_c_string<cl_long16>() { return "long16"; }
+template <> std::string to_cl_c_string<cl_ulong>() { return "ulong"; }
+template <> std::string to_cl_c_string<cl_ulong2>() { return "ulong2"; }
+template <> std::string to_cl_c_string<cl_ulong4>() { return "ulong4"; }
+template <> std::string to_cl_c_string<cl_ulong8>() { return "ulong8"; }
+template <> std::string to_cl_c_string<cl_ulong16>() { return "ulong16"; }
 
 } // namespace compute_samples
 
@@ -194,6 +204,30 @@ bool operator==(const cl_uchar8 &lhs, const cl_uchar8 &rhs) {
 bool operator==(const cl_uchar16 &lhs, const cl_uchar16 &rhs) {
   return compute_samples::compare_cl_vectors(lhs, rhs);
 }
+bool operator==(const cl_long2 &lhs, const cl_long2 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_long4 &lhs, const cl_long4 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_long8 &lhs, const cl_long8 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_long16 &lhs, const cl_long16 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_ulong2 &lhs, const cl_ulong2 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_ulong4 &lhs, const cl_ulong4 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_ulong8 &lhs, const cl_ulong8 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
+bool operator==(const cl_ulong16 &lhs, const cl_ulong16 &rhs) {
+  return compute_samples::compare_cl_vectors(lhs, rhs);
+}
 
 std::ostream &operator<<(std::ostream &os, const cl_int2 &x) {
   return os << compute_samples::cl_vector_to_string(x);
@@ -265,5 +299,29 @@ std::ostream &operator<<(std::ostream &os, const cl_uchar8 &x) {
   return os << compute_samples::cl_vector_to_string(x);
 }
 std::ostream &operator<<(std::ostream &os, const cl_uchar16 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_long2 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_long4 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_long8 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_long16 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_ulong2 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_ulong4 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_ulong8 &x) {
+  return os << compute_samples::cl_vector_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const cl_ulong16 &x) {
   return os << compute_samples::cl_vector_to_string(x);
 }

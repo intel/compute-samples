@@ -58,6 +58,16 @@ template <> struct cl_scalar_type<cl_float8> { using type = cl_float; };
 template <> struct cl_scalar_type<cl_float4> { using type = cl_float; };
 template <> struct cl_scalar_type<cl_float2> { using type = cl_float; };
 template <> struct cl_scalar_type<cl_float> { using type = cl_float; };
+template <> struct cl_scalar_type<cl_long> { using type = cl_long; };
+template <> struct cl_scalar_type<cl_long2> { using type = cl_long; };
+template <> struct cl_scalar_type<cl_long4> { using type = cl_long; };
+template <> struct cl_scalar_type<cl_long8> { using type = cl_long; };
+template <> struct cl_scalar_type<cl_long16> { using type = cl_long; };
+template <> struct cl_scalar_type<cl_ulong> { using type = cl_ulong; };
+template <> struct cl_scalar_type<cl_ulong2> { using type = cl_ulong; };
+template <> struct cl_scalar_type<cl_ulong4> { using type = cl_ulong; };
+template <> struct cl_scalar_type<cl_ulong8> { using type = cl_ulong; };
+template <> struct cl_scalar_type<cl_ulong16> { using type = cl_ulong; };
 
 template <typename T> bool compare_cl_vectors(const T &lhs, const T &rhs) {
   const int size = sizeof(T) / sizeof(typename cl_scalar_type<T>::type);
@@ -83,6 +93,7 @@ template <typename T> std::string cl_vector_to_string(const T &x) {
   ss << "]";
   return ss.str();
 }
+
 } // namespace compute_samples
 
 // Global namespace
@@ -110,6 +121,14 @@ bool operator==(const cl_uchar2 &lhs, const cl_uchar2 &rhs);
 bool operator==(const cl_uchar4 &lhs, const cl_uchar4 &rhs);
 bool operator==(const cl_uchar8 &lhs, const cl_uchar8 &rhs);
 bool operator==(const cl_uchar16 &lhs, const cl_uchar16 &rhs);
+bool operator==(const cl_long2 &lhs, const cl_long2 &rhs);
+bool operator==(const cl_long4 &lhs, const cl_long4 &rhs);
+bool operator==(const cl_long8 &lhs, const cl_long8 &rhs);
+bool operator==(const cl_long16 &lhs, const cl_long16 &rhs);
+bool operator==(const cl_ulong2 &lhs, const cl_ulong2 &rhs);
+bool operator==(const cl_ulong4 &lhs, const cl_ulong4 &rhs);
+bool operator==(const cl_ulong8 &lhs, const cl_ulong8 &rhs);
+bool operator==(const cl_ulong16 &lhs, const cl_ulong16 &rhs);
 
 std::ostream &operator<<(std::ostream &os, const cl_int2 &x);
 std::ostream &operator<<(std::ostream &os, const cl_int4 &x);
@@ -135,5 +154,13 @@ std::ostream &operator<<(std::ostream &os, const cl_uchar2 &x);
 std::ostream &operator<<(std::ostream &os, const cl_uchar4 &x);
 std::ostream &operator<<(std::ostream &os, const cl_uchar8 &x);
 std::ostream &operator<<(std::ostream &os, const cl_uchar16 &x);
+std::ostream &operator<<(std::ostream &os, const cl_long2 &x);
+std::ostream &operator<<(std::ostream &os, const cl_long4 &x);
+std::ostream &operator<<(std::ostream &os, const cl_long8 &x);
+std::ostream &operator<<(std::ostream &os, const cl_long16 &x);
+std::ostream &operator<<(std::ostream &os, const cl_ulong2 &x);
+std::ostream &operator<<(std::ostream &os, const cl_ulong4 &x);
+std::ostream &operator<<(std::ostream &os, const cl_ulong8 &x);
+std::ostream &operator<<(std::ostream &os, const cl_ulong16 &x);
 
 #endif
