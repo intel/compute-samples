@@ -44,7 +44,8 @@ void init_logging(const LoggingSettings settings);
 void init_logging(std::vector<std::string> &command_line);
 void stop_logging();
 void add_stream(const boost::shared_ptr<std::ostream> &stream);
-LoggingSettings parse_command_line(std::vector<std::string> &command_line);
+LoggingSettings
+logging_parse_command_line(std::vector<std::string> &command_line);
 
 template <typename T> std::string to_string(const std::vector<T> &x) {
   std::stringstream ss;

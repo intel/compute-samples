@@ -65,79 +65,79 @@ TEST_F(LoggingTest, PrintFatal) {
 
 TEST(LoggingCommandLineParser, ChooseSimpleFormatFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-format=simple"};
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_format::simple, settings.format);
 }
 
 TEST(LoggingCommandLineParser, ChoosePreciseFormatFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-format=precise"};
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_format::precise, settings.format);
 }
 
 TEST(LoggingCommandLineParser, PreciseFormatIsDefault) {
   std::vector<std::string> cmd;
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_format::precise, settings.format);
 }
 
 TEST(LoggingCommandLineParser, ChooseUnknownFormatFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-format=unknown"};
-  EXPECT_THROW(cs::parse_command_line(cmd), po::validation_error);
+  EXPECT_THROW(cs::logging_parse_command_line(cmd), po::validation_error);
 }
 
 TEST(LoggingCommandLineParser, ConsumeOnlyKnownOptionsFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-format=precise",
                                   "positional_option", "--option"};
-  cs::parse_command_line(cmd);
+  cs::logging_parse_command_line(cmd);
   EXPECT_EQ(2, cmd.size());
 }
 
 TEST(LoggingCommandLineParser, ChooseTraceLevelFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-level=trace"};
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_level::trace, settings.level);
 }
 
 TEST(LoggingCommandLineParser, ChooseDebugLevelFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-level=debug"};
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_level::debug, settings.level);
 }
 
 TEST(LoggingCommandLineParser, ChooseInfoLevelFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-level=info"};
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_level::info, settings.level);
 }
 
 TEST(LoggingCommandLineParser, ChooseWarningLevelFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-level=warning"};
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_level::warning, settings.level);
 }
 
 TEST(LoggingCommandLineParser, ChooseErrorLevelFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-level=error"};
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_level::error, settings.level);
 }
 
 TEST(LoggingCommandLineParser, ChooseFatalLevelFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-level=fatal"};
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_level::fatal, settings.level);
 }
 
 TEST(LoggingCommandLineParser, InfoLevelIsDefault) {
   std::vector<std::string> cmd;
-  const cs::LoggingSettings settings = cs::parse_command_line(cmd);
+  const cs::LoggingSettings settings = cs::logging_parse_command_line(cmd);
   EXPECT_EQ(cs::logging_level::info, settings.level);
 }
 
 TEST(LoggingCommandLineParser, ChooseUnknownLevelFromCommandLine) {
   std::vector<std::string> cmd = {"--logging-level=unknown"};
-  EXPECT_THROW(cs::parse_command_line(cmd), po::validation_error);
+  EXPECT_THROW(cs::logging_parse_command_line(cmd), po::validation_error);
 }
 
 class LoggingInitTest : public ::testing::Test {

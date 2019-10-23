@@ -62,7 +62,7 @@ void init_logging(const LoggingSettings settings) {
 }
 
 void init_logging(std::vector<std::string> &command_line) {
-  init_logging(parse_command_line(command_line));
+  init_logging(logging_parse_command_line(command_line));
 }
 
 void stop_logging() {
@@ -98,7 +98,8 @@ std::istream &operator>>(std::istream &is, logging_format &f) {
   return is;
 }
 
-LoggingSettings parse_command_line(std::vector<std::string> &command_line) {
+LoggingSettings
+logging_parse_command_line(std::vector<std::string> &command_line) {
   LoggingSettings settings;
 
   po::options_description desc("Allowed options");

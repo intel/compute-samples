@@ -12,6 +12,8 @@ add_core_library(test_harness
 target_link_libraries(test_harness
     PUBLIC
     compute_samples::logging
+    GTest::GTest
+    Boost::program_options
 )
 
 add_core_library_test(test_harness
