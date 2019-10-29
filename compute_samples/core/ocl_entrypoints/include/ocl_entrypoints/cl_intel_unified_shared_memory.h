@@ -74,9 +74,9 @@ typedef cl_uint cl_mem_advice_intel;
 #define CL_MEM_ALLOC_BASE_PTR_INTEL 0x419B
 #define CL_MEM_ALLOC_SIZE_INTEL 0x419C
 
-typedef CL_API_ENTRY void* (CL_API_CALL *clHostMemAllocINTEL_fn)(
+typedef CL_API_ENTRY void *(CL_API_CALL *clHostMemAllocINTEL_fn)(
     cl_context context, const cl_mem_properties_intel *properties, size_t size,
-    cl_uint alignment, cl_int *errcodeRet) CL_API_SUFFIX__VERSION_2_2;
+    cl_uint alignment, cl_int *errcodeRet)CL_API_SUFFIX__VERSION_2_2;
 
 extern CL_API_ENTRY void *CL_API_CALL clHostMemAllocINTEL(
     cl_context context, const cl_mem_properties_intel *properties, size_t size,
@@ -85,7 +85,7 @@ extern CL_API_ENTRY void *CL_API_CALL clHostMemAllocINTEL(
 typedef CL_API_ENTRY void *(CL_API_CALL *clDeviceMemAllocINTEL_fn)(
     cl_context context, cl_device_id device,
     const cl_mem_properties_intel *properties, size_t size, cl_uint alignment,
-    cl_int *errcodeRet) CL_API_SUFFIX__VERSION_2_2;
+    cl_int *errcodeRet)CL_API_SUFFIX__VERSION_2_2;
 
 extern CL_API_ENTRY void *CL_API_CALL clDeviceMemAllocINTEL(
     cl_context context, cl_device_id device,
@@ -95,20 +95,20 @@ extern CL_API_ENTRY void *CL_API_CALL clDeviceMemAllocINTEL(
 typedef CL_API_ENTRY void *(CL_API_CALL *clSharedMemAllocINTEL_fn)(
     cl_context context, cl_device_id device,
     const cl_mem_properties_intel *properties, size_t size, cl_uint alignment,
-    cl_int *errcodeRet) CL_API_SUFFIX__VERSION_2_2;
+    cl_int *errcodeRet)CL_API_SUFFIX__VERSION_2_2;
 
 extern CL_API_ENTRY void *CL_API_CALL clSharedMemAllocINTEL(
     cl_context context, cl_device_id device,
     const cl_mem_properties_intel *properties, size_t size, cl_uint alignment,
     cl_int *errcodeRet) CL_API_SUFFIX__VERSION_2_2;
 
-typedef CL_API_ENTRY cl_int (CL_API_CALL
-*clMemFreeINTEL_fn)(cl_context context, const void *ptr) CL_API_SUFFIX__VERSION_2_2;
+typedef CL_API_ENTRY cl_int(CL_API_CALL *clMemFreeINTEL_fn)(
+    cl_context context, const void *ptr) CL_API_SUFFIX__VERSION_2_2;
 
 extern CL_API_ENTRY cl_int CL_API_CALL
 clMemFreeINTEL(cl_context context, const void *ptr) CL_API_SUFFIX__VERSION_2_2;
 
-typedef CL_API_ENTRY cl_int (CL_API_CALL *clGetMemAllocInfoINTEL_fn)(
+typedef CL_API_ENTRY cl_int(CL_API_CALL *clGetMemAllocInfoINTEL_fn)(
     cl_context context, const void *ptr, cl_mem_info_intel paramName,
     size_t paramValueSize, void *paramValue,
     size_t *paramValueSizeRet) CL_API_SUFFIX__VERSION_2_2;
@@ -118,15 +118,15 @@ extern CL_API_ENTRY cl_int CL_API_CALL clGetMemAllocInfoINTEL(
     size_t paramValueSize, void *paramValue,
     size_t *paramValueSizeRet) CL_API_SUFFIX__VERSION_2_2;
 
-typedef CL_API_ENTRY cl_int (CL_API_CALL
-*clSetKernelArgMemPointerINTEL_fn)(cl_kernel kernel, cl_uint argIndex,
-                              const void *argValue) CL_API_SUFFIX__VERSION_2_2;
+typedef CL_API_ENTRY cl_int(CL_API_CALL *clSetKernelArgMemPointerINTEL_fn)(
+    cl_kernel kernel, cl_uint argIndex,
+    const void *argValue) CL_API_SUFFIX__VERSION_2_2;
 
 extern CL_API_ENTRY cl_int CL_API_CALL
 clSetKernelArgMemPointerINTEL(cl_kernel kernel, cl_uint argIndex,
                               const void *argValue) CL_API_SUFFIX__VERSION_2_2;
 
-typedef CL_API_ENTRY cl_int (CL_API_CALL *clEnqueueMemsetINTEL_fn)(
+typedef CL_API_ENTRY cl_int(CL_API_CALL *clEnqueueMemsetINTEL_fn)(
     cl_command_queue commandQueue, void *dstPtr, cl_int value, size_t size,
     cl_uint numEventsInWaitList, const cl_event *eventWaitList,
     cl_event *event) CL_API_SUFFIX__VERSION_2_2;
@@ -136,7 +136,7 @@ extern CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemsetINTEL(
     cl_uint numEventsInWaitList, const cl_event *eventWaitList,
     cl_event *event) CL_API_SUFFIX__VERSION_2_2;
 
-typedef CL_API_ENTRY cl_int (CL_API_CALL *clEnqueueMemcpyINTEL_fn)(
+typedef CL_API_ENTRY cl_int(CL_API_CALL *clEnqueueMemcpyINTEL_fn)(
     cl_command_queue commandQueue, cl_bool blocking, void *dstPtr,
     const void *srcPtr, size_t size, cl_uint numEventsInWaitList,
     const cl_event *eventWaitList, cl_event *event) CL_API_SUFFIX__VERSION_2_2;
@@ -146,7 +146,7 @@ extern CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemcpyINTEL(
     const void *srcPtr, size_t size, cl_uint numEventsInWaitList,
     const cl_event *eventWaitList, cl_event *event) CL_API_SUFFIX__VERSION_2_2;
 
-typedef CL_API_ENTRY cl_int (CL_API_CALL *clEnqueueMigrateMemINTEL_fn)(
+typedef CL_API_ENTRY cl_int(CL_API_CALL *clEnqueueMigrateMemINTEL_fn)(
     cl_command_queue commandQueue, const void *ptr, size_t size,
     cl_mem_migration_flags flags, cl_uint numEventsInWaitList,
     const cl_event *eventWaitList, cl_event *event) CL_API_SUFFIX__VERSION_2_2;
@@ -156,7 +156,7 @@ extern CL_API_ENTRY cl_int CL_API_CALL clEnqueueMigrateMemINTEL(
     cl_mem_migration_flags flags, cl_uint numEventsInWaitList,
     const cl_event *eventWaitList, cl_event *event) CL_API_SUFFIX__VERSION_2_2;
 
-typedef CL_API_ENTRY cl_int (CL_API_CALL *clEnqueueMemAdviseINTEL_fn)(
+typedef CL_API_ENTRY cl_int(CL_API_CALL *clEnqueueMemAdviseINTEL_fn)(
     cl_command_queue commandQueue, const void *ptr, size_t size,
     cl_mem_advice_intel advice, cl_uint numEventsInWaitList,
     const cl_event *eventWaitList, cl_event *event) CL_API_SUFFIX__VERSION_2_2;

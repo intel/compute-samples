@@ -71,7 +71,7 @@ def format_files(files, clang_format):
 
 
 def find_source_files(root_path):
-    types = ('.cpp', '.hpp', '.cl')
+    types = ('.cpp', '.hpp', '.h', '.cl')
     files = []
     for t in types:
         pattern = '{}/**/*{}'.format(root_path, t)
