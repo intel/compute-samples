@@ -74,15 +74,18 @@ void add_stream(const boost::shared_ptr<std::ostream> &stream) {
   sink->locked_backend()->add_stream(stream);
 }
 
-std::ostream &operator<<(std::ostream &os, const logging_format &f) {
+std::string to_string(const logging_format &f) {
   if (f == logging_format::simple) {
-    os << "simple";
-  } else if (f == logging_format::precise) {
-    os << "precise";
-  } else {
-    throw std::runtime_error("Unknown logging_format");
+    return "simple";
   }
-  return os;
+  if (f == logging_format::precise) {
+    return "precise";
+  }
+  throw std::runtime_error("Unknown logging_format");
+}
+
+std::ostream &operator<<(std::ostream &os, const logging_format &f) {
+  return os << to_string(f);
 }
 
 std::istream &operator>>(std::istream &is, logging_format &f) {

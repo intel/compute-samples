@@ -29,6 +29,7 @@ namespace compute_samples {
 #define LOG_EXIT_FUNCTION LOG_TRACE << "Exit function: " << __func__;
 
 enum class logging_format { simple, precise };
+std::string to_string(const logging_format &f);
 std::ostream &operator<<(std::ostream &os, const logging_format &f);
 std::istream &operator>>(std::istream &is, logging_format &f);
 
