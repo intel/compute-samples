@@ -65,7 +65,7 @@ typedef cl_uint cl_mem_advice_intel;
 
 #define CL_KERNEL_EXEC_INFO_USM_PTRS_INTEL 0x4203
 
-#define CL_COMMAND_MEMSET_INTEL 0x4204
+#define CL_COMMAND_MEMFILL_INTEL 0x4204
 #define CL_COMMAND_MEMCPY_INTEL 0x4205
 #define CL_COMMAND_MIGRATEMEM_INTEL 0x4206
 #define CL_COMMAND_MEMADVISE_INTEL 0x4207
@@ -126,15 +126,15 @@ extern CL_API_ENTRY cl_int CL_API_CALL
 clSetKernelArgMemPointerINTEL(cl_kernel kernel, cl_uint argIndex,
                               const void *argValue) CL_API_SUFFIX__VERSION_2_2;
 
-typedef CL_API_ENTRY cl_int(CL_API_CALL *clEnqueueMemsetINTEL_fn)(
-    cl_command_queue commandQueue, void *dstPtr, cl_int value, size_t size,
-    cl_uint numEventsInWaitList, const cl_event *eventWaitList,
-    cl_event *event) CL_API_SUFFIX__VERSION_2_2;
+typedef CL_API_ENTRY cl_int(CL_API_CALL *clEnqueueMemFillINTEL_fn)(
+    cl_command_queue commandQueue, void *dstPtr, const void *pattern,
+    size_t patternSize, size_t size, cl_uint numEventsInWaitList,
+    const cl_event *eventWaitList, cl_event *event) CL_API_SUFFIX__VERSION_2_2;
 
-extern CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemsetINTEL(
-    cl_command_queue commandQueue, void *dstPtr, cl_int value, size_t size,
-    cl_uint numEventsInWaitList, const cl_event *eventWaitList,
-    cl_event *event) CL_API_SUFFIX__VERSION_2_2;
+extern CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemFillINTEL(
+    cl_command_queue commandQueue, void *dstPtr, const void *pattern,
+    size_t patternSize, size_t size, cl_uint numEventsInWaitList,
+    const cl_event *eventWaitList, cl_event *event) CL_API_SUFFIX__VERSION_2_2;
 
 typedef CL_API_ENTRY cl_int(CL_API_CALL *clEnqueueMemcpyINTEL_fn)(
     cl_command_queue commandQueue, cl_bool blocking, void *dstPtr,

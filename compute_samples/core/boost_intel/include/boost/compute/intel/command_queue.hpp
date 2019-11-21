@@ -45,13 +45,14 @@ public:
                           expected_data.size() * sizeof(T), comparison_mode);
   }
 
-  event enqueue_memset(void *dst_ptr, cl_int value, size_t size,
-                       const wait_list &events = wait_list()) {
+  event enqueue_mem_fill(void *dst_ptr, const void *pattern,
+                         size_t pattern_size, size_t size,
+                         const wait_list &events = wait_list()) {
     event event_;
 
-    cl_int ret =
-        clEnqueueMemsetINTEL(get(), dst_ptr, value, size, events.size(),
-                             events.get_event_ptr(), &event_.get());
+    cl_int ret = clEnqueueMemFillINTEL(get(), dst_ptr, pattern, pattern_size,
+                                       size, events.size(),
+                                       events.get_event_ptr(), &event_.get());
 
     if (ret != CL_SUCCESS) {
       BOOST_THROW_EXCEPTION(opencl_error(ret));

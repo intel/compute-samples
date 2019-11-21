@@ -61,14 +61,14 @@ clSetKernelArgMemPointerINTEL(cl_kernel kernel, cl_uint argIndex,
   return e(kernel, argIndex, argValue);
 }
 
-CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemsetINTEL(
-    cl_command_queue commandQueue, void *dstPtr, cl_int value, size_t size,
-    cl_uint numEventsInWaitList, const cl_event *eventWaitList,
-    cl_event *event) CL_API_SUFFIX__VERSION_2_2 {
-  const auto e = cs::load_entrypoint<clEnqueueMemsetINTEL_fn>(
-      commandQueue, "clEnqueueMemsetINTEL");
-  return e(commandQueue, dstPtr, value, size, numEventsInWaitList,
-           eventWaitList, event);
+CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemFillINTEL(
+    cl_command_queue commandQueue, void *dstPtr, const void *pattern,
+    size_t patternSize, size_t size, cl_uint numEventsInWaitList,
+    const cl_event *eventWaitList, cl_event *event) CL_API_SUFFIX__VERSION_2_2 {
+  const auto e = cs::load_entrypoint<clEnqueueMemFillINTEL_fn>(
+      commandQueue, "clEnqueueMemFillINTEL");
+  return e(commandQueue, dstPtr, pattern, patternSize, size,
+           numEventsInWaitList, eventWaitList, event);
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemcpyINTEL(
