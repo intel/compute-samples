@@ -15,16 +15,16 @@
 namespace boost {
 namespace compute {
 
-void add_aub_comment(const platform &platform, const char *comment) {
-  cl_int ret = clAddCommentINTEL(platform.id(), comment);
+void add_aub_comment(const device &device, const char *comment) {
+  cl_int ret = clAddCommentINTEL(device.get(), comment);
 
   if (ret != CL_SUCCESS) {
     BOOST_THROW_EXCEPTION(opencl_error(ret));
   }
 }
 
-void add_aub_comment(const platform &platform, const std::string comment) {
-  add_aub_comment(platform, comment.c_str());
+void add_aub_comment(const device &device, const std::string comment) {
+  add_aub_comment(device, comment.c_str());
 }
 
 } // namespace compute

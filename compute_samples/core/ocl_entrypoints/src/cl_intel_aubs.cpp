@@ -21,8 +21,8 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueVerifyMemoryINTEL(
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clAddCommentINTEL(
-    cl_platform_id platform, const char *comment) CL_API_SUFFIX__VERSION_2_1 {
+    cl_device_id device, const char *comment) CL_API_SUFFIX__VERSION_2_1 {
   const auto e =
-      cs::load_entrypoint<clAddCommentINTEL_fn>(platform, "clAddCommentINTEL");
-  return e(platform, comment);
+      cs::load_entrypoint<clAddCommentINTEL_fn>(device, "clAddCommentINTEL");
+  return e(device, comment);
 }
