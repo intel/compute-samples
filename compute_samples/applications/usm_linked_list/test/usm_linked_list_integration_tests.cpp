@@ -74,7 +74,7 @@ HWTEST_P(UsmLinkedListIntegrationTests, WalkLinkedList) {
   cs::free_linked_list(head);
 }
 
-INSTANTIATE_TEST_CASE_P(UsmTypes, UsmLinkedListIntegrationTests,
-                        ::testing::Values(compute::usm_type::host,
-                                          compute::usm_type::device,
-                                          compute::usm_type::shared));
+INSTANTIATE_TEST_SUITE_P(UsmTypes, UsmLinkedListIntegrationTests,
+                         ::testing::Values(compute::usm_type::host,
+                                           compute::usm_type::device,
+                                           compute::usm_type::shared));

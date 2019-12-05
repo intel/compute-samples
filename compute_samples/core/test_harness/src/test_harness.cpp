@@ -46,15 +46,6 @@ test_harness_parse_command_line(std::vector<std::string> &command_line) {
   return settings;
 }
 
-void report_unsupported_scenario(const std::string &message) {
-  if (allow_skips) {
-    LOG_WARNING << message;
-    return;
-    // GTEST_SKIP should be used when it will be supported by GTest
-  }
-  GTEST_FAIL()
-      << message
-      << "\nPass --allow-skips flag to set unsupported scenarios as skips";
-}
+bool are_skips_allowed() { return allow_skips; }
 
 } // namespace compute_samples

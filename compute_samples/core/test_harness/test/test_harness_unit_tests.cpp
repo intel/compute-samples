@@ -38,12 +38,12 @@ HWTEST_P(ValueParametrizedTest, TestCaseName) {
   EXPECT_EQ("TestCaseName_HWTEST/0", test_name);
 }
 
-INSTANTIATE_TEST_CASE_P(Dummy, ValueParametrizedTest, ::testing::Values(1));
+INSTANTIATE_TEST_SUITE_P(Dummy, ValueParametrizedTest, ::testing::Values(1));
 
 template <typename T> class TypedTest : public ::testing::Test {};
 
 using MyTypes = ::testing::Types<int>;
-TYPED_TEST_CASE(TypedTest, MyTypes);
+TYPED_TEST_SUITE(TypedTest, MyTypes);
 
 TYPED_HWTEST(TypedTest, TestCaseName) {
   const ::testing::TestInfo *const test_info =
@@ -77,15 +77,15 @@ TEST(TestReportUnsupportedScenario, AllowSkipsDisabled) {
   cs::TestHarnessSettings settings;
   settings.allow_skips = false;
   cs::init_test_harness(settings);
-  EXPECT_FATAL_FAILURE(cs::report_unsupported_scenario("message"), "message");
+  EXPECT_FATAL_FAILURE(REPORT_UNSUPPORTED_SCENARIO("message"), "message");
 }
 
 TEST(TestReportUnsupportedScenario, AllowSkipsEnabled) {
   cs::TestHarnessSettings settings;
   settings.allow_skips = true;
   cs::init_test_harness(settings);
-  cs::report_unsupported_scenario("message");
-  // GTEST_FAIL() << "Should not reach here";
+  REPORT_UNSUPPORTED_SCENARIO("message");
+  GTEST_FAIL() << "Should not reach here";
 }
 
 } // namespace

@@ -14,7 +14,7 @@ template <typename T> class SizeInBytes : public testing::Test {};
 typedef testing::Types<uint8_t, int8_t, uint16_t, int16_t, uint32_t, int16_t,
                        uint64_t, int64_t, float, double>
     StandardTypes;
-TYPED_TEST_CASE(SizeInBytes, StandardTypes);
+TYPED_TEST_SUITE(SizeInBytes, StandardTypes);
 
 TYPED_TEST(SizeInBytes, EmptyVector) {
   const std::vector<TypeParam> vector(0);

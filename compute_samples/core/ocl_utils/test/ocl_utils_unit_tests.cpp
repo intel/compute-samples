@@ -16,7 +16,7 @@ template <typename T> class SizeInBytes : public testing::Test {};
 typedef testing::Types<cl_char, cl_uchar, cl_short, cl_ushort, cl_int, cl_uint,
                        cl_long, cl_ulong, cl_half, cl_float, cl_double>
     OpenCLTypes;
-TYPED_TEST_CASE(SizeInBytes, OpenCLTypes);
+TYPED_TEST_SUITE(SizeInBytes, OpenCLTypes);
 
 TYPED_TEST(SizeInBytes, EmptyVector) {
   const std::vector<TypeParam> vector(0);
