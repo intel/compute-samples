@@ -1,0 +1,15 @@
+#
+# Copyright (C) 2019 Intel Corporation
+#
+# SPDX-License-Identifier: MIT
+#
+
+@PACKAGE_INIT@
+
+get_filename_component(fp_types_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+if(NOT TARGET compute_samples::fp_types)
+    include("${fp_types_CMAKE_DIR}/fp_types-targets.cmake")
+endif()
+
+check_required_components(fp_types)
