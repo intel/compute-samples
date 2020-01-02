@@ -57,6 +57,35 @@ std::vector<OUTPUT_TYPE> pack_vector(const std::vector<INPUT_TYPE> &input,
   return output;
 }
 
+template <typename OUTPUT_TYPE, typename INPUT_TYPE>
+std::vector<OUTPUT_TYPE> unpack_vector(const std::vector<INPUT_TYPE> &input,
+                                       const int step) {
+  static_assert(sizeof(INPUT_TYPE) >= sizeof(OUTPUT_TYPE),
+                "Size of INPUT_TYPE must be greater or equal to OUTPUT_TYPE");
+  assert(step > 0);
+
+  const size_t size_ratio = sizeof(INPUT_TYPE) / sizeof(OUTPUT_TYPE);
+
+  std::vector<OUTPUT_TYPE> output(input.size() * size_ratio);
+
+  const size_t columns = static_cast<size_t>(step);
+  const size_t rows = input.size() / columns;
+
+  for (size_t y = 0; y < rows; ++y) {
+    for (size_t x = 0; x < columns; ++x) {
+      std::vector<OUTPUT_TYPE> tmp(size_ratio);
+      const int input_offset = y * columns + x;
+      std::memcpy(tmp.data(), &input[input_offset], sizeof(INPUT_TYPE));
+      size_t output_offset = x + y * columns * size_ratio;
+      for (size_t i = 0; i < tmp.size(); ++i) {
+        output[output_offset] = tmp[i];
+        output_offset += columns;
+      }
+    }
+  }
+  return output;
+}
+
 } // namespace compute_samples
 
 #endif

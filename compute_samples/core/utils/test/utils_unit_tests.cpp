@@ -131,3 +131,106 @@ TEST(PackVector, Input8BitsOutput16BitsStep3) {
   const std::vector<uint16_t> output = cs::pack_vector<uint16_t>(input, 3);
   EXPECT_EQ(expected, output);
 }
+
+TEST(UnpackVector, Input8BitsOutput8BitsStep1) {
+  const std::vector<uint8_t> input = {0x00, 0x01, 0x02, 0x03};
+  const std::vector<uint8_t> expected = {0x00, 0x01, 0x02, 0x03};
+
+  const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 1);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input16BitsOutput8BitsStep1) {
+  const std::vector<uint16_t> input = {0x0100, 0x0302, 0x0504, 0x0706};
+  const std::vector<uint8_t> expected = {0x00, 0x01, 0x02, 0x03,
+                                         0x04, 0x05, 0x06, 0x07};
+
+  const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 1);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input32BitsOutput8BitsStep1) {
+  const std::vector<uint32_t> input = {0x03020100, 0x07060504, 0x0B0A0908,
+                                       0x0F0E0D0C};
+  const std::vector<uint8_t> expected = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
+                                         0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B,
+                                         0x0C, 0x0D, 0x0E, 0x0F};
+
+  const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 1);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input16BitsOutput16BitsStep1) {
+  const std::vector<uint16_t> input = {0x0100, 0x0302, 0x0504, 0x0706};
+  const std::vector<uint16_t> expected = {0x0100, 0x0302, 0x0504, 0x0706};
+
+  const std::vector<uint16_t> output = cs::unpack_vector<uint16_t>(input, 1);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input32BitsOutput16BitsStep1) {
+  const std::vector<uint32_t> input = {0x03020100, 0x07060504, 0x0B0A0908,
+                                       0x0F0E0D0C};
+  const std::vector<uint16_t> expected = {0x0100, 0x0302, 0x0504, 0x0706,
+                                          0x0908, 0x0B0A, 0x0D0C, 0x0F0E};
+
+  const std::vector<uint16_t> output = cs::unpack_vector<uint16_t>(input, 1);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input32BitsOutput32BitsStep1) {
+  const std::vector<uint32_t> input = {0x03020100, 0x07060504, 0x0B0A0908,
+                                       0x0F0E0D0C};
+  const std::vector<uint32_t> expected = {0x03020100, 0x07060504, 0x0B0A0908,
+                                          0x0F0E0D0C};
+  const std::vector<uint32_t> output = cs::unpack_vector<uint32_t>(input, 1);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input24BitsOutput8BitsStep1) {
+  const std::vector<CustomType> input = {
+      {0x00, 0x01, 0x02}, {0x03, 0x04, 0x05}, {0x06, 0x07, 0x08}};
+  const std::vector<uint8_t> expected = {0x00, 0x01, 0x02, 0x03, 0x04,
+                                         0x05, 0x06, 0x07, 0x08};
+
+  const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 1);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input8BitsOutput8BitsStep2) {
+  const std::vector<uint8_t> input = {0x00, 0x01, 0x02, 0x03};
+  const std::vector<uint8_t> expected = {0x00, 0x01, 0x02, 0x03};
+
+  const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 2);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input16BitsOutput8BitsStep2) {
+  const std::vector<uint16_t> input = {0x0200, 0x0301, 0x0604, 0x0705};
+  const std::vector<uint8_t> expected = {0x00, 0x01, 0x02, 0x03,
+                                         0x04, 0x05, 0x06, 0x07};
+
+  const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 2);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input32BitsOutput8BitsStep2) {
+  const std::vector<uint32_t> input = {0x06040200, 0x07050301, 0x0E0C0A08,
+                                       0x0F0D0B09};
+  const std::vector<uint8_t> expected = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
+                                         0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B,
+                                         0x0C, 0x0D, 0x0E, 0x0F};
+
+  const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 2);
+  EXPECT_EQ(expected, output);
+}
+
+TEST(UnpackVector, Input16BitsOutput8BitsStep3) {
+  const std::vector<uint16_t> input = {0x0300, 0x0401, 0x0502,
+                                       0x0906, 0x0A07, 0xB08};
+  const std::vector<uint8_t> expected = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
+                                         0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B};
+
+  const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 3);
+  EXPECT_EQ(expected, output);
+}
