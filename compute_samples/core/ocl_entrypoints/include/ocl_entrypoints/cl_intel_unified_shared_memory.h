@@ -73,6 +73,7 @@ typedef cl_uint cl_mem_advice_intel;
 #define CL_MEM_ALLOC_TYPE_INTEL 0x419A
 #define CL_MEM_ALLOC_BASE_PTR_INTEL 0x419B
 #define CL_MEM_ALLOC_SIZE_INTEL 0x419C
+#define CL_MEM_ALLOC_DEVICE_INTEL 0x419D
 
 typedef CL_API_ENTRY void *(CL_API_CALL *clHostMemAllocINTEL_fn)(
     cl_context context, const cl_mem_properties_intel *properties, size_t size,
