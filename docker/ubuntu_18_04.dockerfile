@@ -17,9 +17,9 @@ RUN apt-get update && apt-get install -y \
 
 COPY . /opt/src
 
-RUN /opt/src/scripts/install/install_ubuntu_18_04.sh
+RUN cd /opt/src && scripts/install/install_ubuntu_18_04.sh
 
-RUN mkdir /opt/src/build; cd /opt/src/build; cmake .. -DCMAKE_BUILD_TYPE=RELEASE; cmake --build . -- -j
+RUN mkdir /opt/src/build && cd /opt/src/build && cmake .. -DCMAKE_BUILD_TYPE=RELEASE && cmake --build .
 
 CMD ["/bin/bash"]
 
