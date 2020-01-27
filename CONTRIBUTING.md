@@ -26,7 +26,7 @@ Testing instructions can be found in the [README](README.md).
 * `third_party` - external dependencies.
 
 ## How to add a new application?
-In order to automatically create an application from a template please use `scripts/generate_application.py` with the following command line `python generate_application.py your_app`.
+In order to automatically create an application from a template please use `scripts/generate_target.py` with the following command line `python generate_target.py your_app`.
 
 If you want to manually prepare an application from scratch then please follow the instruction below.
 
