@@ -82,6 +82,8 @@ function(add_kernels target)
     foreach(kernel ${ARGN})
         target_sources(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${kernel}")
         source_group("Kernel Files" FILES "${CMAKE_CURRENT_SOURCE_DIR}/${kernel}")
+        # Do not compile kernel files
+        set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/${kernel}" PROPERTIES HEADER_FILE_ONLY TRUE)
         #TODO Replace kernel links below by cmake's CREATE_LINK after updating infrastructure to cmake version 3.14.
         if(WIN32)
           file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${kernel}" native_current_binary_dir_kernel)
