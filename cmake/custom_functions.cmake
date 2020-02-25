@@ -66,6 +66,7 @@ function(add_application_test project_name)
     target_link_libraries(${name}
         PUBLIC
         compute_samples::${project_name}_lib
+        GMock::GMock
         GTest::GTest
         compute_samples::test_harness
     )
