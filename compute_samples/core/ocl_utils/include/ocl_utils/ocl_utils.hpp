@@ -20,6 +20,34 @@ boost::compute::program build_program_il(const boost::compute::context &context,
                                          const std::string &file,
                                          const std::string &options = "");
 
+struct cl_char3 {
+  ::cl_char3 data;
+};
+struct cl_uchar3 {
+  ::cl_uchar3 data;
+};
+struct cl_short3 {
+  ::cl_short3 data;
+};
+struct cl_ushort3 {
+  ::cl_ushort3 data;
+};
+struct cl_int3 {
+  ::cl_int3 data;
+};
+struct cl_uint3 {
+  ::cl_uint3 data;
+};
+struct cl_float3 {
+  ::cl_float3 data;
+};
+struct cl_long3 {
+  ::cl_long3 data;
+};
+struct cl_ulong3 {
+  ::cl_ulong3 data;
+};
+
 template <typename T> std::string to_cl_c_string();
 
 template <typename T> struct cl_scalar_type {};
@@ -69,6 +97,34 @@ template <> struct cl_scalar_type<cl_ulong4> { using type = cl_ulong; };
 template <> struct cl_scalar_type<cl_ulong8> { using type = cl_ulong; };
 template <> struct cl_scalar_type<cl_ulong16> { using type = cl_ulong; };
 
+template <> struct cl_scalar_type<compute_samples::cl_char3> {
+  using type = cl_char;
+};
+template <> struct cl_scalar_type<compute_samples::cl_uchar3> {
+  using type = cl_uchar;
+};
+template <> struct cl_scalar_type<compute_samples::cl_short3> {
+  using type = cl_short;
+};
+template <> struct cl_scalar_type<compute_samples::cl_ushort3> {
+  using type = cl_ushort;
+};
+template <> struct cl_scalar_type<compute_samples::cl_int3> {
+  using type = cl_int;
+};
+template <> struct cl_scalar_type<compute_samples::cl_uint3> {
+  using type = cl_uint;
+};
+template <> struct cl_scalar_type<compute_samples::cl_float3> {
+  using type = cl_float;
+};
+template <> struct cl_scalar_type<compute_samples::cl_long3> {
+  using type = cl_long;
+};
+template <> struct cl_scalar_type<compute_samples::cl_ulong3> {
+  using type = cl_ulong;
+};
+
 template <typename T> bool compare_cl_vectors(const T &lhs, const T &rhs) {
   const int size = sizeof(T) / sizeof(typename cl_scalar_type<T>::type);
   for (auto i = 0; i < size; ++i) {
@@ -94,6 +150,58 @@ template <typename T> std::string cl_vector_to_string(const T &x) {
   return ss.str();
 }
 
+template <typename T> std::string cl_vector3_to_string(const T &x) {
+  std::stringstream ss;
+  ss << "[";
+  for (auto i = 0; i < 3; ++i) {
+    if (i != 0) {
+      ss << ", ";
+    }
+    // + converts cl_char and cl_uchar to integers instead of ASCII characters
+    ss << +x.data.s[i];
+  }
+  ss << "]";
+  return ss.str();
+}
+
+template <typename T> bool compare_cl_vectors3(const T &lhs, const T &rhs) {
+  for (auto i = 0; i < 3; ++i) {
+    if (lhs.data.s[i] != rhs.data.s[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+// need to be inside a namespace
+// https://stackoverflow.com/questions/33371088/how-to-get-a-custom-operator-to-work-with-google-test
+bool operator==(const compute_samples::cl_char3 &lhs,
+                const compute_samples::cl_char3 &rhs);
+bool operator==(const compute_samples::cl_uchar3 &lhs,
+                const compute_samples::cl_uchar3 &rhs);
+bool operator==(const compute_samples::cl_short3 &lhs,
+                const compute_samples::cl_short3 &rhs);
+bool operator==(const compute_samples::cl_ushort3 &lhs,
+                const compute_samples::cl_ushort3 &rhs);
+bool operator==(const compute_samples::cl_int3 &lhs,
+                const compute_samples::cl_int3 &rhs);
+bool operator==(const compute_samples::cl_uint3 &lhs,
+                const compute_samples::cl_uint3 &rhs);
+bool operator==(const compute_samples::cl_float3 &lhs,
+                const compute_samples::cl_float3 &rhs);
+bool operator==(const compute_samples::cl_long3 &lhs,
+                const compute_samples::cl_long3 &rhs);
+bool operator==(const compute_samples::cl_ulong3 &lhs,
+                const compute_samples::cl_ulong3 &rhs);
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_char3 &x);
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_uchar3 &x);
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_short3 &x);
+std::ostream &operator<<(std::ostream &os,
+                         const compute_samples::cl_ushort3 &x);
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_int3 &x);
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_uint3 &x);
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_float3 &x);
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_long3 &x);
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_ulong3 &x);
 } // namespace compute_samples
 
 // Global namespace

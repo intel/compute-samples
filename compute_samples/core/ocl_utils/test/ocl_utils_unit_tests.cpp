@@ -14,7 +14,8 @@ namespace compute = boost::compute;
 
 template <typename T> class SizeInBytes : public testing::Test {};
 typedef testing::Types<cl_char, cl_uchar, cl_short, cl_ushort, cl_int, cl_uint,
-                       cl_long, cl_ulong, cl_half, cl_float, cl_double>
+                       cl_long, cl_ulong, cl_half, cl_float, cl_double,
+                       cs::cl_uint3, cs::cl_float3>
     OpenCLTypes;
 TYPED_TEST_SUITE(SizeInBytes, OpenCLTypes);
 
@@ -43,6 +44,18 @@ TEST(CompareCLVectors, cl_int8_not_equal) {
   const cl_int8 lhs = {0, 1, 2, 3, 4, 5, 6, 7};
   const cl_int8 rhs = {1, 2, 3, 4, 5, 6, 7, 0};
   EXPECT_FALSE(cs::compare_cl_vectors(lhs, rhs));
+}
+
+TEST(CompareCLVectors, cl_uint3_equal) {
+  const cs::cl_uint3 lhs = {4, 5, 6};
+  const cs::cl_uint3 rhs = lhs;
+  EXPECT_TRUE(cs::compare_cl_vectors3(lhs, rhs));
+}
+
+TEST(CompareCLVectors, cl_uint3_not_equal) {
+  const cs::cl_uint3 lhs = {4, 5, 6};
+  const cs::cl_uint3 rhs = {5, 5, 6};
+  EXPECT_FALSE(cs::compare_cl_vectors3(lhs, rhs));
 }
 
 TEST(CompareCLVectors, cl_int4_equal) {
@@ -82,6 +95,26 @@ TEST(CLVectorToString, cl_int4) {
 TEST(CLVectorToString, cl_int2) {
   const cl_int2 x = {0, 1};
   EXPECT_EQ("[0, 1]", cs::cl_vector_to_string(x));
+}
+
+TEST(CLVectorToString, cl_uint3) {
+  const cs::cl_uint3 x = {0, 1, 2};
+  EXPECT_EQ("[0, 1, 2]", cs::cl_vector3_to_string(x));
+}
+
+TEST(CLVectorToString, cl_float3) {
+  const cs::cl_float3 x = {0.1, 1.2, 2.3};
+  EXPECT_EQ("[0.1, 1.2, 2.3]", cs::cl_vector3_to_string(x));
+}
+
+TEST(CLVectorScalarTypeSize, cl_char3) {
+  const int size = sizeof(typename cs::cl_scalar_type<cs::cl_char3>::type);
+  EXPECT_EQ(1, size);
+}
+
+TEST(CLVectorScalarTypeSize, cl_float3) {
+  const int size = sizeof(typename cs::cl_scalar_type<cs::cl_float3>::type);
+  EXPECT_EQ(4, size);
 }
 
 TEST(ToStringTest, UsmTypeHost) {

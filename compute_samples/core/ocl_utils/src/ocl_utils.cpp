@@ -130,6 +130,102 @@ template <> std::string to_cl_c_string<cl_ulong4>() { return "ulong4"; }
 template <> std::string to_cl_c_string<cl_ulong8>() { return "ulong8"; }
 template <> std::string to_cl_c_string<cl_ulong16>() { return "ulong16"; }
 
+template <> std::string to_cl_c_string<compute_samples::cl_char3>() {
+  return "char3";
+}
+template <> std::string to_cl_c_string<compute_samples::cl_uchar3>() {
+  return "uchar3";
+}
+template <> std::string to_cl_c_string<compute_samples::cl_short3>() {
+  return "short3";
+}
+template <> std::string to_cl_c_string<compute_samples::cl_ushort3>() {
+  return "ushort3";
+}
+template <> std::string to_cl_c_string<compute_samples::cl_int3>() {
+  return "int3";
+}
+template <> std::string to_cl_c_string<compute_samples::cl_uint3>() {
+  return "uint3";
+}
+template <> std::string to_cl_c_string<compute_samples::cl_float3>() {
+  return "float3";
+}
+template <> std::string to_cl_c_string<compute_samples::cl_long3>() {
+  return "long3";
+}
+template <> std::string to_cl_c_string<compute_samples::cl_ulong3>() {
+  return "ulong3";
+}
+bool operator==(const compute_samples::cl_char3 &lhs,
+                const compute_samples::cl_char3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+bool operator==(const compute_samples::cl_uchar3 &lhs,
+                const compute_samples::cl_uchar3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+bool operator==(const compute_samples::cl_short3 &lhs,
+                const compute_samples::cl_short3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+bool operator==(const compute_samples::cl_ushort3 &lhs,
+                const compute_samples::cl_ushort3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+bool operator==(const compute_samples::cl_int3 &lhs,
+                const compute_samples::cl_int3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+bool operator==(const compute_samples::cl_uint3 &lhs,
+                const compute_samples::cl_uint3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+bool operator==(const compute_samples::cl_float3 &lhs,
+                const compute_samples::cl_float3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+bool operator==(const compute_samples::cl_long3 &lhs,
+                const compute_samples::cl_long3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+bool operator==(const compute_samples::cl_ulong3 &lhs,
+                const compute_samples::cl_ulong3 &rhs) {
+  return compute_samples::compare_cl_vectors3(lhs, rhs);
+}
+
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_char3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os,
+                         const compute_samples::cl_uchar3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os,
+                         const compute_samples::cl_short3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os,
+                         const compute_samples::cl_ushort3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_int3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_uint3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os,
+                         const compute_samples::cl_float3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os, const compute_samples::cl_long3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
+std::ostream &operator<<(std::ostream &os,
+                         const compute_samples::cl_ulong3 &x) {
+  return os << compute_samples::cl_vector3_to_string(x);
+}
 } // namespace compute_samples
 
 bool operator==(const cl_int2 &lhs, const cl_int2 &rhs) {
