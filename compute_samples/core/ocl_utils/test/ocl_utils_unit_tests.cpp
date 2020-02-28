@@ -36,53 +36,52 @@ TYPED_TEST(SizeInBytes, MultipleElements) {
 TEST(CompareCLVectors, cl_int8_equal) {
   const cl_int8 lhs = {0, 1, 2, 3, 4, 5, 6, 7};
   const cl_int8 rhs = lhs;
-  EXPECT_TRUE(compute_samples::compare_cl_vectors(lhs, rhs));
+  EXPECT_TRUE(cs::compare_cl_vectors(lhs, rhs));
 }
 
 TEST(CompareCLVectors, cl_int8_not_equal) {
   const cl_int8 lhs = {0, 1, 2, 3, 4, 5, 6, 7};
   const cl_int8 rhs = {1, 2, 3, 4, 5, 6, 7, 0};
-  EXPECT_FALSE(compute_samples::compare_cl_vectors(lhs, rhs));
+  EXPECT_FALSE(cs::compare_cl_vectors(lhs, rhs));
 }
 
 TEST(CompareCLVectors, cl_int4_equal) {
   const cl_int4 lhs = {0, 1, 2, 3};
   const cl_int4 rhs = lhs;
-  EXPECT_TRUE(compute_samples::compare_cl_vectors(lhs, rhs));
+  EXPECT_TRUE(cs::compare_cl_vectors(lhs, rhs));
 }
 
 TEST(CompareCLVectors, cl_int4_not_equal) {
   const cl_int4 lhs = {0, 1, 2, 3};
   const cl_int4 rhs = {1, 2, 3, 4};
-  EXPECT_FALSE(compute_samples::compare_cl_vectors(lhs, rhs));
+  EXPECT_FALSE(cs::compare_cl_vectors(lhs, rhs));
 }
 
 TEST(CompareCLVectors, cl_int2_equal) {
   const cl_int2 lhs = {0, 1};
   const cl_int2 rhs = lhs;
-  EXPECT_TRUE(compute_samples::compare_cl_vectors(lhs, rhs));
+  EXPECT_TRUE(cs::compare_cl_vectors(lhs, rhs));
 }
 
 TEST(CompareCLVectors, cl_int2_not_equal) {
   const cl_int2 lhs = {0, 1};
   const cl_int2 rhs = {1, 2};
-  EXPECT_FALSE(compute_samples::compare_cl_vectors(lhs, rhs));
+  EXPECT_FALSE(cs::compare_cl_vectors(lhs, rhs));
 }
 
 TEST(CLVectorToString, cl_int8) {
   const cl_int8 x = {0, 1, 2, 3, 4, 5, 6, 7};
-  EXPECT_EQ("[0, 1, 2, 3, 4, 5, 6, 7]",
-            compute_samples::cl_vector_to_string(x));
+  EXPECT_EQ("[0, 1, 2, 3, 4, 5, 6, 7]", cs::cl_vector_to_string(x));
 }
 
 TEST(CLVectorToString, cl_int4) {
   const cl_int4 x = {0, 1, 2, 3};
-  EXPECT_EQ("[0, 1, 2, 3]", compute_samples::cl_vector_to_string(x));
+  EXPECT_EQ("[0, 1, 2, 3]", cs::cl_vector_to_string(x));
 }
 
 TEST(CLVectorToString, cl_int2) {
   const cl_int2 x = {0, 1};
-  EXPECT_EQ("[0, 1]", compute_samples::cl_vector_to_string(x));
+  EXPECT_EQ("[0, 1]", cs::cl_vector_to_string(x));
 }
 
 TEST(ToStringTest, UsmTypeHost) {
