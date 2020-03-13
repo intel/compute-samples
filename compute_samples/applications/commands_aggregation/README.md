@@ -72,3 +72,7 @@ There are 3 cases of updating the task level in command queue:
 The sample allows to enqueue kernels as described above or enqueue all commands to one IOQ to present serialized version.
 
 Run `commands_aggregation` and `commands_aggregation --in-order` to check the performance boost.
+
+## Usage
+    commands_aggregation
+    commands_aggregation --in-order

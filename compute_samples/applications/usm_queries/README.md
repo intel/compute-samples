@@ -15,3 +15,6 @@ Device can allow different set of operations for each allocation type, so you sh
 * `MEMORY_ATOMIC_ACCESS`;
 * `MEMORY_CONCURRENT_ACCESS`;
 * `MEMORY_CONCURRENT_ATOMIC_ACCESS`;
+
+## Usage
+    usm_queries

@@ -64,6 +64,9 @@ Here are some additional ideas to experiment with:
 * Use the "required Subgroup size" kernel attribute to change the Subgroup size.  Note, this
   requires the `cl_intel_required_subgroup_size` extension.
 
+## Usage
+    subgroups_visualization
+
 ----
 
 Intel and the Intel logo are trademarks of Intel Corporation or its subsidiaries in the U.S. and/or other countries.

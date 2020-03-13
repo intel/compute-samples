@@ -25,3 +25,9 @@ Basic structure of an application using USM is presented below:
 1. Read results using for example:
     1. `memcpy`/`std::copy`/`clEnqueueMemcpyINTEL`;
 1. Free memory using `clMemFreeINTEL`.
+
+## Usage
+    usm_hello_world host
+    usm_hello_world device
+    usm_hello_world shared
+    usm_hello_world host --size 1024

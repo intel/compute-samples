@@ -49,6 +49,9 @@ Here are some additional ideas to experiment with:
   Hint: To flip the image horizontally, you'll likely want to use Subgroup shuffles to flip the
   data within the Subgroup.
 
+## Usage
+    subgroups_imagecopy
+
 ----
 
 Intel and the Intel logo are trademarks of Intel Corporation or its subsidiaries in the U.S. and/or other countries.

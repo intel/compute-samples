@@ -12,3 +12,9 @@ Based on the fact that USM allocators return pointers you can use them in standa
 Please note that `device` memory is not accessible on host, so you can't dereference it.
 
 If a kernel uses a memory allocation indirectly i.e. memory is not passed as a kernel argument then it should be specified using `clSetKernelExecInfo`. It can be done explicitly by passing all pointers as `CL_KERNEL_EXEC_INFO_​USM_PTRS_INTEL` or implicitly by setting `CL_KERNEL_EXEC_INFO_​INDIRECT_HOST/DEVICE/SHARED_ACCESS_INTEL`.
+
+## Usage
+    usm_linked_list host
+    usm_linked_list device
+    usm_linked_list shared
+    usm_linked_list host --size 1024

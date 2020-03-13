@@ -15,7 +15,7 @@ There are utility scripts available that help with installation of all dependenc
     # Install dependencies for Ubuntu 18.04
     scripts/install/install_ubuntu_18_04.sh
 
-Note: In order to build the project using GCC 8, Boost 1.68 is required, becasue of [this](https://github.com/boostorg/compute/issues/778) bug in Boost::Compute.
+Note: In order to build the project using GCC 8, Boost 1.68 is required, because of [this](https://github.com/boostorg/compute/issues/778) bug in Boost::Compute.
 
 Note: By default all dependencies on Windows are built for x64.
 

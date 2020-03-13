@@ -5,3 +5,8 @@ Each USM pointer can be queried about:
 * allocation type - `CL_MEM_ALLOC_TYPE_INTEL`;
 * base pointer - `CL_MEM_ALLOC_BASE_PTR_INTEL`;
 * size - `CL_MEM_ALLOC_SIZE_INTEL`;
+
+## Usage
+    usm_mem_info host
+    usm_mem_info device
+    usm_mem_info shared
