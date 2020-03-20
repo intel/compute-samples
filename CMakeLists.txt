@@ -21,7 +21,7 @@
 #
 
 cmake_minimum_required(VERSION 3.8)
-project(compute_samples VERSION 0.2.0)
+project(compute_samples VERSION 0.3.0)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -34,7 +34,20 @@ include(import_boost)
 include(import_gtest)
 include(import_libpng)
 include(import_mediadata)
-include(import_opencl)
+
+option(WITH_OCL "Build OCL Samples" ON)
+if(WITH_OCL)
+    include(import_opencl)
+endif()
+
+option(WITH_L0 "Build L0 Samples" ON)
+if(WIN32)
+    set(WITH_L0 OFF)
+endif()
+
+if(WITH_L0)
+    include(import_level_zero)
+endif()
 
 enable_testing()
 add_subdirectory(${PROJECT_NAME})

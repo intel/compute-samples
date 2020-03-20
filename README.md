@@ -8,7 +8,7 @@ Sample GPU Compute applications for Intel® Processor Graphics that demonstrate:
 - features specific to Intel® Processor Graphics
 - efficient way of using Intel® GPUs for general computing
 
-Compute samples are currently limited to the OpenCL™ compute API.
+Compute samples currently support OpenCL™ and oneApi Level Zero compute APIs.
 
 ## Samples Overview
 List of all available samples and their description can be found in the [Samples Overview](docs/samples_overview.md).

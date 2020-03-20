@@ -51,3 +51,7 @@ endif()
 if(NOT DEFINED OPENCL_ROOT)
     set(OPENCL_ROOT "${THIRD_PARTY_DIRECTORY}/opencl")
 endif()
+
+if(NOT DEFINED L0_ROOT)
+    set(L0_ROOT "${THIRD_PARTY_DIRECTORY}/level_zero")
+endif()

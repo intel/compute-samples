@@ -1,0 +1,18 @@
+#
+# Copyright (C) 2020 Intel Corporation
+#
+# SPDX-License-Identifier: MIT
+#
+
+@PACKAGE_INIT@
+
+get_filename_component(ze_utils_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+include(CMakeFindDependencyMacro)
+find_dependency(ze_loader REQUIRED)
+
+if(NOT TARGET compute_samples::ze_utils)
+    include("${ze_utils_CMAKE_DIR}/ze_utils-targets.cmake")
+endif()
+
+check_required_components(ze_utils)

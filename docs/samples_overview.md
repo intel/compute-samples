@@ -19,3 +19,6 @@
         1. [USM Hello World](../compute_samples/applications/usm_hello_world/README.md)
         1. [USM Linked List](../compute_samples/applications/usm_linked_list/README.md)
         1. [USM Mem Info](../compute_samples/applications/usm_mem_info/README.md)
+1. oneAPI Level Zero
+    1. Basic
+        1. [ze_info](../compute_samples/applications/ze_info/README.md)

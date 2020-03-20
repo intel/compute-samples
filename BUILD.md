@@ -31,6 +31,15 @@ Given that all dependencies are installed then use the following commands to bui
 In order to use a different generator than a default one please use `-G` option based on the [CMake documentation](https://cmake.org/cmake/help/v3.8/manual/cmake-generators.7.html). 
 For example, you can generate a Visual Studio 2017 solution by running: `cmake .. -G "Visual Studio 15 2017 Win64"`
 
+## Build samples for specific API
+Our project currently supports OpenCL and oneApi Level Zero APIs. By default all samples are enabled and built.
+If necessary you can disable specific API by using `WITH_OCL=OFF` or `WITH_L0=OFF` CMake flags.
+
+For example:
+
+    cmake .. -DWITH_L0=OFF
+    cmake --build .
+
 # Installation
 The following command installs project's binaries.
 By default they are installed in the `build` directory, but it can be customized by adding `CMAKE_INSTALL_PREFIX=your/path` during CMake configuration.
@@ -43,7 +52,7 @@ In order to create a redistributable package please use the following command:
     cmake --build . --target package
 
 # Source Package
-In order to create a redistributable source package please use the following command:
+In order to create a redistributable package of the source please use the following command:
 
     cmake --build . --target package_source
 
@@ -56,6 +65,9 @@ CMake can be configured using the following parameters:
 * `ZLIB_ROOT` - Path to the custom zlib installation directory.
 * `OPENCL_ROOT` - Path to the custom OpenCL ICD installation directory.
 * `MEDIADATA_ROOT` - Path to the custom mediadata directory.
+* `L0_ROOT` - Path to the custom Level Zero ICD installation directory.
+* `WITH_OCL` - If set to `OFF` disables building the OCL samples and utilities. Default is `ON`.
+* `WITH_L0` - If set to `OFF` disables building the L0 samples. Default is `ON`.
 
 Example command line with custom options: `cmake .. -DBOOST_ROOT=/home/boost_1_64_0`
 
@@ -69,7 +81,7 @@ There are 2 ways to run tests depending on the use case:
 
     If you want to run `ctest` on a different configuration like `Debug` or `Release` please use `-C` option according to the [CTest documentation](https://cmake.org/cmake/help/v3.8/manual/ctest.1.html).
 
-1. Using [Google Test](https://github.com/google/googletest/tree/release-1.8.1):
+1. Using [Google Test](https://github.com/google/googletest/tree/release-1.10.0):
     * To run all tests from a specific module find module's tester and run it.
     * To run specific tests from a specific module find module's tester and run it with `--gtest_filter` option.
 
