@@ -4,4 +4,6 @@
 # SPDX-License-Identifier: MIT
 #
 
-add_subdirectory(test_cl_visa_injection_rt_basic)
+if(WITH_OCL)
+    add_subdirectory(test_cl_visa_injection_rt_basic)
+endif()
