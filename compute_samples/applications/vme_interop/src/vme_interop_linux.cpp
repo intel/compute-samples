@@ -105,7 +105,7 @@ VAManager::~VAManager() {
 
 VAManager manager;
 
-static VADisplay get_va_display() {
+static VADisplay get_va_display(int &drm_fd) {
   VADisplay va_display;
   int major_version, minor_version;
   VAStatus status = -1;
@@ -119,7 +119,7 @@ static VADisplay get_va_display() {
   if (status != VA_STATUS_SUCCESS) {
     LOG_INFO << "initializing VADisplay from X11 display "
                 "failed.  Trying render node";
-    int drm_fd = open(DRM_RENDER_NODE_PATH, O_RDWR);
+    drm_fd = open(DRM_RENDER_NODE_PATH, O_RDWR);
     if (drm_fd < 0) {
       LOG_INFO << "initializing VADisplay from render node "
                   "failed. Trying card0 handle";
@@ -382,7 +382,8 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
 
 void VmeInteropApplication::run_os_specific_implementation(
     const Arguments &args, const compute::device &device) const {
-  VADisplay va_display = get_va_display();
+  int drm_fd = -1;
+  VADisplay va_display = get_va_display(drm_fd);
 
   if (get_va_device(device.platform(), va_display) != device) {
     throw std::runtime_error("VA API interoperable device not found.");
@@ -434,5 +435,9 @@ void VmeInteropApplication::run_os_specific_implementation(
   LOG_INFO << "Wrote " << frame_count << " frames with overlaid "
            << "motion vectors to " << args.output_yuv_path << " .";
   writer.write_to_file(args.output_yuv_path.c_str());
+
+  if (drm_fd >= 0) {
+    close(drm_fd);
+  }
 }
 } // namespace compute_samples
