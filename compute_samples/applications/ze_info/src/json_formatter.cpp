@@ -21,7 +21,7 @@ namespace pt = boost::property_tree;
 namespace compute_samples {
 
 pt::ptree drivers_capabilities_to_json(
-    const std::vector<DriverCapabilities> capabilities) {
+    const std::vector<DriverCapabilities> &capabilities) {
   pt::ptree tree;
   if (capabilities.empty()) {
     pt::ptree node;
@@ -35,7 +35,7 @@ pt::ptree drivers_capabilities_to_json(
   return tree;
 }
 
-pt::ptree driver_capabilities_to_json(const DriverCapabilities capabilities) {
+pt::ptree driver_capabilities_to_json(const DriverCapabilities &capabilities) {
   pt::ptree tree;
   const std::string version =
       std::to_string(ZE_MAJOR_VERSION(capabilities.api_version)) + "." +
@@ -73,7 +73,7 @@ pt::ptree driver_ipc_properties_to_json(const ze_driver_ipc_properties_t p) {
   return tree;
 }
 
-pt::ptree device_capabilities_to_json(const DeviceCapabilities capabilities) {
+pt::ptree device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   pt::ptree tree;
   tree.add_child("ze_device_properties_t",
                  device_properties_to_json(capabilities.device_properties));
@@ -329,7 +329,7 @@ std::string ptree_to_string(const pt::ptree tree) {
 }
 
 void write_capabilities_to_json(
-    const std::vector<DriverCapabilities> capabilities,
+    const std::vector<DriverCapabilities> &capabilities,
     const std::string output) {
   const pt::ptree tree = drivers_capabilities_to_json(capabilities);
   const std::string data = ptree_to_string(tree);

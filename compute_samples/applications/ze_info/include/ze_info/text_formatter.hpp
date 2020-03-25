@@ -14,11 +14,11 @@
 #include <vector>
 
 namespace compute_samples {
-std::string
-drivers_capabilities_to_text(const std::vector<DriverCapabilities> capabilities,
-                             const int indentation_level);
+std::string drivers_capabilities_to_text(
+    const std::vector<DriverCapabilities> &capabilities,
+    const int indentation_level);
 
-std::string driver_capabilities_to_text(const DriverCapabilities capabilities,
+std::string driver_capabilities_to_text(const DriverCapabilities &capabilities,
                                         const int indentation_level);
 
 std::string driver_properties_to_text(const ze_driver_properties_t p,
@@ -30,7 +30,7 @@ std::string driver_api_version_to_text(const ze_api_version_t v,
 std::string driver_ipc_properties_to_text(const ze_driver_ipc_properties_t p,
                                           const int indentation_level);
 
-std::string device_capabilities_to_text(const DeviceCapabilities capabilities,
+std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
                                         const int indentation_level);
 
 std::string device_properties_to_text(const ze_device_properties_t p,

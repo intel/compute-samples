@@ -15,9 +15,9 @@
 
 namespace compute_samples {
 
-std::string
-drivers_capabilities_to_text(const std::vector<DriverCapabilities> capabilities,
-                             const int indentation_level) {
+std::string drivers_capabilities_to_text(
+    const std::vector<DriverCapabilities> &capabilities,
+    const int indentation_level) {
   std::stringstream ss;
   ss << key_value_to_text("Number of drivers",
                           std::to_string(capabilities.size()),
@@ -28,7 +28,7 @@ drivers_capabilities_to_text(const std::vector<DriverCapabilities> capabilities,
   return ss.str();
 }
 
-std::string driver_capabilities_to_text(const DriverCapabilities capabilities,
+std::string driver_capabilities_to_text(const DriverCapabilities &capabilities,
                                         const int indentation_level) {
   std::stringstream ss;
   ss << driver_api_version_to_text(capabilities.api_version, indentation_level);
@@ -75,7 +75,7 @@ std::string driver_ipc_properties_to_text(const ze_driver_ipc_properties_t p,
   return ss.str();
 }
 
-std::string device_capabilities_to_text(const DeviceCapabilities capabilities,
+std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
                                         const int indentation_level) {
   std::stringstream ss;
   ss << device_properties_to_text(capabilities.device_properties,

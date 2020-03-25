@@ -14,10 +14,10 @@
 
 namespace compute_samples {
 boost::property_tree::ptree drivers_capabilities_to_json(
-    const std::vector<DriverCapabilities> capabilities);
+    const std::vector<DriverCapabilities> &capabilities);
 
 boost::property_tree::ptree
-driver_capabilities_to_json(const DriverCapabilities capabilities);
+driver_capabilities_to_json(const DriverCapabilities &capabilities);
 
 boost::property_tree::ptree
 driver_properties_to_json(const ze_driver_properties_t p);
@@ -26,7 +26,7 @@ boost::property_tree::ptree
 driver_ipc_properties_to_json(const ze_driver_ipc_properties_t p);
 
 boost::property_tree::ptree
-device_capabilities_to_json(const DeviceCapabilities capabilities);
+device_capabilities_to_json(const DeviceCapabilities &capabilities);
 
 boost::property_tree::ptree
 device_properties_to_json(const ze_device_properties_t p);
@@ -55,7 +55,7 @@ device_image_properties_to_json(const ze_device_image_properties_t p);
 std::string ptree_to_string(const boost::property_tree::ptree tree);
 
 void write_capabilities_to_json(
-    const std::vector<DriverCapabilities> capabilities,
+    const std::vector<DriverCapabilities> &capabilities,
     const std::string output);
 } // namespace compute_samples
 
