@@ -9,8 +9,8 @@ The following packages are required to build the project:
 
 There are utility scripts available that help with installation of all dependencies on Windows and Linux. Examples below:
 
-    # Install dependencies for Visual Studio 2017
-    scripts/install/install_vs2017.ps1
+    # Install dependencies for Windows
+    scripts/install/install_windows.ps1
 
     # Install dependencies for Ubuntu 18.04
     scripts/install/install_ubuntu_18_04.sh
