@@ -16,13 +16,14 @@ echo "Installing Level Zero"
 ROOT_PATH=`pwd`
 INSTALL_PATH="$ROOT_PATH/third_party"
 LEVEL_ZERO_PATH="$INSTALL_PATH/level_zero"
+OPENCL_PATH="$INSTALL_PATH/opencl"
 
 pushd .
 cd level-zero-0.91
 mkdir build
 cd build
 
-cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX="$LEVEL_ZERO_PATH"
+cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX="$LEVEL_ZERO_PATH" -DOPENCL_PATH="$OPENCL_PATH/include"
 cmake --build . --target install
 popd
 
