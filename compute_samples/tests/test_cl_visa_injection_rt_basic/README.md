@@ -48,7 +48,7 @@ This feature is experimental and may not be supported on our drivers or with a l
   ```
   __asm__ ("add (M1, 16) %1(0,0)<1> %1(0,0)<1;1,0> %0"
            :
-           : "rw"(0x42), "rw"(tmp));
+           : "i"(0x42), "rw"(tmp));
   ```
 - Multiple vISA instructions
   example:
@@ -120,7 +120,7 @@ This feature is experimental and may not be supported on our drivers or with a l
   ```
   __asm__("add (M1, 16) %1(0,0)<1> %2(0,0)<1;1,0> %0"
           :
-          : "rw"(0xffff5aa6), "=rw"(dst), "rw"(src1), "rw"(src0));
+          : "i"(0xffff5aa6), "=rw"(dst), "rw"(src1), "rw"(src0));
   ```
 - Single output
   example:
@@ -141,7 +141,7 @@ This feature is experimental and may not be supported on our drivers or with a l
   ```
   __asm__("or (M1, 16) %0(0,0)<1> %1 %0(0,0)<1;1,0>"
           : "+rw"(dst)
-          : "rw"(1 << (sizeof(int) * 8 - 1) | 0x42));
+          : "i"(1 << (sizeof(int) * 8 - 1) | 0x42));
   ```
 - Pointer Load/Store
   example:

@@ -13,6 +13,6 @@ test_template_no_outputs(global int *const d0) {
   // tmp += 0x42;
   __asm__ volatile("add (M1, 16) %1(0,0)<1> %1(0,0)<1;1,0> %0"
                    :
-                   : "rw"(0x42), "rw"(tmp));
+                   : "i"(0x42), "rw"(tmp));
   d0[tid] = tmp;
 }

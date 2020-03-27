@@ -14,7 +14,7 @@ test_constraints_immediate(global int *const d0) {
   /* dst |= 1 << (sizeof(int) * 8 - 1) | 0x42; */
   __asm__("or (M1, 16) %0(0,0)<1> %1 %0(0,0)<1;1,0>"
           : "+rw"(dst)
-          : "rw"(1 << (sizeof(int) * 8 - 1) | 0x42));
+          : "i"(1 << (sizeof(int) * 8 - 1) | 0x42));
 
   d0[tid] = dst;
 }

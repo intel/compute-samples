@@ -18,7 +18,7 @@ test_constraints_multiple_inputs(global int *const d0,
   /* dst = src1 - 0xa55a; */
   __asm__("add (M1, 16) %1(0,0)<1> %2(0,0)<1;1,0> %0"
           :
-          : "rw"(0xffff5aa6), "=rw"(dst), "rw"(src1), "rw"(src0));
+          : "i"(0xffff5aa6), "=rw"(dst), "rw"(src1), "rw"(src0));
 
   d0[tid] = dst;
 }
