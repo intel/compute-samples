@@ -462,6 +462,7 @@ HWTEST(TestCLVisaInjectionRtBasic, ConstraintsImmediateOperand) {
   const size_t size = 64;
   const int seed = 0;
 
+  const auto const_argument = cs::generate_value<uint32_t>(seed);
   auto dst = cs::generate_vector<int>(size, seed);
 
   const compute::context context = compute::system::default_context();
@@ -469,8 +470,11 @@ HWTEST(TestCLVisaInjectionRtBasic, ConstraintsImmediateOperand) {
   compute::buffer out_buffer(context, size * 4,
                              compute::memory_object::read_write);
 
+  const std::string build_options =
+      "-DCONST_ARGUMENT=" + std::to_string(const_argument);
   compute::program program = compute_samples::build_program(
-      context, "test_cl_visa_injection_rt_basic_constraints_immediate.cl");
+      context, "test_cl_visa_injection_rt_basic_constraints_immediate.cl",
+      build_options);
 
   compute::kernel kernel = program.create_kernel("test_constraints_immediate");
   kernel.set_args(out_buffer);
@@ -486,6 +490,32 @@ HWTEST(TestCLVisaInjectionRtBasic, ConstraintsImmediateOperand) {
     std::vector<int> expected(size);
     for (size_t i = 0; i < size; ++i) {
       expected[i] = dst[i] | 1 << (sizeof(int) * 8 - 1) | 0x42;
+    }
+
+    EXPECT_THAT(result, ::testing::ElementsAreArray(expected));
+  }
+
+  EXPECT_TRUE(check_supported_subgroup_size(8));
+
+  kernel = program.create_kernel("test_constraints_immediate_simd8");
+
+  auto src = cs::generate_vector<int>(size, seed);
+  compute::buffer in_buffer(context, cs::size_in_bytes(src),
+                            compute::memory_object::read_only |
+                                compute::memory_object::use_host_ptr,
+                            src.data());
+  kernel.set_args(in_buffer, out_buffer);
+
+  queue.enqueue_write_buffer(out_buffer, 0, cs::size_in_bytes(dst), dst.data());
+  queue.enqueue_1d_range_kernel(kernel, 0, size, 0);
+
+  {
+    std::vector<int> result(size, 0);
+    queue.enqueue_read_buffer(out_buffer, 0, cs::size_in_bytes(result),
+                              result.data());
+    std::vector<int> expected(size);
+    for (size_t i = 0; i < size; ++i) {
+      expected[i] = src[i] + const_argument;
     }
 
     EXPECT_THAT(result, ::testing::ElementsAreArray(expected));

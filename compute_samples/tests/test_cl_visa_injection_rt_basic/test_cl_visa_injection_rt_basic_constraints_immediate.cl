@@ -18,3 +18,13 @@ test_constraints_immediate(global int *const d0) {
 
   d0[tid] = dst;
 }
+
+__attribute__((intel_reqd_sub_group_size(8))) kernel void
+test_constraints_immediate_simd8(global const int *const A,
+                                 global int *const B) {
+  const size_t wiID = get_global_id(0);
+
+  __asm__("add (M1, 8) %0(0, 0)<1> %1(0, 0)<1;1,0> %2"
+          : "=rw"(B[wiID])
+          : "rw"(A[wiID]), "i"(CONST_ARGUMENT));
+}
