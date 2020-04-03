@@ -1,6 +1,6 @@
 # Dependencies
 The following packages are required to build the project:
-* [Boost 1.64](http://www.boost.org/)
+* [Boost 1.71](http://www.boost.org/)
 * [libpng 1.6.37](http://www.libpng.org/pub/png/libpng.html)
 * [Google Test 1.10.0](https://github.com/google/googletest)
 * VAAPI Interoperability on Linux
@@ -14,8 +14,6 @@ There are utility scripts available that help with installation of all dependenc
 
     # Install dependencies for Ubuntu 18.04
     scripts/install/install_ubuntu_18_04.sh
-
-Note: In order to build the project using GCC 8, Boost 1.68 is required, because of [this](https://github.com/boostorg/compute/issues/778) bug in Boost::Compute.
 
 Note: By default all dependencies on Windows are built for x64.
 

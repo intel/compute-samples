@@ -9,7 +9,7 @@
 get_filename_component(timer_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 include(CMakeFindDependencyMacro)
-find_dependency(Boost 1.64 REQUIRED COMPONENTS timer)
+find_dependency(Boost 1.71 CONFIG REQUIRED COMPONENTS timer)
 
 if(NOT TARGET compute_samples::timer)
     include("${timer_CMAKE_DIR}/timer-targets.cmake")

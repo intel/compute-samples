@@ -9,7 +9,7 @@
 get_filename_component(image_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 include(CMakeFindDependencyMacro)
-find_dependency(Boost 1.64 REQUIRED COMPONENTS boost)
+find_dependency(Boost 1.71 CONFIG REQUIRED COMPONENTS boost)
 find_dependency(PNG REQUIRED)
 
 if(NOT TARGET compute_samples::image)

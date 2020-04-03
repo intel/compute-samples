@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 LABEL maintainer="lukasz.towarek@intel.com"
 
@@ -11,12 +11,13 @@ RUN apt-get update && apt-get install -y \
     libva-dev \
     libpng-dev \
     ocl-icd-opencl-dev \
+    libboost-all-dev \
     wget \
     unzip
 
 COPY . /opt/src
 
-RUN cd /opt/src && scripts/install/install_ubuntu_18_04.sh
+RUN cd /opt/src && scripts/install/install_ubuntu_20_04.sh
 
 RUN mkdir /opt/src/build && cd /opt/src/build && cmake .. -DCMAKE_BUILD_TYPE=RELEASE && cmake --build .
 
