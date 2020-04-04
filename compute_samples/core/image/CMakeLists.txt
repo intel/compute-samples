@@ -8,12 +8,6 @@ add_core_library(image
     SOURCE
     "include/image/image.hpp"
     "src/image.cpp"
-    "src/bmp.hpp"
-    "src/bmp.cpp"
-)
-target_include_directories(image
-    PRIVATE
-    "src"
 )
 target_link_libraries(image
     PUBLIC

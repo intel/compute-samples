@@ -8,9 +8,8 @@
 #include "image/image.hpp"
 
 #include <boost/gil/extension/io/png.hpp>
+#include <boost/gil/extension/io/bmp.hpp>
 namespace gil = boost::gil;
-
-#include "bmp.hpp"
 
 namespace compute_samples {
 template <typename T> ImagePNG<T>::ImagePNG() : width_(0), height_(0) {}
@@ -138,37 +137,64 @@ ImageBMP<T>::ImageBMP(const int width, const int height,
     : width_(width), height_(height), pixels_(data) {}
 
 template <typename T> bool ImageBMP<T>::read(const std::string &image_path) {
-  std::unique_ptr<uint8_t> data = nullptr;
-  uint8_t *tmp = nullptr;
-  int pitch = 0;
-  uint16_t bits_per_pixel = 0;
-  bool error = !BmpUtils::load_bmp_image(tmp, width_, height_, pitch,
-                                         bits_per_pixel, image_path.c_str());
-  data.reset(tmp);
-  pixels_.resize(size(), 0);
-  copy_raw_data(reinterpret_cast<T *>(data.get()));
-  return error;
+  gil::argb8_image_t image;
+  gil::read_image(image_path, image, gil::bmp_tag());
+  gil::argb8_view_t view = gil::view(image);
+  for (gil::argb8_pixel_t pixel : view) {
+    uint32_t raw_pixel =
+        (pixel[0] << 24) + (pixel[1] << 16) + (pixel[2] << 8) + pixel[3];
+    pixels_.push_back(raw_pixel);
+  }
+  width_ = static_cast<int>(view.width());
+  height_ = static_cast<int>(view.height());
+  return false;
 }
 
 template <> bool ImageBMP<uint8_t>::read(const std::string &image_path) {
-  std::unique_ptr<uint8_t> data = nullptr;
-  uint8_t *tmp = nullptr;
-  bool error =
-      !BmpUtils::load_bmp_image_8u(tmp, width_, height_, image_path.c_str());
-  data.reset(tmp);
-  pixels_.resize(size(), 0);
-  copy_raw_data(data.get());
-  return error;
+  gil::argb8_image_t image;
+  gil::read_image(image_path, image, gil::bmp_tag());
+  gil::argb8_view_t view = gil::view(image);
+  for (gil::argb8_pixel_t pixel : view) {
+    uint8_t raw_pixel = pixel[1];
+    pixels_.push_back(raw_pixel);
+  }
+  width_ = static_cast<int>(view.width());
+  height_ = static_cast<int>(view.height());
+  return false;
 }
 
 template <typename T> bool ImageBMP<T>::write(const std::string &image_path) {
-  return !BmpUtils::save_image_as_bmp(pixels_.data(), width(), height(),
-                                      image_path.c_str());
+  gil::argb8_image_t image(width(), height());
+  std::vector<gil::argb8_pixel_t> channels;
+  const gil::argb8_view_t &view = gil::view(image);
+  for (int id = 0; id < static_cast<int>(pixels_.size()); ++id) {
+    uint32_t raw_pixel = pixels_[id];
+    gil::argb8_pixel_t pixel;
+    pixel[3] = raw_pixel & 0xFF;
+    pixel[2] = (raw_pixel >> 8) & 0xFF;
+    pixel[1] = (raw_pixel >> 16) & 0xFF;
+    pixel[0] = (raw_pixel >> 24) & 0xFF;
+    view[id] = pixel;
+  }
+  gil::write_view(image_path, view, gil::bmp_tag());
+  return false;
 }
 
 template <> bool ImageBMP<uint8_t>::write(const std::string &image_path) {
-  return !BmpUtils::save_image_as_bmp_8u(pixels_.data(), width(), height(),
-                                         image_path.c_str());
+  gil::argb8_image_t image(width(), height());
+  std::vector<gil::argb8_pixel_t> channels;
+  const gil::argb8_view_t &view = gil::view(image);
+  for (int id = 0; id < static_cast<int>(pixels_.size()); ++id) {
+    uint32_t raw_pixel = pixels_[id];
+    gil::argb8_pixel_t pixel;
+    pixel[3] = raw_pixel & 0xFF;
+    pixel[2] = raw_pixel & 0xFF;
+    pixel[1] = raw_pixel & 0xFF;
+    pixel[0] = raw_pixel & 0xFF;
+    view[id] = pixel;
+  }
+  gil::write_view(image_path, view, gil::bmp_tag());
+  return false;
 }
 
 template <typename T>
