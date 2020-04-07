@@ -29,12 +29,6 @@ void try_build(compute::program &program, const std::string &options) {
   LOG_EXIT_FUNCTION
 }
 
-compute::program create_with_source_file(const std::string &file,
-                                         const compute::context &context) {
-  std::string text_file = load_text_file(file);
-  return compute::program::create_with_source(text_file, context);
-}
-
 compute::program build_program(const compute::context &context,
                                const std::string &file,
                                const std::string &options) {
@@ -42,26 +36,13 @@ compute::program build_program(const compute::context &context,
   LOG_DEBUG << "Program file: " << file;
   LOG_DEBUG << "Build options: " << options;
 
-  compute::program program = create_with_source_file(file, context);
+  compute::program program =
+      compute::program::create_with_source_file(file, context);
   LOG_DEBUG << "Program successfully created with source file";
   try_build(program, options);
 
   LOG_EXIT_FUNCTION
   return program;
-}
-
-compute::program create_with_il_file(const std::string &file,
-                                     const compute::context &context) {
-  std::vector<uint8_t> binary_spv_file = load_binary_file(file);
-
-  cl_int error = 0;
-  cl_program clprogram = clCreateProgramWithIL(context, binary_spv_file.data(),
-                                               binary_spv_file.size(), &error);
-  if (error != 0) {
-    BOOST_THROW_EXCEPTION(compute::opencl_error(error));
-  }
-
-  return compute::program(clprogram, true);
 }
 
 compute::program build_program_il(const compute::context &context,
@@ -71,7 +52,8 @@ compute::program build_program_il(const compute::context &context,
   LOG_DEBUG << "Program file: " << file;
   LOG_DEBUG << "Build options: " << options;
 
-  compute::program program = create_with_il_file(file, context);
+  compute::program program =
+      compute::program::create_with_il_file(file, context);
   LOG_DEBUG << "Program successfully created with il file";
   try_build(program, options);
 
