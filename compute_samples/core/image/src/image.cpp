@@ -31,7 +31,7 @@ ImagePNG<T>::ImagePNG(const int width, const int height,
 
 template <> bool ImagePNG<uint32_t>::read(const std::string &image_path) {
   gil::rgba8_image_t image;
-  gil::read_image(image_path, image, gil::png_tag());
+  gil::read_and_convert_image(image_path, image, gil::png_tag());
   gil::rgba8_view_t view = gil::view(image);
   for (gil::rgba8_pixel_t pixel : view) {
     uint32_t raw_pixel =
@@ -138,7 +138,7 @@ ImageBMP<T>::ImageBMP(const int width, const int height,
 
 template <typename T> bool ImageBMP<T>::read(const std::string &image_path) {
   gil::argb8_image_t image;
-  gil::read_image(image_path, image, gil::bmp_tag());
+  gil::read_and_convert_image(image_path, image, gil::bmp_tag());
   gil::argb8_view_t view = gil::view(image);
   for (gil::argb8_pixel_t pixel : view) {
     uint32_t raw_pixel =
@@ -152,7 +152,7 @@ template <typename T> bool ImageBMP<T>::read(const std::string &image_path) {
 
 template <> bool ImageBMP<uint8_t>::read(const std::string &image_path) {
   gil::argb8_image_t image;
-  gil::read_image(image_path, image, gil::bmp_tag());
+  gil::read_and_convert_image(image_path, image, gil::bmp_tag());
   gil::argb8_view_t view = gil::view(image);
   for (gil::argb8_pixel_t pixel : view) {
     uint8_t raw_pixel = pixel[1];
