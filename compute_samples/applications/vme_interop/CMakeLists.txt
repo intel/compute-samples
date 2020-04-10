@@ -27,6 +27,11 @@ if(UNIX)
         X11
         dl
     )
+    include(import_libva)
+    target_include_directories(vme_interop_lib
+        PUBLIC
+        VA::VA
+    )
 endif()
 if(WIN32)
     target_sources(vme_interop_lib PRIVATE "src/vme_interop_windows.cpp")

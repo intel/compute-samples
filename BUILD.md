@@ -64,6 +64,7 @@ CMake can be configured using the following parameters:
 * `OPENCL_ROOT` - Path to the custom OpenCL ICD installation directory.
 * `MEDIADATA_ROOT` - Path to the custom mediadata directory.
 * `L0_ROOT` - Path to the custom Level Zero ICD installation directory.
+* `VA_ROOT` - Path to the custom libva installation directory.
 * `WITH_OCL` - If set to `OFF` disables building the OCL samples and utilities. Default is `ON`.
 * `WITH_L0` - If set to `OFF` disables building the L0 samples. Default is `ON`.
 
