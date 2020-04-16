@@ -68,6 +68,15 @@ half half::operator-() const {
   return half(static_cast<uint16_t>(data ^ 0x8000));
 }
 bool half::operator==(const half &rhs) const { return data == rhs.data; }
+bool half::nan_sensitive_eq(const half &rhs) const {
+  const bool this_nan = (data & 0x7c00) == 0x7c00 && (data & 0x03ff) != 0;
+  const bool rhs_nan =
+      (rhs.data & 0x7c00) == 0x7c00 && (rhs.data & 0x03ff) != 0;
+  if (this_nan && rhs_nan) {
+    return true;
+  }
+  return data == rhs.data;
+}
 half &half::operator+=(const half &rhs) {
   const half tmp = half(static_cast<float>(*this) + static_cast<float>(rhs));
   data = static_cast<uint16_t>(tmp);

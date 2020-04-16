@@ -90,4 +90,21 @@ TEST(Half, Addition) {
   EXPECT_NEAR(expected, actual, 1e-2);
 }
 
+TEST(Half, NanSensitiveComparisonSameNanValue) {
+  const cs::half h(uint16_t(0x7f00));
+  EXPECT_TRUE(h.nan_sensitive_eq(h));
+}
+
+TEST(Half, NanSensitiveComparisonDifferentNanValue) {
+  const cs::half h1(uint16_t(0x7f00));
+  const cs::half h2(uint16_t(0x7c01));
+  EXPECT_TRUE(h1.nan_sensitive_eq(h2));
+}
+
+TEST(Half, NanSensitiveComparisonNanInf) {
+  const cs::half h1(uint16_t(0x7f00));
+  const cs::half h2(uint16_t(0x7c00));
+  EXPECT_FALSE(h1.nan_sensitive_eq(h2));
+}
+
 } // namespace

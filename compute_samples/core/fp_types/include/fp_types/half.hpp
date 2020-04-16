@@ -25,6 +25,7 @@ public:
   explicit operator uint32_t() const;
   half operator-() const;
   bool operator==(const half &rhs) const;
+  bool nan_sensitive_eq(const half &rhs) const;
   half &operator+=(const half &rhs);
   half &operator*=(const half &rhs);
 
