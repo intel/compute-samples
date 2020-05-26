@@ -47,13 +47,13 @@ HWTEST_P(UsmLinkedListIntegrationTests, AllocateLinkedList) {
   }
   EXPECT_EQ(size, actual);
 
-  cs::free_linked_list(head);
+  cs::free_linked_list(head, GetParam());
 }
 
 HWTEST_P(UsmLinkedListIntegrationTests, FreeLinkedList) {
   const int size = 10;
   cs::Node *head = cs::allocate_linked_list(size, GetParam());
-  EXPECT_NO_THROW(cs::free_linked_list(head));
+  EXPECT_NO_THROW(cs::free_linked_list(head, GetParam()));
 }
 
 HWTEST_P(UsmLinkedListIntegrationTests, WalkLinkedList) {
@@ -71,7 +71,7 @@ HWTEST_P(UsmLinkedListIntegrationTests, WalkLinkedList) {
     count++;
   }
 
-  cs::free_linked_list(head);
+  cs::free_linked_list(head, GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(UsmTypes, UsmLinkedListIntegrationTests,

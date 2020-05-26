@@ -73,7 +73,7 @@ prepare_kernel(const boost::compute::usm_type type);
 
 Node *allocate_linked_list(const int size, const boost::compute::usm_type type);
 void walk_linked_list(Node *head, boost::compute::kernel_intel &kernel);
-void free_linked_list(Node *head);
+void free_linked_list(Node *head, const boost::compute::usm_type type);
 
 } // namespace compute_samples
 

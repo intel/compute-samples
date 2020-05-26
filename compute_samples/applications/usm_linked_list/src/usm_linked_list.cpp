@@ -68,7 +68,7 @@ Application::Status UsmLinkedListApplication::run_implementation(
   walk_linked_list(head, kernel);
   timer.print("Linked list traversed");
 
-  free_linked_list(head);
+  free_linked_list(head, args.type);
   timer.print("Linked list freed");
 
   timer_total.print("Total");
@@ -177,12 +177,19 @@ void walk_linked_list(Node *head, compute::kernel_intel &kernel) {
   queue.finish();
 }
 
-void free_linked_list(Node *head) {
+void free_linked_list(Node *head, const compute::usm_type type) {
   compute::context context(compute::system::default_context());
   Node *current = head;
   Node *next = nullptr;
   while (current != nullptr) {
-    next = current->next;
+    if (type == compute::usm_type::device) {
+      Node host_copy_of_current;
+      compute::command_queue_intel queue(compute::system::default_queue());
+      queue.enqueue_memcpy(&host_copy_of_current, current, sizeof(Node));
+      next = host_copy_of_current.next;
+    } else {
+      next = current->next;
+    }
     compute::mem_free(context, current);
     current = next;
   }
