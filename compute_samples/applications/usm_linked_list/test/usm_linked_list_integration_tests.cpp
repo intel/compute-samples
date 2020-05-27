@@ -43,8 +43,16 @@ HWTEST_P(UsmLinkedListIntegrationTests, AllocateLinkedList) {
   cs::Node *current = head;
   while (current != nullptr) {
     actual++;
-    current = current->next;
+    if (GetParam() == compute::usm_type::device) {
+      cs::Node host_copy_of_current;
+      compute::command_queue_intel queue(compute::system::default_queue());
+      queue.enqueue_memcpy(&host_copy_of_current, current, sizeof(cs::Node));
+      current = host_copy_of_current.next;
+    } else {
+      current = current->next;
+    }
   }
+
   EXPECT_EQ(size, actual);
 
   cs::free_linked_list(head, GetParam());
@@ -67,7 +75,14 @@ HWTEST_P(UsmLinkedListIntegrationTests, WalkLinkedList) {
   int count = 0;
   while (current != nullptr) {
     EXPECT_EQ(count * 4 + 1, cs::read_memory(current, GetParam()).value);
-    current = current->next;
+    if (GetParam() == compute::usm_type::device) {
+      cs::Node host_copy_of_current;
+      compute::command_queue_intel queue(compute::system::default_queue());
+      queue.enqueue_memcpy(&host_copy_of_current, current, sizeof(cs::Node));
+      current = host_copy_of_current.next;
+    } else {
+      current = current->next;
+    }
     count++;
   }
 
