@@ -8,8 +8,10 @@
 #ifndef COMPUTE_SAMPLES_UTILS_HPP
 #define COMPUTE_SAMPLES_UTILS_HPP
 
+#include <algorithm>
 #include <vector>
 #include <string>
+#include <tuple>
 #include <cassert>
 #include <cstring>
 
@@ -84,6 +86,15 @@ std::vector<OUTPUT_TYPE> unpack_vector(const std::vector<INPUT_TYPE> &input,
     }
   }
   return output;
+}
+
+template <typename In, typename Out>
+std::vector<std::tuple<In, Out>> zip(const std::vector<In> in,
+                                     const std::vector<Out> out) {
+  std::vector<std::tuple<In, Out>> temp(in.size());
+  std::transform(in.begin(), in.end(), out.begin(), temp.begin(),
+                 [](const In &a, const Out &b) { return std::tie(a, b); });
+  return temp;
 }
 
 } // namespace compute_samples

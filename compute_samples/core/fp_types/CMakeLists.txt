@@ -6,6 +6,7 @@
 
 add_core_library(fp_types
     SOURCE
+    "include/fp_types/common.hpp"
     "include/fp_types/half.hpp"
     "src/half.cpp"
 )
