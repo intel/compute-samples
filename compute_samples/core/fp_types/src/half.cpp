@@ -50,16 +50,38 @@ half::half(float v) {
 half::half(uint32_t v) : half(static_cast<float>(v)) {}
 half::operator uint16_t() const { return data; }
 half::operator float() const {
-  const int float_exponent_offset = 127;
-  const int half_exponent_offset = 15;
-  const uint16_t sign = (data & 0x8000) >> 15;
-  uint16_t exponent = (data & 0x7c00) >> 10;
-  const uint16_t mantissa = (data & 0x03ff);
-  exponent += float_exponent_offset - half_exponent_offset;
-  uint32_t float_binary = (sign << 31) | (exponent << 23) | (mantissa << 13);
-  float tmp_f;
-  std::memcpy(&tmp_f, &float_binary, sizeof(uint32_t));
-  return tmp_f;
+  const uint32_t float16_exp_shift = (23 - 10);
+  const uint32_t float16_exp_mask = 0x7c00;
+  const uint32_t float32_exp_mask = 0x7f800000;
+  const uint32_t float16_mantissa_mask = 0x03ff;
+  // -9 is needed because later we do multiplication of floats
+  // 127 - 15 - 9 = 103, float exponent: 103 - 127 = -24
+  // smallest half denorm = 2^-14 * 2^-10 = 2^-24
+  // 2^-24 * float(mantissa = 0x0001) = 2^-24 * 1.0
+  const uint32_t float16_to_32_bias_diff_denorm = ((127 - 15 - 9) << 23);
+  const uint32_t float16_to_32_bias_diff = ((127 - 15) << 10);
+  const uint32_t float16_sign_mask = 0x8000;
+  const uint32_t exp = data & float16_exp_mask;
+  const uint32_t mantissa = data & float16_mantissa_mask;
+  const uint32_t sign = (data & float16_sign_mask) << 16;
+  const uint32_t nan = (exp == float16_exp_mask ? float32_exp_mask : 0u);
+  // 0.0
+  if ((exp | mantissa) == 0) {
+    return *reinterpret_cast<const float *>(&sign);
+  }
+  // normals
+  if (exp != 0) {
+    uint32_t tmp =
+        (((exp + float16_to_32_bias_diff) | mantissa) << float16_exp_shift) |
+        nan | sign;
+    return *reinterpret_cast<float *>(&tmp);
+  }
+  // subnormals
+  float tmpf =
+      *reinterpret_cast<const float *>(&float16_to_32_bias_diff_denorm) *
+      static_cast<float>(mantissa);
+  *reinterpret_cast<uint32_t *>(&tmpf) |= sign;
+  return tmpf;
 }
 half::operator uint32_t() const {
   return static_cast<uint32_t>(static_cast<float>(*this));
