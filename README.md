@@ -18,9 +18,9 @@ List of all available samples and their description can be found in the [Samples
 ### Prerequisites
 * [Intel® Graphics 5XX (Skylake) or newer](https://en.wikipedia.org/wiki/Intel_HD_and_Iris_Graphics)
 * [OpenCL GPU driver](https://software.intel.com/en-us/articles/opencl-drivers)
-* Compiler with C++11 support
+* Compiler with C++14 support
   * [GCC 5.4](https://gcc.gnu.org/) or newer
-  * [Microsoft Visual Studio 2015](https://www.visualstudio.com/) or newer
+  * [Microsoft Visual Studio 2017](https://www.visualstudio.com/) or newer
   * [Clang 3.8](https://clang.llvm.org/) or newer
 * [CMake 3.8](https://cmake.org/) or newer
 
