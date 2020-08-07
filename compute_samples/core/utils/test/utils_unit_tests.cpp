@@ -234,3 +234,156 @@ TEST(UnpackVector, Input16BitsOutput8BitsStep3) {
   const std::vector<uint8_t> output = cs::unpack_vector<uint8_t>(input, 3);
   EXPECT_EQ(expected, output);
 }
+
+TEST(UUIDToString, ValidValue) {
+  const uint8_t uuid[] = {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
+                          0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12};
+  EXPECT_EQ("12345678-1234-5678-1234-567812345678",
+            compute_samples::uuid_to_string(uuid));
+}
+
+TEST(EraseSubstring, EmptyString) {
+  const std::string input;
+  const std::string substring = ", ";
+  std::string string = input;
+  compute_samples::erase_substring(string, substring);
+  EXPECT_EQ(input, string);
+}
+
+TEST(EraseSubstring, EmptySubstring) {
+  const std::string input = "abc, def, ghi";
+  const std::string substring;
+  std::string string = input;
+  compute_samples::erase_substring(string, substring);
+  EXPECT_EQ(input, string);
+}
+
+TEST(EraseSubstring, SingleSubstring) {
+  const std::string input = "abc, def";
+  const std::string substring = ", ";
+  const std::string expected = "abcdef";
+  std::string string = input;
+  compute_samples::erase_substring(string, substring);
+  EXPECT_EQ(expected, string);
+}
+
+TEST(EraseSubstring, MultipleSubstrings) {
+  const std::string input = "abc, def, 123";
+  const std::string substring = ", ";
+  const std::string expected = "abcdef123";
+  std::string string = input;
+  compute_samples::erase_substring(string, substring);
+  EXPECT_EQ(expected, string);
+}
+
+TEST(EraseSubstring, NotFoundSubstring) {
+  const std::string input = "abc, def, 123";
+  const std::string substring = "xxx";
+  std::string string = input;
+  compute_samples::erase_substring(string, substring);
+  EXPECT_EQ(input, string);
+}
+
+TEST(EraseSubstrings, EmptyString) {
+  const std::string input;
+  const std::vector<std::string> substrings = {"xx", "yy"};
+  std::string string = input;
+  compute_samples::erase_substrings(string, substrings);
+  EXPECT_EQ(input, string);
+}
+
+TEST(EraseSubstrings, NoSubstrings) {
+  const std::string input = "abc, def, 123";
+  const std::vector<std::string> substrings = {};
+  std::string string = input;
+  compute_samples::erase_substrings(string, substrings);
+  EXPECT_EQ(input, string);
+}
+
+TEST(EraseSubstrings, SingleSubstring) {
+  const std::string input = "abc, def, 123";
+  const std::vector<std::string> substrings = {", "};
+  const std::string expected = "abcdef123";
+  std::string string = input;
+  compute_samples::erase_substrings(string, substrings);
+  EXPECT_EQ(expected, string);
+}
+
+TEST(EraseSubstrings, MultipleSubstrings) {
+  const std::string input = "abcxxdefyy123";
+  const std::vector<std::string> substrings = {"xx", "yy"};
+  const std::string expected = "abcdef123";
+  std::string string = input;
+  compute_samples::erase_substrings(string, substrings);
+  EXPECT_EQ(expected, string);
+}
+
+TEST(SplitString, EmptyString) {
+  const std::string input;
+  const std::string delimeter = ", ";
+  const std::vector<std::string> expected = {input};
+  EXPECT_EQ(expected, compute_samples::split_string(input, delimeter));
+}
+
+TEST(SplitString, EmptyDelimeter) {
+  const std::string input = "abc, def, 123";
+  const std::string delimeter;
+  const std::vector<std::string> expected = {input};
+  EXPECT_EQ(expected, compute_samples::split_string(input, delimeter));
+}
+
+TEST(SplitString, SingleToken) {
+  const std::string input = "abc, def";
+  const std::string delimeter = ", ";
+  const std::vector<std::string> expected = {"abc", "def"};
+  EXPECT_EQ(expected, compute_samples::split_string(input, delimeter));
+}
+
+TEST(SplitString, TwoTokens) {
+  const std::string input = "abc, def, 123";
+  const std::string delimeter = ", ";
+  const std::vector<std::string> expected = {"abc", "def", "123"};
+  EXPECT_EQ(expected, compute_samples::split_string(input, delimeter));
+}
+
+TEST(SplitString, MultipleTokens) {
+  const std::string input = "abc, def, 123, 456";
+  const std::string delimeter = ", ";
+  const std::vector<std::string> expected = {"abc", "def", "123", "456"};
+  EXPECT_EQ(expected, compute_samples::split_string(input, delimeter));
+}
+
+TEST(JoinStrings, EmptyString) {
+  const std::vector<std::string> input = {};
+  const std::string delimeter = ", ";
+  const std::string expected;
+  EXPECT_EQ(expected, compute_samples::join_strings(input, delimeter));
+}
+
+TEST(JoinStrings, EmptyDelimeter) {
+  const std::vector<std::string> input = {"abc, def, 123"};
+  const std::string delimeter;
+  const std::string expected = input[0];
+  EXPECT_EQ(expected, compute_samples::join_strings(input, delimeter));
+}
+
+TEST(JoinStrings, SingleToken) {
+  const std::vector<std::string> input = {"abc", "def"};
+  const std::string delimeter = ", ";
+  const std::string expected = "abc, def";
+  EXPECT_EQ(expected, compute_samples::join_strings(input, delimeter));
+}
+
+TEST(JoinStrings, TwoTokens) {
+  const std::vector<std::string> input = {"abc", "def", "123"};
+  const std::string delimeter = ", ";
+  const std::string expected = "abc, def, 123";
+  EXPECT_EQ(expected, compute_samples::join_strings(input, delimeter));
+}
+
+TEST(JoinStrings, MultipleTokens) {
+  const std::vector<std::string> input = {"abc", "def", "123", "456"};
+  const std::string delimeter = ", ";
+  const std::string expected = "abc, def, 123, 456";
+  EXPECT_EQ(expected, compute_samples::join_strings(input, delimeter));
+}

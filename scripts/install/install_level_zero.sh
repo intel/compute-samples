@@ -7,26 +7,25 @@
 #
 
 echo "Downloading Level Zero"
-wget https://github.com/oneapi-src/level-zero/archive/v0.91.zip -O level-zero-0.91.zip
+wget https://github.com/oneapi-src/level-zero/archive/v1.0.zip -O level-zero-1.0.zip
 
 echo "Extracting Level Zero"
-unzip -q level-zero-0.91.zip
+unzip -q level-zero-1.0.zip
 
 echo "Installing Level Zero"
 ROOT_PATH=`pwd`
 INSTALL_PATH="$ROOT_PATH/third_party"
 LEVEL_ZERO_PATH="$INSTALL_PATH/level_zero"
-OPENCL_PATH="$INSTALL_PATH/opencl"
 
 pushd .
-cd level-zero-0.91
+cd level-zero-1.0
 mkdir build
 cd build
 
-cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX="$LEVEL_ZERO_PATH" -DOPENCL_PATH="$OPENCL_PATH/include"
+cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX="$LEVEL_ZERO_PATH"
 cmake --build . --target install
 popd
 
 echo "Cleaning Level Zero"
-rm -rf level-zero-0.91
-rm level-zero-0.91.zip
+rm -rf level-zero-1.0
+rm level-zero-1.0.zip

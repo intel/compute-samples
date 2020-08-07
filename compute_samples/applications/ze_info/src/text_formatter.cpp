@@ -6,8 +6,9 @@
  */
 
 #include "ze_info/text_formatter.hpp"
-
+#include "utils/utils.hpp"
 #include "ze_utils/ze_utils.hpp"
+#include "ze_api.h"
 
 #include <sstream>
 #include <string>
@@ -22,8 +23,9 @@ std::string drivers_capabilities_to_text(
   ss << key_value_to_text("Number of drivers",
                           std::to_string(capabilities.size()),
                           indentation_level);
-  for (const auto &capability : capabilities) {
-    ss << driver_capabilities_to_text(capability, indentation_level + 1);
+  for (size_t i = 0; i < capabilities.size(); ++i) {
+    ss << key_value_to_text("Driver", std::to_string(i), indentation_level);
+    ss << driver_capabilities_to_text(capabilities[i], indentation_level + 1);
   }
   return ss.str();
 }
@@ -36,41 +38,69 @@ std::string driver_capabilities_to_text(const DriverCapabilities &capabilities,
                                   indentation_level);
   ss << driver_ipc_properties_to_text(capabilities.ipc_properties,
                                       indentation_level);
+  ss << all_driver_extension_properties_to_text(
+      capabilities.extension_properties, indentation_level);
   ss << key_value_to_text("Number of devices",
                           std::to_string(capabilities.devices.size()),
                           indentation_level);
-  for (const auto &device : capabilities.devices) {
-    ss << device_capabilities_to_text(device, indentation_level + 1);
+  for (size_t i = 0; i < capabilities.devices.size(); ++i) {
+    ss << key_value_to_text("Device", std::to_string(i), indentation_level);
+    ss << device_capabilities_to_text(capabilities.devices[i],
+                                      indentation_level + 1);
   }
   return ss.str();
 }
 
-std::string driver_api_version_to_text(const ze_api_version_t v,
+std::string driver_api_version_to_text(const ze_api_version_t &v,
                                        const int indentation_level) {
   std::stringstream ss;
-  const std::string version = std::to_string(ZE_MAJOR_VERSION(v)) + "." +
-                              std::to_string(ZE_MINOR_VERSION(v));
-  ss << key_value_to_text("Driver API version", version, indentation_level);
+  const auto int_version = static_cast<uint32_t>(v);
+  const std::string string_version =
+      std::to_string(ZE_MAJOR_VERSION(int_version)) + "." +
+      std::to_string(ZE_MINOR_VERSION(int_version));
+  ss << key_value_to_text("Driver API version", string_version,
+                          indentation_level);
   return ss.str();
 }
 
-std::string driver_properties_to_text(const ze_driver_properties_t p,
+std::string driver_properties_to_text(const ze_driver_properties_t &p,
                                       const int indentation_level) {
+
   std::stringstream ss;
   ss << key_value_to_text("Driver version", std::to_string(p.driverVersion),
                           indentation_level);
-  ss << key_value_to_text("UUID", to_string(p.uuid), indentation_level);
+  ss << key_value_to_text("UUID", uuid_to_string(p.uuid.id), indentation_level);
   return ss.str();
 }
 
-std::string driver_ipc_properties_to_text(const ze_driver_ipc_properties_t p,
+std::string driver_ipc_properties_to_text(const ze_driver_ipc_properties_t &p,
                                           const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("IPC memory supported",
-                          p.memsSupported != 0u ? "true" : "false",
+  ss << key_value_to_text("IPC flags",
+                          flags_to_string<ze_ipc_property_flag_t>(p.flags),
                           indentation_level);
-  ss << key_value_to_text("IPC events supported",
-                          p.eventsSupported != 0u ? "true" : "false",
+  return ss.str();
+}
+
+std::string all_driver_extension_properties_to_text(
+    const std::vector<ze_driver_extension_properties_t> &p,
+    int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Number of extensions", std::to_string(p.size()),
+                          indentation_level);
+  for (size_t i = 0; i < p.size(); ++i) {
+    ss << key_value_to_text("Extension", std::to_string(i), indentation_level);
+    ss << driver_extension_properties_to_text(p[i], indentation_level + 1);
+  }
+  return ss.str();
+}
+
+std::string
+driver_extension_properties_to_text(const ze_driver_extension_properties_t &p,
+                                    int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Name", p.name, indentation_level);
+  ss << key_value_to_text("Version", std::to_string(p.version),
                           indentation_level);
   return ss.str();
 }
@@ -82,64 +112,56 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
                                   indentation_level);
   ss << device_compute_properties_to_text(capabilities.compute_properties,
                                           indentation_level);
-  ss << device_kernel_properties_to_text(capabilities.kernel_properties,
+  ss << device_module_properties_to_text(capabilities.module_properties,
                                          indentation_level);
+  ss << all_device_command_queue_group_properties_to_text(
+      capabilities.command_queue_group_properties, indentation_level);
   ss << all_device_memory_properties_to_text(capabilities.memory_properties,
                                              indentation_level);
   ss << device_memory_access_properties_to_text(
       capabilities.memory_access_properties, indentation_level);
-  ss << device_cache_properties_to_text(capabilities.cache_properties,
-                                        indentation_level);
+  ss << all_device_cache_properties_to_text(capabilities.cache_properties,
+                                            indentation_level);
   ss << device_image_properties_to_text(capabilities.image_properties,
                                         indentation_level);
+  ss << device_external_memory_properties_to_text(
+      capabilities.external_memory_properties, indentation_level);
   ss << key_value_to_text("Number of sub-devices",
                           std::to_string(capabilities.sub_devices.size()),
                           indentation_level);
-  for (const auto &sub_device : capabilities.sub_devices) {
-    ss << device_capabilities_to_text(sub_device, indentation_level + 1);
+  for (size_t i = 0; i < capabilities.sub_devices.size(); ++i) {
+    ss << key_value_to_text("Sub-device", std::to_string(i), indentation_level);
+    ss << device_capabilities_to_text(capabilities.sub_devices[i],
+                                      indentation_level + 1);
   }
   return ss.str();
 }
 
-std::string device_properties_to_text(const ze_device_properties_t p,
+std::string device_properties_to_text(const ze_device_properties_t &p,
                                       const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("Device name", p.name, indentation_level);
-  ss << key_value_to_text("Device type", to_string(p.type), indentation_level);
+  ss << key_value_to_text("Name", p.name, indentation_level);
+  ss << key_value_to_text("Type", to_string(p.type), indentation_level);
   ss << key_value_to_text("Vendor ID", std::to_string(p.vendorId),
                           indentation_level);
   ss << key_value_to_text("Device ID", std::to_string(p.deviceId),
                           indentation_level);
-  ss << key_value_to_text("UUID", to_string(p.uuid), indentation_level);
-  ss << key_value_to_text("Is sub-device",
-                          p.isSubdevice != 0u ? "true" : "false",
+  ss << key_value_to_text("UUID", uuid_to_string(p.uuid.id), indentation_level);
+  ss << key_value_to_text("Device flags",
+                          flags_to_string<ze_device_property_flag_t>(p.flags),
                           indentation_level);
-  if (p.isSubdevice == 1u) {
+  if ((p.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE) != 0u) {
     ss << key_value_to_text("Sub-device ID", std::to_string(p.subdeviceId),
                             indentation_level);
   }
   ss << key_value_to_text("Core clock rate", std::to_string(p.coreClockRate),
                           indentation_level);
-  ss << key_value_to_text("Is unified memory supported",
-                          p.unifiedMemorySupported != 0u ? "true" : "false",
+  ss << key_value_to_text("Maximum memory allocation size",
+                          std::to_string(p.maxMemAllocSize), indentation_level);
+  ss << key_value_to_text("Maximum number of logical hardware contexts",
+                          std::to_string(p.maxHardwareContexts),
                           indentation_level);
-  ss << key_value_to_text("Is ECC memory supported",
-                          p.eccMemorySupported != 0u ? "true" : "false",
-                          indentation_level);
-  ss << key_value_to_text("Are on demand page faults supported",
-                          p.onDemandPageFaultsSupported != 0u ? "true"
-                                                              : "false",
-                          indentation_level);
-  ss << key_value_to_text("Max command queues",
-                          std::to_string(p.maxCommandQueues),
-                          indentation_level);
-  ss << key_value_to_text("Number of asynchronous compute engines",
-                          std::to_string(p.numAsyncComputeEngines),
-                          indentation_level);
-  ss << key_value_to_text("Number of asynchronous copy engines",
-                          std::to_string(p.numAsyncCopyEngines),
-                          indentation_level);
-  ss << key_value_to_text("Max command queue priority",
+  ss << key_value_to_text("Maximum priority for command queues",
                           std::to_string(p.maxCommandQueuePriority),
                           indentation_level);
   ss << key_value_to_text("Number of threads per EU",
@@ -157,11 +179,17 @@ std::string device_properties_to_text(const ze_device_properties_t p,
                           indentation_level);
   ss << key_value_to_text("Timer resolution", std::to_string(p.timerResolution),
                           indentation_level);
+  ss << key_value_to_text("Timestamp valid bits",
+                          std::to_string(p.timestampValidBits),
+                          indentation_level);
+  ss << key_value_to_text("Kernel timestamp valid bits",
+                          std::to_string(p.kernelTimestampValidBits),
+                          indentation_level);
   return ss.str();
 }
 
 std::string
-device_compute_properties_to_text(const ze_device_compute_properties_t p,
+device_compute_properties_to_text(const ze_device_compute_properties_t &p,
                                   const int indentation_level) {
   std::stringstream ss;
   ss << key_value_to_text("Max total group size",
@@ -195,39 +223,63 @@ device_compute_properties_to_text(const ze_device_compute_properties_t p,
 }
 
 std::string
-device_kernel_properties_to_text(const ze_device_kernel_properties_t p,
+device_module_properties_to_text(const ze_device_module_properties_t &p,
                                  const int indentation_level) {
   std::stringstream ss;
   ss << key_value_to_text("SPIR-V version",
                           std::to_string(p.spirvVersionSupported),
                           indentation_level);
-  ss << key_value_to_text("Native kernel supported",
-                          to_string(p.nativeKernelSupported),
+  ss << key_value_to_text("Module flags",
+                          flags_to_string<ze_device_module_flag_t>(p.flags),
                           indentation_level);
-  ss << key_value_to_text("FP16 supported",
-                          p.fp16Supported != 0u ? "true" : "false",
+  ss << key_value_to_text("FP16 flags",
+                          flags_to_string<ze_device_fp_flag_t>(p.fp16flags),
                           indentation_level);
-  ss << key_value_to_text("FP64 supported",
-                          p.fp64Supported != 0u ? "true" : "false",
+  ss << key_value_to_text("FP32 flags",
+                          flags_to_string<ze_device_fp_flag_t>(p.fp32flags),
                           indentation_level);
-  ss << key_value_to_text("INT64 atomics supported",
-                          p.int64AtomicsSupported != 0u ? "true" : "false",
+  ss << key_value_to_text("FP64 flags",
+                          flags_to_string<ze_device_fp_flag_t>(p.fp64flags),
                           indentation_level);
-  ss << key_value_to_text("DP4A supported",
-                          p.dp4aSupported != 0u ? "true" : "false",
-                          indentation_level);
-  ss << key_value_to_text("Half-precision floating-point capabilities",
-                          to_string(p.halfFpCapabilities), indentation_level);
-  ss << key_value_to_text("Single-precision floating-point capabilities",
-                          to_string(p.singleFpCapabilities), indentation_level);
-  ss << key_value_to_text("Double-precision floating-point capabilities",
-                          to_string(p.doubleFpCapabilities), indentation_level);
-  ss << key_value_to_text("Max argument size",
+  ss << key_value_to_text("Maximum argument size",
                           std::to_string(p.maxArgumentsSize),
                           indentation_level);
   ss << key_value_to_text("printf buffer size",
                           std::to_string(p.printfBufferSize),
                           indentation_level);
+  ss << key_value_to_text("Native kernel supported",
+                          uuid_to_string(p.nativeKernelSupported.id),
+                          indentation_level);
+  return ss.str();
+}
+
+std::string all_device_command_queue_group_properties_to_text(
+    const std::vector<ze_command_queue_group_properties_t> &p,
+    const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Number of command queue groups",
+                          std::to_string(p.size()), indentation_level);
+  for (size_t i = 0; i < p.size(); ++i) {
+    ss << key_value_to_text("Command queue group", std::to_string(i),
+                            indentation_level);
+    ss << device_command_queue_group_properties_to_text(p[i],
+                                                        indentation_level + 1);
+  }
+  return ss.str();
+}
+
+std::string device_command_queue_group_properties_to_text(
+    const ze_command_queue_group_properties_t &p, const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text(
+      "Command queue group flags",
+      flags_to_string<ze_command_queue_group_property_flag_t>(p.flags),
+      indentation_level);
+  ss << key_value_to_text("Maximum fill pattern size",
+                          std::to_string(p.maxMemoryFillPatternSize),
+                          indentation_level);
+  ss << key_value_to_text("Number of physical command queues",
+                          std::to_string(p.numQueues), indentation_level);
   return ss.str();
 }
 
@@ -237,19 +289,25 @@ std::string all_device_memory_properties_to_text(
   std::stringstream ss;
   ss << key_value_to_text("Number of memory properties",
                           std::to_string(p.size()), indentation_level);
-  for (const auto &properties : p) {
-    ss << device_memory_properties_to_text(properties, indentation_level + 1);
+  for (size_t i = 0; i < p.size(); ++i) {
+    ss << key_value_to_text("Memory", std::to_string(i), indentation_level);
+    ss << device_memory_properties_to_text(p[i], indentation_level + 1);
   }
   return ss.str();
 }
 
 std::string
-device_memory_properties_to_text(const ze_device_memory_properties_t p,
+device_memory_properties_to_text(const ze_device_memory_properties_t &p,
                                  const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("Max clock rate", std::to_string(p.maxClockRate),
+  ss << key_value_to_text("Name", p.name, indentation_level);
+  ss << key_value_to_text(
+      "Memory flags",
+      flags_to_string<ze_device_memory_property_flag_t>(p.flags),
+      indentation_level);
+  ss << key_value_to_text("Maximum clock rate", std::to_string(p.maxClockRate),
                           indentation_level);
-  ss << key_value_to_text("Max bus width", std::to_string(p.maxBusWidth),
+  ss << key_value_to_text("Maximum bus width", std::to_string(p.maxBusWidth),
                           indentation_level);
   ss << key_value_to_text("Total size", std::to_string(p.totalSize),
                           indentation_level);
@@ -257,80 +315,104 @@ device_memory_properties_to_text(const ze_device_memory_properties_t p,
 }
 
 std::string device_memory_access_properties_to_text(
-    const ze_device_memory_access_properties_t p, const int indentation_level) {
+    const ze_device_memory_access_properties_t &p,
+    const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("Host allocation capabilities",
-                          to_string(p.hostAllocCapabilities),
-                          indentation_level);
-  ss << key_value_to_text("Device allocation capabilities",
-                          to_string(p.deviceAllocCapabilities),
-                          indentation_level);
+  ss << key_value_to_text(
+      "Host allocation capabilities",
+      flags_to_string<ze_memory_access_cap_flag_t>(p.hostAllocCapabilities),
+      indentation_level);
+  ss << key_value_to_text(
+      "Device allocation capabilities",
+      flags_to_string<ze_memory_access_cap_flag_t>(p.deviceAllocCapabilities),
+      indentation_level);
   ss << key_value_to_text("Shared single-device allocation capabilities",
-                          to_string(p.sharedSingleDeviceAllocCapabilities),
+                          flags_to_string<ze_memory_access_cap_flag_t>(
+                              p.sharedSingleDeviceAllocCapabilities),
                           indentation_level);
   ss << key_value_to_text("Shared cross-device allocation capabilities",
-                          to_string(p.sharedCrossDeviceAllocCapabilities),
+                          flags_to_string<ze_memory_access_cap_flag_t>(
+                              p.sharedCrossDeviceAllocCapabilities),
                           indentation_level);
   ss << key_value_to_text("Shared system allocation capabilities",
-                          to_string(p.sharedSystemAllocCapabilities),
+                          flags_to_string<ze_memory_access_cap_flag_t>(
+                              p.sharedSystemAllocCapabilities),
+                          indentation_level);
+  return ss.str();
+}
+
+std::string all_device_cache_properties_to_text(
+    const std::vector<ze_device_cache_properties_t> &p,
+    const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Number of cache properties",
+                          std::to_string(p.size()), indentation_level);
+  for (size_t i = 0; i < p.size(); ++i) {
+    ss << key_value_to_text("Cache", std::to_string(i), indentation_level);
+    ss << device_cache_properties_to_text(p[i], indentation_level + 1);
+  }
+  return ss.str();
+}
+
+std::string
+device_cache_properties_to_text(const ze_device_cache_properties_t &p,
+                                const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text(
+      "Cache flags", flags_to_string<ze_device_cache_property_flag_t>(p.flags),
+      indentation_level);
+  ss << key_value_to_text("Cache size", std::to_string(p.cacheSize),
                           indentation_level);
   return ss.str();
 }
 
 std::string
-device_cache_properties_to_text(const ze_device_cache_properties_t p,
+device_image_properties_to_text(const ze_device_image_properties_t &p,
                                 const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("Intermediate cache control supported",
-                          p.intermediateCacheControlSupported != 0u ? "true"
-                                                                    : "false",
+  ss << key_value_to_text("Maximum image 1D", std::to_string(p.maxImageDims1D),
                           indentation_level);
-  ss << key_value_to_text("Intermediate cache size",
-                          std::to_string(p.intermediateCacheSize),
+  ss << key_value_to_text("Maximum image 2D", std::to_string(p.maxImageDims2D),
                           indentation_level);
-  ss << key_value_to_text("Intermediate cacheline size",
-                          std::to_string(p.intermediateCachelineSize),
+  ss << key_value_to_text("Maximum image 3D", std::to_string(p.maxImageDims3D),
                           indentation_level);
-  ss << key_value_to_text("Last level cache size control supported",
-                          p.lastLevelCacheSizeControlSupported != 0u ? "true"
-                                                                     : "false",
-                          indentation_level);
-  ss << key_value_to_text("Last level cache size",
-                          std::to_string(p.lastLevelCacheSize),
-                          indentation_level);
-  ss << key_value_to_text("Last level cacheline size",
-                          std::to_string(p.lastLevelCachelineSize),
-                          indentation_level);
-  return ss.str();
-}
-
-std::string
-device_image_properties_to_text(const ze_device_image_properties_t p,
-                                const int indentation_level) {
-  std::stringstream ss;
-  ss << key_value_to_text("Are images supported",
-                          p.supported != 0u ? "true" : "false",
-                          indentation_level);
-  ss << key_value_to_text("Max image 1D", std::to_string(p.maxImageDims1D),
-                          indentation_level);
-  ss << key_value_to_text("Max image 2D", std::to_string(p.maxImageDims2D),
-                          indentation_level);
-  ss << key_value_to_text("Max image 3D", std::to_string(p.maxImageDims3D),
-                          indentation_level);
-  ss << key_value_to_text("Max image buffer slices",
+  ss << key_value_to_text("Maximum image buffer size",
                           std::to_string(p.maxImageBufferSize),
                           indentation_level);
-  ss << key_value_to_text("Max image array slices",
+  ss << key_value_to_text("Maximum image array slices",
                           std::to_string(p.maxImageArraySlices),
                           indentation_level);
-  ss << key_value_to_text("Max number of samplers",
+  ss << key_value_to_text("Maximum number of samplers",
                           std::to_string(p.maxSamplers), indentation_level);
-  ss << key_value_to_text("Max number of read arguments",
+  ss << key_value_to_text("Maximum number of read arguments",
                           std::to_string(p.maxReadImageArgs),
                           indentation_level);
-  ss << key_value_to_text("Max number of write arguments",
+  ss << key_value_to_text("Maximum number of write arguments",
                           std::to_string(p.maxWriteImageArgs),
                           indentation_level);
+  return ss.str();
+}
+
+std::string device_external_memory_properties_to_text(
+    const ze_device_external_memory_properties_t &p,
+    const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Memory allocation import types",
+                          flags_to_string<ze_external_memory_type_flag_t>(
+                              p.memoryAllocationImportTypes),
+                          indentation_level);
+  ss << key_value_to_text("Memory allocation import types",
+                          flags_to_string<ze_external_memory_type_flag_t>(
+                              p.memoryAllocationExportTypes),
+                          indentation_level);
+  ss << key_value_to_text(
+      "Image import types",
+      flags_to_string<ze_external_memory_type_flag_t>(p.imageImportTypes),
+      indentation_level);
+  ss << key_value_to_text(
+      "Image export types",
+      flags_to_string<ze_external_memory_type_flag_t>(p.imageImportTypes),
+      indentation_level);
   return ss.str();
 }
 

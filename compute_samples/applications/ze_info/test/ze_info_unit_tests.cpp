@@ -8,13 +8,248 @@
 #include "gmock/gmock.h"
 #include "ze_info/text_formatter.hpp"
 #include "ze_info/json_formatter.hpp"
+#include "ze_api.h"
 
 #include <sstream>
+#include <cstring>
 
 #include <boost/property_tree/ptree.hpp>
 
 namespace cs = compute_samples;
 namespace pt = boost::property_tree;
+
+ze_device_properties_t fake_device_properties() {
+  ze_device_properties_t device_properties = {};
+  device_properties.type = ZE_DEVICE_TYPE_GPU;
+  device_properties.vendorId = 1;
+  device_properties.deviceId = 2;
+  device_properties.flags =
+      ZE_DEVICE_PROPERTY_FLAG_ECC | ZE_DEVICE_PROPERTY_FLAG_INTEGRATED;
+  device_properties.subdeviceId = 0;
+  device_properties.coreClockRate = 3;
+  device_properties.maxMemAllocSize = 4;
+  device_properties.maxHardwareContexts = 5;
+  device_properties.maxCommandQueuePriority = 6;
+  device_properties.numThreadsPerEU = 7;
+  device_properties.physicalEUSimdWidth = 8;
+  device_properties.numEUsPerSubslice = 9;
+  device_properties.numSubslicesPerSlice = 10;
+  device_properties.numSlices = 11;
+  device_properties.timerResolution = 12;
+  device_properties.timestampValidBits = 13;
+  device_properties.kernelTimestampValidBits = 14;
+  device_properties.uuid = {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
+                            0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12};
+  const std::string name = "device_name";
+  strncpy(device_properties.name, name.c_str(), sizeof(device_properties.name));
+  device_properties.name[sizeof(device_properties.name) - 1] = 0;
+  return device_properties;
+}
+
+ze_device_properties_t fake_sub_device_properties() {
+  ze_device_properties_t device_properties = fake_device_properties();
+  device_properties.flags =
+      device_properties.flags | ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE;
+  device_properties.subdeviceId = 15;
+  return device_properties;
+}
+
+ze_device_compute_properties_t fake_device_compute_properties() {
+  ze_device_compute_properties_t compute_properties = {};
+  compute_properties.maxTotalGroupSize = 1;
+  compute_properties.maxGroupSizeX = 2;
+  compute_properties.maxGroupSizeY = 3;
+  compute_properties.maxGroupSizeZ = 4;
+  compute_properties.maxGroupCountX = 5;
+  compute_properties.maxGroupCountY = 6;
+  compute_properties.maxGroupCountZ = 7;
+  compute_properties.maxSharedLocalMemory = 8;
+  compute_properties.numSubGroupSizes = 2;
+  compute_properties.subGroupSizes[0] = 9;
+  compute_properties.subGroupSizes[1] = 10;
+  return compute_properties;
+}
+
+ze_device_module_properties_t fake_device_module_properties() {
+  ze_device_module_properties_t module_properties = {};
+  module_properties.spirvVersionSupported = 1;
+  module_properties.flags =
+      ZE_DEVICE_MODULE_FLAG_DP4A | ZE_DEVICE_MODULE_FLAG_FP16;
+  module_properties.fp16flags =
+      ZE_DEVICE_FP_FLAG_DENORM | ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST;
+  module_properties.fp32flags =
+      ZE_DEVICE_FP_FLAG_INF_NAN | ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO;
+  module_properties.fp64flags =
+      ZE_DEVICE_FP_FLAG_ROUND_TO_INF | ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT;
+  module_properties.maxArgumentsSize = 2;
+  module_properties.printfBufferSize = 3;
+  module_properties.nativeKernelSupported = {0x78, 0x56, 0x34, 0x12, 0x78, 0x56,
+                                             0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
+                                             0x78, 0x56, 0x34, 0x12};
+  return module_properties;
+}
+
+ze_command_queue_group_properties_t
+fake_device_command_queue_group_properties() {
+  ze_command_queue_group_properties_t command_queue_group_properties = {};
+  command_queue_group_properties.flags =
+      ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE |
+      ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS;
+  command_queue_group_properties.maxMemoryFillPatternSize = 1;
+  command_queue_group_properties.numQueues = 2;
+  return command_queue_group_properties;
+}
+
+ze_device_memory_properties_t fake_device_memory_properties() {
+  ze_device_memory_properties_t memory_properties = {};
+  const std::string name = "memory_name";
+  strncpy(memory_properties.name, name.c_str(), sizeof(memory_properties.name));
+  memory_properties.name[sizeof(memory_properties.name) - 1] = 0;
+  memory_properties.flags = ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD;
+  memory_properties.maxClockRate = 1;
+  memory_properties.maxBusWidth = 2;
+  memory_properties.totalSize = 3;
+  return memory_properties;
+}
+
+ze_device_memory_access_properties_t fake_device_memory_access_properties() {
+  ze_device_memory_access_properties_t memory_access_properties = {};
+  memory_access_properties.hostAllocCapabilities =
+      ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT;
+  memory_access_properties.deviceAllocCapabilities =
+      ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT;
+  memory_access_properties.sharedSingleDeviceAllocCapabilities =
+      ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC |
+      ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT;
+  memory_access_properties.sharedCrossDeviceAllocCapabilities =
+      ZE_MEMORY_ACCESS_CAP_FLAG_RW | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT;
+  memory_access_properties.sharedSystemAllocCapabilities =
+      ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC | ZE_MEMORY_ACCESS_CAP_FLAG_RW;
+  return memory_access_properties;
+}
+
+ze_device_cache_properties_t fake_device_cache_properties() {
+  ze_device_cache_properties_t cache_properties = {};
+  cache_properties.flags = ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL;
+  cache_properties.cacheSize = 1;
+  return cache_properties;
+}
+
+ze_device_image_properties_t fake_device_image_properties() {
+  ze_device_image_properties_t image_properties = {};
+  image_properties.maxImageDims1D = 1;
+  image_properties.maxImageDims2D = 2;
+  image_properties.maxImageDims3D = 3;
+  image_properties.maxImageBufferSize = 4;
+  image_properties.maxImageArraySlices = 5;
+  image_properties.maxSamplers = 6;
+  image_properties.maxReadImageArgs = 7;
+  image_properties.maxWriteImageArgs = 8;
+  return image_properties;
+}
+
+ze_device_external_memory_properties_t
+fake_device_external_memory_properties() {
+  ze_device_external_memory_properties_t external_memory_properties = {};
+  external_memory_properties.memoryAllocationImportTypes =
+      ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF |
+      ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD;
+  external_memory_properties.memoryAllocationExportTypes =
+      ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF |
+      ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD;
+  external_memory_properties.imageImportTypes =
+      ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF |
+      ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD;
+  external_memory_properties.imageExportTypes =
+      ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF |
+      ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD;
+  return external_memory_properties;
+}
+
+cs::DeviceCapabilities fake_device_capabilities() {
+  cs::DeviceCapabilities capabilities = {};
+  capabilities.device_properties = fake_device_properties();
+  capabilities.compute_properties = fake_device_compute_properties();
+  capabilities.module_properties = fake_device_module_properties();
+  capabilities.command_queue_group_properties = {
+      fake_device_command_queue_group_properties(),
+      fake_device_command_queue_group_properties()};
+  capabilities.memory_properties = {fake_device_memory_properties(),
+                                    fake_device_memory_properties()};
+  capabilities.memory_access_properties =
+      fake_device_memory_access_properties();
+  capabilities.cache_properties = {fake_device_cache_properties(),
+                                   fake_device_cache_properties()};
+  capabilities.image_properties = fake_device_image_properties();
+  capabilities.external_memory_properties =
+      fake_device_external_memory_properties();
+  return capabilities;
+}
+
+cs::DeviceCapabilities fake_sub_device_capabilities() {
+  cs::DeviceCapabilities capabilities = fake_device_capabilities();
+  capabilities.device_properties = fake_sub_device_properties();
+  return capabilities;
+}
+
+cs::DeviceCapabilities fake_device_with_sub_devices_capabilities() {
+  cs::DeviceCapabilities capabilities = fake_device_capabilities();
+  capabilities.sub_devices = {fake_sub_device_capabilities(),
+                              fake_sub_device_capabilities()};
+  return capabilities;
+}
+
+ze_api_version_t fake_driver_api_version() { return ZE_API_VERSION_1_0; }
+
+ze_driver_properties_t fake_driver_properties() {
+  ze_driver_properties_t driver_properties = {};
+  driver_properties.uuid = {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
+                            0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12};
+  driver_properties.driverVersion = 123;
+  return driver_properties;
+}
+
+ze_driver_ipc_properties_t fake_driver_ipc_properties() {
+  ze_driver_ipc_properties_t ipc_properties = {};
+  ipc_properties.flags =
+      ZE_IPC_PROPERTY_FLAG_EVENT_POOL | ZE_IPC_PROPERTY_FLAG_MEMORY;
+  return ipc_properties;
+}
+
+ze_driver_extension_properties_t fake_driver_extension_properties() {
+  ze_driver_extension_properties_t extension_properties = {};
+  const std::string name = "extension";
+  strncpy(extension_properties.name, name.c_str(),
+          sizeof(extension_properties.name));
+  extension_properties.name[sizeof(extension_properties.name) - 1] = 0;
+  extension_properties.version = 1;
+  return extension_properties;
+}
+
+cs::DriverCapabilities fake_driver_capabilities() {
+  cs::DriverCapabilities driver_capabilities = {};
+  driver_capabilities.api_version = fake_driver_api_version();
+  driver_capabilities.driver_properties = fake_driver_properties();
+  driver_capabilities.ipc_properties = fake_driver_ipc_properties();
+  driver_capabilities.extension_properties = {
+      fake_driver_extension_properties(), fake_driver_extension_properties()};
+  return driver_capabilities;
+}
+
+cs::DriverCapabilities fake_driver_with_devices_capabilities() {
+  cs::DriverCapabilities driver_capabilities = fake_driver_capabilities();
+  driver_capabilities.devices = {fake_device_capabilities(),
+                                 fake_device_capabilities()};
+  return driver_capabilities;
+}
+
+cs::DriverCapabilities
+fake_driver_with_devices_with_sub_devices_capabilities() {
+  cs::DriverCapabilities driver_capabilities = fake_driver_capabilities();
+  driver_capabilities.devices = {fake_device_with_sub_devices_capabilities(),
+                                 fake_device_with_sub_devices_capabilities()};
+  return driver_capabilities;
+}
 
 class TextFormatterTests : public ::testing::Test {
 protected:
@@ -22,33 +257,26 @@ protected:
 };
 
 TEST_F(TextFormatterTests, DriversCapabilitiesToText) {
-  const std::vector<cs::DriverCapabilities> capabilities = {
-      cs::DriverCapabilities{}, cs::DriverCapabilities{}};
-  const std::string actual =
-      cs::drivers_capabilities_to_text(capabilities, indentation_level_);
+  const auto capabilities = std::vector<cs::DriverCapabilities>{
+      fake_driver_capabilities(), fake_driver_capabilities()};
 
   std::stringstream ss;
   ss << cs::key_value_to_text("Number of drivers", "2", indentation_level_);
+  ss << cs::key_value_to_text("Driver", "0", indentation_level_);
   ss << cs::driver_capabilities_to_text(capabilities[0],
                                         indentation_level_ + 1);
+  ss << cs::key_value_to_text("Driver", "1", indentation_level_);
   ss << cs::driver_capabilities_to_text(capabilities[1],
                                         indentation_level_ + 1);
-  const std::string expected = ss.str();
+  const auto expected = ss.str();
+  const auto actual =
+      cs::drivers_capabilities_to_text(capabilities, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DriverCapabilitiesToText) {
-  const cs::DriverCapabilities capabilities = {
-      ZE_API_VERSION_1_0,
-      {ZE_DRIVER_PROPERTIES_VERSION_CURRENT,
-       {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
-        0x78, 0x56, 0x34, 0x12},
-       123},
-      {ZE_DRIVER_IPC_PROPERTIES_VERSION_CURRENT, 1, 0},
-      {cs::DeviceCapabilities{}, cs::DeviceCapabilities{}}};
-  const std::string actual =
-      cs::driver_capabilities_to_text(capabilities, indentation_level_);
+  const auto capabilities = fake_driver_capabilities();
 
   std::stringstream ss;
   ss << cs::driver_api_version_to_text(capabilities.api_version,
@@ -57,176 +285,237 @@ TEST_F(TextFormatterTests, DriverCapabilitiesToText) {
                                       indentation_level_);
   ss << cs::driver_ipc_properties_to_text(capabilities.ipc_properties,
                                           indentation_level_);
-  ss << cs::key_value_to_text("Number of devices", "2", indentation_level_);
-  ss << cs::device_capabilities_to_text(capabilities.devices[0],
-                                        indentation_level_ + 1);
-  ss << cs::device_capabilities_to_text(capabilities.devices[1],
-                                        indentation_level_ + 1);
-  const std::string expected = ss.str();
+  ss << cs::all_driver_extension_properties_to_text(
+      capabilities.extension_properties, indentation_level_);
+  ss << cs::key_value_to_text("Number of devices", "0", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::driver_capabilities_to_text(capabilities, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
-TEST_F(TextFormatterTests, DriverPropertiesToText) {
-  const ze_driver_properties_t p = {ZE_DRIVER_PROPERTIES_VERSION_CURRENT,
-                                    {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34,
-                                     0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56,
-                                     0x34, 0x12},
-                                    1234};
-  const std::string actual =
-      cs::driver_properties_to_text(p, indentation_level_);
+TEST_F(TextFormatterTests, DriverWithDevicesCapabilitiesToText) {
+  const auto capabilities = fake_driver_with_devices_capabilities();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("Driver version", "1234", indentation_level_);
-  ss << cs::key_value_to_text("UUID", "12345678-1234-5678-1234-567812345678",
-                              indentation_level_);
-  const std::string expected = ss.str();
+  ss << cs::driver_api_version_to_text(capabilities.api_version,
+                                       indentation_level_);
+  ss << cs::driver_properties_to_text(capabilities.driver_properties,
+                                      indentation_level_);
+  ss << cs::driver_ipc_properties_to_text(capabilities.ipc_properties,
+                                          indentation_level_);
+  ss << cs::all_driver_extension_properties_to_text(
+      capabilities.extension_properties, indentation_level_);
+  ss << cs::key_value_to_text("Number of devices", "2", indentation_level_);
+  ss << cs::key_value_to_text("Device", "0", indentation_level_);
+  ss << cs::device_capabilities_to_text(capabilities.devices[0],
+                                        indentation_level_ + 1);
+  ss << cs::key_value_to_text("Device", "1", indentation_level_);
+  ss << cs::device_capabilities_to_text(capabilities.devices[1],
+                                        indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::driver_capabilities_to_text(capabilities, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DriverApiVersionToText) {
-  const ze_api_version_t v = ZE_API_VERSION_1_0;
-  const std::string actual =
-      cs::driver_api_version_to_text(v, indentation_level_);
+  const auto api_version = fake_driver_api_version();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("Driver API version", "0.91", indentation_level_);
-  const std::string expected = ss.str();
+  ss << cs::key_value_to_text("Driver API version", "1.0", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::driver_api_version_to_text(api_version, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DriverPropertiesToText) {
+  const auto properties = fake_driver_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Driver version", "123", indentation_level_);
+  ss << cs::key_value_to_text("UUID", "12345678-1234-5678-1234-567812345678",
+                              indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::driver_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DriverIpcPropertiesToText) {
-  const ze_driver_ipc_properties_t p = {
-      ZE_DRIVER_IPC_PROPERTIES_VERSION_CURRENT, 1, 0};
-  const std::string actual =
-      cs::driver_ipc_properties_to_text(p, indentation_level_);
+  const auto properties = fake_driver_ipc_properties();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("IPC memory supported", "true",
-                              indentation_level_);
-  ss << cs::key_value_to_text("IPC events supported", "false",
-                              indentation_level_);
-  const std::string expected = ss.str();
+  ss << cs::key_value_to_text(
+      "IPC flags",
+      "ZE_IPC_PROPERTY_FLAG_MEMORY | ZE_IPC_PROPERTY_FLAG_EVENT_POOL",
+      indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::driver_ipc_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDriverExtensionPropertiesToText) {
+  const auto properties = std::vector<ze_driver_extension_properties_t>{
+      fake_driver_extension_properties(), fake_driver_extension_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of extensions", "2", indentation_level_);
+  ss << cs::key_value_to_text("Extension", "0", indentation_level_);
+  ss << cs::driver_extension_properties_to_text(properties[0],
+                                                indentation_level_ + 1);
+  ss << cs::key_value_to_text("Extension", "1", indentation_level_);
+  ss << cs::driver_extension_properties_to_text(properties[1],
+                                                indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual = cs::all_driver_extension_properties_to_text(
+      properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DriverExtensionPropertiesToText) {
+  const auto properties = fake_driver_extension_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Name", "extension", indentation_level_);
+  ss << cs::key_value_to_text("Version", "1", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::driver_extension_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
-  const cs::DeviceCapabilities capabilities = {
-      {}, {}, {}, {},
-      {}, {}, {}, {cs::DeviceCapabilities{}, cs::DeviceCapabilities{}}};
-  const std::string actual =
-      cs::device_capabilities_to_text(capabilities, indentation_level_);
+  const auto capabilities = fake_device_with_sub_devices_capabilities();
 
   std::stringstream ss;
   ss << cs::device_properties_to_text(capabilities.device_properties,
                                       indentation_level_);
   ss << cs::device_compute_properties_to_text(capabilities.compute_properties,
                                               indentation_level_);
-  ss << cs::device_kernel_properties_to_text(capabilities.kernel_properties,
+  ss << cs::device_module_properties_to_text(capabilities.module_properties,
                                              indentation_level_);
+  ss << cs::all_device_command_queue_group_properties_to_text(
+      capabilities.command_queue_group_properties, indentation_level_);
   ss << cs::all_device_memory_properties_to_text(capabilities.memory_properties,
                                                  indentation_level_);
   ss << cs::device_memory_access_properties_to_text(
       capabilities.memory_access_properties, indentation_level_);
-  ss << cs::device_cache_properties_to_text(capabilities.cache_properties,
-                                            indentation_level_);
+  ss << cs::all_device_cache_properties_to_text(capabilities.cache_properties,
+                                                indentation_level_);
   ss << cs::device_image_properties_to_text(capabilities.image_properties,
                                             indentation_level_);
+  ss << cs::device_external_memory_properties_to_text(
+      capabilities.external_memory_properties, indentation_level_);
   ss << cs::key_value_to_text("Number of sub-devices", "2", indentation_level_);
+  ss << cs::key_value_to_text("Sub-device", "0", indentation_level_);
   ss << cs::device_capabilities_to_text(capabilities.sub_devices[0],
                                         indentation_level_ + 1);
+  ss << cs::key_value_to_text("Sub-device", "1", indentation_level_);
   ss << cs::device_capabilities_to_text(capabilities.sub_devices[1],
                                         indentation_level_ + 1);
-  const std::string expected = ss.str();
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_capabilities_to_text(capabilities, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DevicePropertiesToText) {
-  const ze_device_properties_t p = {ZE_DEVICE_PROPERTIES_VERSION_CURRENT,
-                                    ZE_DEVICE_TYPE_GPU,
-                                    1,
-                                    2,
-                                    {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34,
-                                     0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56,
-                                     0x34, 0x12},
-                                    1,
-                                    3,
-                                    4,
-                                    1,
-                                    1,
-                                    1,
-                                    5,
-                                    6,
-                                    7,
-                                    8,
-                                    9,
-                                    10,
-                                    11,
-                                    12,
-                                    13,
-                                    14,
-                                    "device_name"};
-  const std::string actual =
-      cs::device_properties_to_text(p, indentation_level_);
+  const auto properties = fake_device_properties();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("Device name", "device_name", indentation_level_);
-  ss << cs::key_value_to_text("Device type", "ZE_DEVICE_TYPE_GPU",
-                              indentation_level_);
+  ss << cs::key_value_to_text("Name", "device_name", indentation_level_);
+  ss << cs::key_value_to_text("Type", "ZE_DEVICE_TYPE_GPU", indentation_level_);
   ss << cs::key_value_to_text("Vendor ID", "1", indentation_level_);
   ss << cs::key_value_to_text("Device ID", "2", indentation_level_);
   ss << cs::key_value_to_text("UUID", "12345678-1234-5678-1234-567812345678",
                               indentation_level_);
-  ss << cs::key_value_to_text("Is sub-device", "true", indentation_level_);
-  ss << cs::key_value_to_text("Sub-device ID", "3", indentation_level_);
-  ss << cs::key_value_to_text("Core clock rate", "4", indentation_level_);
-  ss << cs::key_value_to_text("Is unified memory supported", "true",
+  ss << cs::key_value_to_text(
+      "Device flags",
+      "ZE_DEVICE_PROPERTY_FLAG_INTEGRATED | ZE_DEVICE_PROPERTY_FLAG_ECC",
+      indentation_level_);
+  ss << cs::key_value_to_text("Core clock rate", "3", indentation_level_);
+  ss << cs::key_value_to_text("Maximum memory allocation size", "4",
                               indentation_level_);
-  ss << cs::key_value_to_text("Is ECC memory supported", "true",
+  ss << cs::key_value_to_text("Maximum number of logical hardware contexts",
+                              "5", indentation_level_);
+  ss << cs::key_value_to_text("Maximum priority for command queues", "6",
                               indentation_level_);
-  ss << cs::key_value_to_text("Are on demand page faults supported", "true",
+  ss << cs::key_value_to_text("Number of threads per EU", "7",
                               indentation_level_);
-  ss << cs::key_value_to_text("Max command queues", "5", indentation_level_);
-  ss << cs::key_value_to_text("Number of asynchronous compute engines", "6",
+  ss << cs::key_value_to_text("Physical EU SIMD width", "8",
                               indentation_level_);
-  ss << cs::key_value_to_text("Number of asynchronous copy engines", "7",
+  ss << cs::key_value_to_text("Number of EUs per subslice", "9",
                               indentation_level_);
-  ss << cs::key_value_to_text("Max command queue priority", "8",
+  ss << cs::key_value_to_text("Number of subslices per slice", "10",
                               indentation_level_);
-  ss << cs::key_value_to_text("Number of threads per EU", "9",
+  ss << cs::key_value_to_text("Number of slices", "11", indentation_level_);
+  ss << cs::key_value_to_text("Timer resolution", "12", indentation_level_);
+  ss << cs::key_value_to_text("Timestamp valid bits", "13", indentation_level_);
+  ss << cs::key_value_to_text("Kernel timestamp valid bits", "14",
                               indentation_level_);
-  ss << cs::key_value_to_text("Physical EU SIMD width", "10",
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, SubDevicePropertiesToText) {
+  const auto properties = fake_sub_device_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Name", "device_name", indentation_level_);
+  ss << cs::key_value_to_text("Type", "ZE_DEVICE_TYPE_GPU", indentation_level_);
+  ss << cs::key_value_to_text("Vendor ID", "1", indentation_level_);
+  ss << cs::key_value_to_text("Device ID", "2", indentation_level_);
+  ss << cs::key_value_to_text("UUID", "12345678-1234-5678-1234-567812345678",
                               indentation_level_);
-  ss << cs::key_value_to_text("Number of EUs per subslice", "11",
+  ss << cs::key_value_to_text(
+      "Device flags",
+      "ZE_DEVICE_PROPERTY_FLAG_INTEGRATED | ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE "
+      "| ZE_DEVICE_PROPERTY_FLAG_ECC",
+      indentation_level_);
+  ss << cs::key_value_to_text("Sub-device ID", "15", indentation_level_);
+  ss << cs::key_value_to_text("Core clock rate", "3", indentation_level_);
+  ss << cs::key_value_to_text("Maximum memory allocation size", "4",
                               indentation_level_);
-  ss << cs::key_value_to_text("Number of subslices per slice", "12",
+  ss << cs::key_value_to_text("Maximum number of logical hardware contexts",
+                              "5", indentation_level_);
+  ss << cs::key_value_to_text("Maximum priority for command queues", "6",
                               indentation_level_);
-  ss << cs::key_value_to_text("Number of slices", "13", indentation_level_);
-  ss << cs::key_value_to_text("Timer resolution", "14", indentation_level_);
-  const std::string expected = ss.str();
+  ss << cs::key_value_to_text("Number of threads per EU", "7",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Physical EU SIMD width", "8",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Number of EUs per subslice", "9",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Number of subslices per slice", "10",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Number of slices", "11", indentation_level_);
+  ss << cs::key_value_to_text("Timer resolution", "12", indentation_level_);
+  ss << cs::key_value_to_text("Timestamp valid bits", "13", indentation_level_);
+  ss << cs::key_value_to_text("Kernel timestamp valid bits", "14",
+                              indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DeviceComputePropertiesToText) {
-  const ze_device_compute_properties_t p = {
-      ZE_DEVICE_COMPUTE_PROPERTIES_VERSION_CURRENT,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      2,
-      {8, 9, 0, 0, 0, 0, 0, 0}};
-  const std::string actual =
-      cs::device_compute_properties_to_text(p, indentation_level_);
+  const auto properties = fake_device_compute_properties();
 
   std::stringstream ss;
   ss << cs::key_value_to_text("Max total group size", "1", indentation_level_);
@@ -238,163 +527,236 @@ TEST_F(TextFormatterTests, DeviceComputePropertiesToText) {
   ss << cs::key_value_to_text("Max group count Z", "7", indentation_level_);
   ss << cs::key_value_to_text("Max shared local memory", "8",
                               indentation_level_);
-  ss << cs::key_value_to_text("Sub-group sizes", "8 9", indentation_level_);
-  const std::string expected = ss.str();
+  ss << cs::key_value_to_text("Sub-group sizes", "9 10", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_compute_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
-TEST_F(TextFormatterTests, DeviceKernelPropertiesToText) {
-  const ze_device_kernel_properties_t p = {
-      ZE_DEVICE_KERNEL_PROPERTIES_VERSION_CURRENT,
-      1,
-      {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
-       0x78, 0x56, 0x34, 0x12},
-      1,
-      0,
-      1,
-      1,
-      static_cast<ze_fp_capabilities_t>(ZE_FP_CAPS_NONE),
-      static_cast<ze_fp_capabilities_t>(ZE_FP_CAPS_NONE),
-      static_cast<ze_fp_capabilities_t>(ZE_FP_CAPS_DENORM |
-                                        ZE_FP_CAPS_ROUNDED_DIVIDE_SQRT),
-      2,
-      3};
-  const std::string actual =
-      cs::device_kernel_properties_to_text(p, indentation_level_);
+TEST_F(TextFormatterTests, DeviceModulePropertiesToText) {
+  const auto properties = fake_device_module_properties();
 
   std::stringstream ss;
   ss << cs::key_value_to_text("SPIR-V version", "1", indentation_level_);
+  ss << cs::key_value_to_text(
+      "Module flags", "ZE_DEVICE_MODULE_FLAG_FP16 | ZE_DEVICE_MODULE_FLAG_DP4A",
+      indentation_level_);
+  ss << cs::key_value_to_text(
+      "FP16 flags",
+      "ZE_DEVICE_FP_FLAG_DENORM | ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST",
+      indentation_level_);
+  ss << cs::key_value_to_text(
+      "FP32 flags",
+      "ZE_DEVICE_FP_FLAG_INF_NAN | ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO",
+      indentation_level_);
+  ss << cs::key_value_to_text(
+      "FP64 flags",
+      "ZE_DEVICE_FP_FLAG_ROUND_TO_INF | ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT",
+      indentation_level_);
+  ss << cs::key_value_to_text("Maximum argument size", "2", indentation_level_);
+  ss << cs::key_value_to_text("printf buffer size", "3", indentation_level_);
   ss << cs::key_value_to_text("Native kernel supported",
                               "12345678-1234-5678-1234-567812345678",
                               indentation_level_);
-  ss << cs::key_value_to_text("FP16 supported", "true", indentation_level_);
-  ss << cs::key_value_to_text("FP64 supported", "false", indentation_level_);
-  ss << cs::key_value_to_text("INT64 atomics supported", "true",
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_module_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDeviceCommandQueueGroupPropertiesToText) {
+  const auto properties = std::vector<ze_command_queue_group_properties_t>{
+      fake_device_command_queue_group_properties(),
+      fake_device_command_queue_group_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of command queue groups", "2",
                               indentation_level_);
-  ss << cs::key_value_to_text("DP4A supported", "true", indentation_level_);
-  ss << cs::key_value_to_text("Half-precision floating-point capabilities",
-                              "ZE_FP_CAPS_NONE", indentation_level_);
-  ss << cs::key_value_to_text("Single-precision floating-point capabilities",
-                              "ZE_FP_CAPS_NONE", indentation_level_);
+  ss << cs::key_value_to_text("Command queue group", "0", indentation_level_);
+  ss << cs::device_command_queue_group_properties_to_text(
+      properties[0], indentation_level_ + 1);
+  ss << cs::key_value_to_text("Command queue group", "1", indentation_level_);
+  ss << cs::device_command_queue_group_properties_to_text(
+      properties[1], indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual = cs::all_device_command_queue_group_properties_to_text(
+      properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceCommandQueueGroupPropertiesToText) {
+  const auto properties = fake_device_command_queue_group_properties();
+
+  std::stringstream ss;
   ss << cs::key_value_to_text(
-      "Double-precision floating-point capabilities",
-      "ZE_FP_CAPS_DENORM | ZE_FP_CAPS_ROUNDED_DIVIDE_SQRT", indentation_level_);
-  ss << cs::key_value_to_text("Max argument size", "2", indentation_level_);
-  ss << cs::key_value_to_text("printf buffer size", "3", indentation_level_);
-  const std::string expected = ss.str();
+      "Command queue group flags",
+      "ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE | "
+      "ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS",
+      indentation_level_);
+  ss << cs::key_value_to_text("Maximum fill pattern size", "1",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Number of physical command queues", "2",
+                              indentation_level_);
+  const auto expected = ss.str();
+  const auto actual = cs::device_command_queue_group_properties_to_text(
+      properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, AllDeviceMemoryPropertiesToText) {
-  const std::vector<ze_device_memory_properties_t> p = {
-      {ZE_DEVICE_MEMORY_PROPERTIES_VERSION_CURRENT, 1, 2, 3},
-      {ZE_DEVICE_MEMORY_PROPERTIES_VERSION_CURRENT, 4, 5, 6}};
-  const std::string actual =
-      cs::all_device_memory_properties_to_text(p, indentation_level_);
+  const auto properties = std::vector<ze_device_memory_properties_t>{
+      fake_device_memory_properties(), fake_device_memory_properties()};
 
   std::stringstream ss;
   ss << cs::key_value_to_text("Number of memory properties", "2",
                               indentation_level_);
-  ss << cs::device_memory_properties_to_text(p[0], indentation_level_ + 1);
-  ss << cs::device_memory_properties_to_text(p[1], indentation_level_ + 1);
-  const std::string expected = ss.str();
+  ss << cs::key_value_to_text("Memory", "0", indentation_level_);
+  ss << cs::device_memory_properties_to_text(properties[0],
+                                             indentation_level_ + 1);
+  ss << cs::key_value_to_text("Memory", "1", indentation_level_);
+  ss << cs::device_memory_properties_to_text(properties[1],
+                                             indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::all_device_memory_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DeviceMemoryPropertiesToText) {
-  const ze_device_memory_properties_t p = {
-      ZE_DEVICE_MEMORY_PROPERTIES_VERSION_CURRENT, 1, 2, 3};
-  const std::string actual =
-      cs::device_memory_properties_to_text(p, indentation_level_);
+  const auto properties = fake_device_memory_properties();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("Max clock rate", "1", indentation_level_);
-  ss << cs::key_value_to_text("Max bus width", "2", indentation_level_);
+  ss << cs::key_value_to_text("Name", "memory_name", indentation_level_);
+  ss << cs::key_value_to_text(
+      "Memory flags", "ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD", indentation_level_);
+  ss << cs::key_value_to_text("Maximum clock rate", "1", indentation_level_);
+  ss << cs::key_value_to_text("Maximum bus width", "2", indentation_level_);
   ss << cs::key_value_to_text("Total size", "3", indentation_level_);
-  const std::string expected = ss.str();
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_memory_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DeviceMemoryAccessPropertiesToText) {
-  const ze_device_memory_access_properties_t p = {
-      ZE_DEVICE_MEMORY_ACCESS_PROPERTIES_VERSION_CURRENT,
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_ACCESS_NONE),
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_ACCESS),
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_ATOMIC_ACCESS),
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_CONCURRENT_ACCESS),
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_ACCESS |
-                                                   ZE_MEMORY_ATOMIC_ACCESS)};
-  const std::string actual =
-      cs::device_memory_access_properties_to_text(p, indentation_level_);
+  const auto properties = fake_device_memory_access_properties();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("Host allocation capabilities",
-                              "ZE_MEMORY_ACCESS_NONE", indentation_level_);
+  ss << cs::key_value_to_text(
+      "Host allocation capabilities",
+      "ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT",
+      indentation_level_);
   ss << cs::key_value_to_text("Device allocation capabilities",
-                              "ZE_MEMORY_ACCESS", indentation_level_);
+                              "ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT",
+                              indentation_level_);
   ss << cs::key_value_to_text("Shared single-device allocation capabilities",
-                              "ZE_MEMORY_ATOMIC_ACCESS", indentation_level_);
-  ss << cs::key_value_to_text("Shared cross-device allocation capabilities",
-                              "ZE_MEMORY_CONCURRENT_ACCESS",
+                              "ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT | "
+                              "ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC",
                               indentation_level_);
-  ss << cs::key_value_to_text("Shared system allocation capabilities",
-                              "ZE_MEMORY_ACCESS | ZE_MEMORY_ATOMIC_ACCESS",
+  ss << cs::key_value_to_text(
+      "Shared cross-device allocation capabilities",
+      "ZE_MEMORY_ACCESS_CAP_FLAG_RW | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT",
+      indentation_level_);
+  ss << cs::key_value_to_text(
+      "Shared system allocation capabilities",
+      "ZE_MEMORY_ACCESS_CAP_FLAG_RW | ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC",
+      indentation_level_);
+  const auto expected = ss.str();
+  const auto actual = cs::device_memory_access_properties_to_text(
+      properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDeviceCachePropertiesToText) {
+  const auto properties = std::vector<ze_device_cache_properties_t>{
+      fake_device_cache_properties(), fake_device_cache_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of cache properties", "2",
                               indentation_level_);
-  const std::string expected = ss.str();
+  ss << cs::key_value_to_text("Cache", "0", indentation_level_);
+  ss << cs::device_cache_properties_to_text(properties[0],
+                                            indentation_level_ + 1);
+  ss << cs::key_value_to_text("Cache", "1", indentation_level_);
+  ss << cs::device_cache_properties_to_text(properties[1],
+                                            indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::all_device_cache_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DeviceCachePropertiesToText) {
-  const ze_device_cache_properties_t p = {
-      ZE_DEVICE_CACHE_PROPERTIES_VERSION_CURRENT, 1, 2, 3, 1, 4, 5};
-  const std::string actual =
-      cs::device_cache_properties_to_text(p, indentation_level_);
+  const auto properties = fake_device_cache_properties();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("Intermediate cache control supported", "true",
+  ss << cs::key_value_to_text("Cache flags",
+                              "ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL",
                               indentation_level_);
-  ss << cs::key_value_to_text("Intermediate cache size", "2",
-                              indentation_level_);
-  ss << cs::key_value_to_text("Intermediate cacheline size", "3",
-                              indentation_level_);
-  ss << cs::key_value_to_text("Last level cache size control supported", "true",
-                              indentation_level_);
-  ss << cs::key_value_to_text("Last level cache size", "4", indentation_level_);
-  ss << cs::key_value_to_text("Last level cacheline size", "5",
-                              indentation_level_);
-  const std::string expected = ss.str();
+  ss << cs::key_value_to_text("Cache size", "1", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_cache_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST_F(TextFormatterTests, DeviceImagePropertiesToText) {
-  const ze_device_image_properties_t p = {
-      ZE_DEVICE_IMAGE_PROPERTIES_VERSION_CURRENT, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  const std::string actual =
-      cs::device_image_properties_to_text(p, indentation_level_);
+  const auto properties = fake_device_image_properties();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("Are images supported", "true",
+  ss << cs::key_value_to_text("Maximum image 1D", "1", indentation_level_);
+  ss << cs::key_value_to_text("Maximum image 2D", "2", indentation_level_);
+  ss << cs::key_value_to_text("Maximum image 3D", "3", indentation_level_);
+  ss << cs::key_value_to_text("Maximum image buffer size", "4",
                               indentation_level_);
-  ss << cs::key_value_to_text("Max image 1D", "2", indentation_level_);
-  ss << cs::key_value_to_text("Max image 2D", "3", indentation_level_);
-  ss << cs::key_value_to_text("Max image 3D", "4", indentation_level_);
-  ss << cs::key_value_to_text("Max image buffer slices", "5",
+  ss << cs::key_value_to_text("Maximum image array slices", "5",
                               indentation_level_);
-  ss << cs::key_value_to_text("Max image array slices", "6",
+  ss << cs::key_value_to_text("Maximum number of samplers", "6",
                               indentation_level_);
-  ss << cs::key_value_to_text("Max number of samplers", "7",
+  ss << cs::key_value_to_text("Maximum number of read arguments", "7",
                               indentation_level_);
-  ss << cs::key_value_to_text("Max number of read arguments", "8",
+  ss << cs::key_value_to_text("Maximum number of write arguments", "8",
                               indentation_level_);
-  ss << cs::key_value_to_text("Max number of write arguments", "9",
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_image_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceExternalMemoryPropertiesToText) {
+  const auto properties = fake_device_external_memory_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Memory allocation import types",
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD | "
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF",
                               indentation_level_);
-  const std::string expected = ss.str();
+  ss << cs::key_value_to_text("Memory allocation import types",
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD | "
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Image import types",
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD | "
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Image export types",
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD | "
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF",
+                              indentation_level_);
+  const auto expected = ss.str();
+  const auto actual = cs::device_external_memory_properties_to_text(
+      properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
@@ -410,36 +772,59 @@ TEST_F(TextFormatterTests, KeyValueToText) {
 }
 
 TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
-  const std::vector<cs::DriverCapabilities> capabilities = {
-      cs::DriverCapabilities{}, cs::DriverCapabilities{}};
+  const auto capabilities = std::vector<cs::DriverCapabilities>{
+      fake_driver_capabilities(), fake_driver_capabilities()};
 
-  const pt::ptree json = cs::drivers_capabilities_to_json(capabilities);
-
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected =
+  const auto json = cs::drivers_capabilities_to_json(capabilities);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
       "[\n"
       "        {\n"
-      "            \"ze_api_version_t\": 0.0,\n"
+      "            \"ze_api_version_t\": 1.0,\n"
       "            \"ze_driver_properties_t\": {\n"
-      "                \"uuid\": \"00000-00-00-00-000000\",\n"
-      "                \"driverVersion\": 0\n"
+      "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "                \"driverVersion\": 123\n"
       "            },\n"
       "            \"ze_driver_ipc_properties_t\": {\n"
-      "                \"memsSupported\": false,\n"
-      "                \"eventsSupported\": false\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
+      "                    \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+      "                ]\n"
       "            },\n"
+      "            \"ze_driver_extension_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"extension\",\n"
+      "                    \"version\": 1\n"
+      "                },\n"
+      "                {\n"
+      "                    \"name\": \"extension\",\n"
+      "                    \"version\": 1\n"
+      "                }\n"
+      "            ],\n"
       "            \"devices\": []\n"
       "        },\n"
       "        {\n"
-      "            \"ze_api_version_t\": 0.0,\n"
+      "            \"ze_api_version_t\": 1.0,\n"
       "            \"ze_driver_properties_t\": {\n"
-      "                \"uuid\": \"00000-00-00-00-000000\",\n"
-      "                \"driverVersion\": 0\n"
+      "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "                \"driverVersion\": 123\n"
       "            },\n"
       "            \"ze_driver_ipc_properties_t\": {\n"
-      "                \"memsSupported\": false,\n"
-      "                \"eventsSupported\": false\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
+      "                    \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+      "                ]\n"
       "            },\n"
+      "            \"ze_driver_extension_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"extension\",\n"
+      "                    \"version\": 1\n"
+      "                },\n"
+      "                {\n"
+      "                    \"name\": \"extension\",\n"
+      "                    \"version\": 1\n"
+      "                }\n"
+      "            ],\n"
       "            \"devices\": []\n"
       "        }\n"
       "]";
@@ -448,203 +833,399 @@ TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
 }
 
 TEST(JSONFormatterTests, DriverCapabilitiesToJSON) {
-  const cs::DriverCapabilities capabilities = {
-      ZE_API_VERSION_1_0,
-      {ZE_DRIVER_PROPERTIES_VERSION_CURRENT,
-       {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
-        0x78, 0x56, 0x34, 0x12},
-       123},
-      {ZE_DRIVER_IPC_PROPERTIES_VERSION_CURRENT, 1, 0},
-      {cs::DeviceCapabilities{}, cs::DeviceCapabilities{}}};
+  const auto capabilities = fake_driver_capabilities();
 
-  const pt::ptree json = cs::driver_capabilities_to_json(capabilities);
-
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected =
+  const auto json = cs::driver_capabilities_to_json(capabilities);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
       "{\n"
-      "    \"ze_api_version_t\": 0.91,\n"
+      "    \"ze_api_version_t\": 1.0,\n"
       "    \"ze_driver_properties_t\": {\n"
       "        \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "        \"driverVersion\": 123\n"
       "    },\n"
       "    \"ze_driver_ipc_properties_t\": {\n"
-      "        \"memsSupported\": true,\n"
-      "        \"eventsSupported\": false\n"
+      "        \"flags\": [\n"
+      "            \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
+      "            \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+      "        ]\n"
       "    },\n"
+      "    \"ze_driver_extension_properties_t\": [\n"
+      "        {\n"
+      "            \"name\": \"extension\",\n"
+      "            \"version\": 1\n"
+      "        },\n"
+      "        {\n"
+      "            \"name\": \"extension\",\n"
+      "            \"version\": 1\n"
+      "        }\n"
+      "    ],\n"
+      "    \"devices\": []\n"
+      "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
+  const auto capabilities = fake_driver_with_devices_capabilities();
+
+  const auto json = cs::driver_capabilities_to_json(capabilities);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "{\n"
+      "    \"ze_api_version_t\": 1.0,\n"
+      "    \"ze_driver_properties_t\": {\n"
+      "        \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "        \"driverVersion\": 123\n"
+      "    },\n"
+      "    \"ze_driver_ipc_properties_t\": {\n"
+      "        \"flags\": [\n"
+      "            \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
+      "            \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+      "        ]\n"
+      "    },\n"
+      "    \"ze_driver_extension_properties_t\": [\n"
+      "        {\n"
+      "            \"name\": \"extension\",\n"
+      "            \"version\": 1\n"
+      "        },\n"
+      "        {\n"
+      "            \"name\": \"extension\",\n"
+      "            \"version\": 1\n"
+      "        }\n"
+      "    ],\n"
       "    \"devices\": [\n"
       "        {\n"
       "            \"ze_device_properties_t\": {\n"
-      "                \"name\": \"\",\n"
-      "                \"type\": \"Unknown ze_device_type_t value: 0\",\n"
-      "                \"vendorId\": 0,\n"
-      "                \"deviceId\": 0,\n"
-      "                \"uuid\": \"00000-00-00-00-000000\",\n"
-      "                \"isSubdevice\": false,\n"
-      "                \"subdeviceId\": 0,\n"
-      "                \"coreClockRate\": 0,\n"
-      "                \"unifiedMemorySupported\": false,\n"
-      "                \"eccMemorySupported\": false,\n"
-      "                \"onDemandPageFaultsSupported\": false,\n"
-      "                \"maxCommandQueues\": 0,\n"
-      "                \"numAsyncComputeEngines\": 0,\n"
-      "                \"numAsyncCopyEngines\": 0,\n"
-      "                \"numThreadsPerEU\": 0,\n"
-      "                \"physicalEUSimdWidth\": 0,\n"
-      "                \"numEUsPerSubslice\": 0,\n"
-      "                \"numSubslicesPerSlice\": 0,\n"
-      "                \"numSlices\": 0,\n"
-      "                \"timerResolution\": 0\n"
+      "                \"name\": \"device_name\",\n"
+      "                \"type\": \"ZE_DEVICE_TYPE_GPU\",\n"
+      "                \"vendorId\": 1,\n"
+      "                \"deviceId\": 2,\n"
+      "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "                ],\n"
+      "                \"coreClockRate\": 3,\n"
+      "                \"maxMemAllocSize\": 4,\n"
+      "                \"maxHardwareContexts\": 5,\n"
+      "                \"maxCommandQueuePriority\": 6,\n"
+      "                \"numThreadsPerEU\": 7,\n"
+      "                \"physicalEUSimdWidth\": 8,\n"
+      "                \"numEUsPerSubslice\": 9,\n"
+      "                \"numSubslicesPerSlice\": 10,\n"
+      "                \"numSlices\": 11,\n"
+      "                \"timerResolution\": 12,\n"
+      "                \"timestampValidBits\": 13,\n"
+      "                \"kernelTimestampValidBits\": 14\n"
       "            },\n"
       "            \"ze_device_compute_properties_t\": {\n"
-      "                \"maxTotalGroupSize\": 0,\n"
-      "                \"maxGroupSizeX\": 0,\n"
-      "                \"maxGroupSizeY\": 0,\n"
-      "                \"maxGroupSizeZ\": 0,\n"
-      "                \"maxGroupCountX\": 0,\n"
-      "                \"maxGroupCountY\": 0,\n"
-      "                \"maxGroupCountZ\": 0,\n"
-      "                \"maxSharedLocalMemory\": 0,\n"
-      "                \"numSubGroupSizes\": 0,\n"
-      "                \"subGroupSizes\": []\n"
-      "            },\n"
-      "            \"ze_device_kernel_properties_t\": {\n"
-      "                \"spirvVersionSupported\": false,\n"
-      "                \"nativeKernelSupported\": \"00000-00-00-00-000000\",\n"
-      "                \"fp16Supported\": false,\n"
-      "                \"fp64Supported\": false,\n"
-      "                \"int64AtomicsSupported\": false,\n"
-      "                \"dp4aSupported\": false,\n"
-      "                \"halfFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"singleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"doubleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"maxArgumentsSize\": 0,\n"
-      "                \"printfBufferSize\": 0\n"
-      "            },\n"
-      "            \"ze_device_memory_properties_t\": [],\n"
-      "            \"ze_device_memory_access_properties_t\": {\n"
-      "                \"hostAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"deviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedSingleDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedSystemAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
+      "                \"maxTotalGroupSize\": 1,\n"
+      "                \"maxGroupSizeX\": 2,\n"
+      "                \"maxGroupSizeY\": 3,\n"
+      "                \"maxGroupSizeZ\": 4,\n"
+      "                \"maxGroupCountX\": 5,\n"
+      "                \"maxGroupCountY\": 6,\n"
+      "                \"maxGroupCountZ\": 7,\n"
+      "                \"maxSharedLocalMemory\": 8,\n"
+      "                \"subGroupSizes\": [\n"
+      "                    9,\n"
+      "                    10\n"
       "                ]\n"
       "            },\n"
-      "            \"ze_device_cache_properties_t\": {\n"
-      "                \"intermediateCacheControlSupported\": false,\n"
-      "                \"intermediateCacheSize\": 0,\n"
-      "                \"intermediateCachelineSize\": 0,\n"
-      "                \"lastLevelCacheSizeControlSupported\": false,\n"
-      "                \"lastLevelCacheSize\": 0,\n"
-      "                \"lastLevelCachelineSize\": 0\n"
+      "            \"ze_device_module_properties_t\": {\n"
+      "                \"spirvVersionSupported\": 1,\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "                ],\n"
+      "                \"fp16flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST\"\n"
+      "                ],\n"
+      "                \"fp32flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_INF_NAN\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
+      "                ],\n"
+      "                \"fp64flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "                ],\n"
+      "                \"maxArgumentsSize\": 2,\n"
+      "                \"printfBufferSize\": 3,\n"
+      "                \"nativeKernelSupported\": "
+      "\"12345678-1234-5678-1234-567812345678\"\n"
       "            },\n"
+      "            \"ze_command_queue_group_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "                    ],\n"
+      "                    \"maxMemoryFillPatternSize\": 1,\n"
+      "                    \"numQueues\": 2\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "                    ],\n"
+      "                    \"maxMemoryFillPatternSize\": 1,\n"
+      "                    \"numQueues\": 2\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ze_device_memory_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "                    ],\n"
+      "                    \"maxClockRate\": 1,\n"
+      "                    \"maxBusWidth\": 2,\n"
+      "                    \"totalSize\": 3\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "                    ],\n"
+      "                    \"maxClockRate\": 1,\n"
+      "                    \"maxBusWidth\": 2,\n"
+      "                    \"totalSize\": 3\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ze_device_memory_access_properties_t\": {\n"
+      "                \"hostAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"deviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"sharedSingleDeviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
+      "                ],\n"
+      "                \"sharedCrossDeviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"sharedSystemAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_device_cache_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "                    ],\n"
+      "                    \"cacheSize\": 1\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "                    ],\n"
+      "                    \"cacheSize\": 1\n"
+      "                }\n"
+      "            ],\n"
       "            \"ze_device_image_properties_t\": {\n"
-      "                \"supported\": false,\n"
-      "                \"maxImageDims1D\": 0,\n"
-      "                \"maxImageDims2D\": 0,\n"
-      "                \"maxImageDims3D\": 0,\n"
-      "                \"maxImageBufferSize\": 0,\n"
-      "                \"maxImageArraySlices\": 0,\n"
-      "                \"maxSamplers\": 0,\n"
-      "                \"maxReadImageArgs\": 0,\n"
-      "                \"maxWriteImageArgs\": 0\n"
+      "                \"maxImageDims1D\": 1,\n"
+      "                \"maxImageDims2D\": 2,\n"
+      "                \"maxImageDims3D\": 3,\n"
+      "                \"maxImageBufferSize\": 4,\n"
+      "                \"maxImageArraySlices\": 5,\n"
+      "                \"maxSamplers\": 6,\n"
+      "                \"maxReadImageArgs\": 7,\n"
+      "                \"maxWriteImageArgs\": 8\n"
       "            },\n"
-      "            \"subDevices\": []\n"
+      "            \"ze_device_external_memory_properties_t\": {\n"
+      "                \"memoryAllocationImportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"memoryAllocationExportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"imageImportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"imageExportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"sub_devices\": []\n"
       "        },\n"
       "        {\n"
       "            \"ze_device_properties_t\": {\n"
-      "                \"name\": \"\",\n"
-      "                \"type\": \"Unknown ze_device_type_t value: 0\",\n"
-      "                \"vendorId\": 0,\n"
-      "                \"deviceId\": 0,\n"
-      "                \"uuid\": \"00000-00-00-00-000000\",\n"
-      "                \"isSubdevice\": false,\n"
-      "                \"subdeviceId\": 0,\n"
-      "                \"coreClockRate\": 0,\n"
-      "                \"unifiedMemorySupported\": false,\n"
-      "                \"eccMemorySupported\": false,\n"
-      "                \"onDemandPageFaultsSupported\": false,\n"
-      "                \"maxCommandQueues\": 0,\n"
-      "                \"numAsyncComputeEngines\": 0,\n"
-      "                \"numAsyncCopyEngines\": 0,\n"
-      "                \"numThreadsPerEU\": 0,\n"
-      "                \"physicalEUSimdWidth\": 0,\n"
-      "                \"numEUsPerSubslice\": 0,\n"
-      "                \"numSubslicesPerSlice\": 0,\n"
-      "                \"numSlices\": 0,\n"
-      "                \"timerResolution\": 0\n"
+      "                \"name\": \"device_name\",\n"
+      "                \"type\": \"ZE_DEVICE_TYPE_GPU\",\n"
+      "                \"vendorId\": 1,\n"
+      "                \"deviceId\": 2,\n"
+      "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "                ],\n"
+      "                \"coreClockRate\": 3,\n"
+      "                \"maxMemAllocSize\": 4,\n"
+      "                \"maxHardwareContexts\": 5,\n"
+      "                \"maxCommandQueuePriority\": 6,\n"
+      "                \"numThreadsPerEU\": 7,\n"
+      "                \"physicalEUSimdWidth\": 8,\n"
+      "                \"numEUsPerSubslice\": 9,\n"
+      "                \"numSubslicesPerSlice\": 10,\n"
+      "                \"numSlices\": 11,\n"
+      "                \"timerResolution\": 12,\n"
+      "                \"timestampValidBits\": 13,\n"
+      "                \"kernelTimestampValidBits\": 14\n"
       "            },\n"
       "            \"ze_device_compute_properties_t\": {\n"
-      "                \"maxTotalGroupSize\": 0,\n"
-      "                \"maxGroupSizeX\": 0,\n"
-      "                \"maxGroupSizeY\": 0,\n"
-      "                \"maxGroupSizeZ\": 0,\n"
-      "                \"maxGroupCountX\": 0,\n"
-      "                \"maxGroupCountY\": 0,\n"
-      "                \"maxGroupCountZ\": 0,\n"
-      "                \"maxSharedLocalMemory\": 0,\n"
-      "                \"numSubGroupSizes\": 0,\n"
-      "                \"subGroupSizes\": []\n"
-      "            },\n"
-      "            \"ze_device_kernel_properties_t\": {\n"
-      "                \"spirvVersionSupported\": false,\n"
-      "                \"nativeKernelSupported\": \"00000-00-00-00-000000\",\n"
-      "                \"fp16Supported\": false,\n"
-      "                \"fp64Supported\": false,\n"
-      "                \"int64AtomicsSupported\": false,\n"
-      "                \"dp4aSupported\": false,\n"
-      "                \"halfFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"singleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"doubleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"maxArgumentsSize\": 0,\n"
-      "                \"printfBufferSize\": 0\n"
-      "            },\n"
-      "            \"ze_device_memory_properties_t\": [],\n"
-      "            \"ze_device_memory_access_properties_t\": {\n"
-      "                \"hostAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"deviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedSingleDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedSystemAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
+      "                \"maxTotalGroupSize\": 1,\n"
+      "                \"maxGroupSizeX\": 2,\n"
+      "                \"maxGroupSizeY\": 3,\n"
+      "                \"maxGroupSizeZ\": 4,\n"
+      "                \"maxGroupCountX\": 5,\n"
+      "                \"maxGroupCountY\": 6,\n"
+      "                \"maxGroupCountZ\": 7,\n"
+      "                \"maxSharedLocalMemory\": 8,\n"
+      "                \"subGroupSizes\": [\n"
+      "                    9,\n"
+      "                    10\n"
       "                ]\n"
       "            },\n"
-      "            \"ze_device_cache_properties_t\": {\n"
-      "                \"intermediateCacheControlSupported\": false,\n"
-      "                \"intermediateCacheSize\": 0,\n"
-      "                \"intermediateCachelineSize\": 0,\n"
-      "                \"lastLevelCacheSizeControlSupported\": false,\n"
-      "                \"lastLevelCacheSize\": 0,\n"
-      "                \"lastLevelCachelineSize\": 0\n"
+      "            \"ze_device_module_properties_t\": {\n"
+      "                \"spirvVersionSupported\": 1,\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "                ],\n"
+      "                \"fp16flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST\"\n"
+      "                ],\n"
+      "                \"fp32flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_INF_NAN\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
+      "                ],\n"
+      "                \"fp64flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "                ],\n"
+      "                \"maxArgumentsSize\": 2,\n"
+      "                \"printfBufferSize\": 3,\n"
+      "                \"nativeKernelSupported\": "
+      "\"12345678-1234-5678-1234-567812345678\"\n"
       "            },\n"
+      "            \"ze_command_queue_group_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "                    ],\n"
+      "                    \"maxMemoryFillPatternSize\": 1,\n"
+      "                    \"numQueues\": 2\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "                    ],\n"
+      "                    \"maxMemoryFillPatternSize\": 1,\n"
+      "                    \"numQueues\": 2\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ze_device_memory_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "                    ],\n"
+      "                    \"maxClockRate\": 1,\n"
+      "                    \"maxBusWidth\": 2,\n"
+      "                    \"totalSize\": 3\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "                    ],\n"
+      "                    \"maxClockRate\": 1,\n"
+      "                    \"maxBusWidth\": 2,\n"
+      "                    \"totalSize\": 3\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ze_device_memory_access_properties_t\": {\n"
+      "                \"hostAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"deviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"sharedSingleDeviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
+      "                ],\n"
+      "                \"sharedCrossDeviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"sharedSystemAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_device_cache_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "                    ],\n"
+      "                    \"cacheSize\": 1\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "                    ],\n"
+      "                    \"cacheSize\": 1\n"
+      "                }\n"
+      "            ],\n"
       "            \"ze_device_image_properties_t\": {\n"
-      "                \"supported\": false,\n"
-      "                \"maxImageDims1D\": 0,\n"
-      "                \"maxImageDims2D\": 0,\n"
-      "                \"maxImageDims3D\": 0,\n"
-      "                \"maxImageBufferSize\": 0,\n"
-      "                \"maxImageArraySlices\": 0,\n"
-      "                \"maxSamplers\": 0,\n"
-      "                \"maxReadImageArgs\": 0,\n"
-      "                \"maxWriteImageArgs\": 0\n"
+      "                \"maxImageDims1D\": 1,\n"
+      "                \"maxImageDims2D\": 2,\n"
+      "                \"maxImageDims3D\": 3,\n"
+      "                \"maxImageBufferSize\": 4,\n"
+      "                \"maxImageArraySlices\": 5,\n"
+      "                \"maxSamplers\": 6,\n"
+      "                \"maxReadImageArgs\": 7,\n"
+      "                \"maxWriteImageArgs\": 8\n"
       "            },\n"
-      "            \"subDevices\": []\n"
+      "            \"ze_device_external_memory_properties_t\": {\n"
+      "                \"memoryAllocationImportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"memoryAllocationExportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"imageImportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"imageExportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"sub_devices\": []\n"
       "        }\n"
       "    ]\n"
       "}";
@@ -652,289 +1233,572 @@ TEST(JSONFormatterTests, DriverCapabilitiesToJSON) {
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
+TEST(JSONFormatterTests, DriverPropertiesToJSON) {
+  const auto properties = fake_driver_properties();
+
+  const auto json = cs::driver_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "{\n"
+      "    \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "    \"driverVersion\": 123\n"
+      "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
 TEST(JSONFormatterTests, DriverIpcPropertiesToJSON) {
-  const ze_driver_ipc_properties_t p = {
-      ZE_DRIVER_IPC_PROPERTIES_VERSION_CURRENT, 1, 0};
+  const auto properties = fake_driver_ipc_properties();
 
-  const pt::ptree json = cs::driver_ipc_properties_to_json(p);
+  const auto json = cs::driver_ipc_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"flags\": [\n"
+                        "        \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
+                        "        \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+                        "    ]\n"
+                        "}";
 
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected = "{\n"
-                               "    \"memsSupported\": true,\n"
-                               "    \"eventsSupported\": false\n"
-                               "}";
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, AllDriverExtensionPropertiesToJSON) {
+  const auto properties = std::vector<ze_driver_extension_properties_t>{
+      fake_driver_extension_properties(), fake_driver_extension_properties()};
+
+  const auto json = cs::all_driver_extension_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "[\n"
+                        "        {\n"
+                        "            \"name\": \"extension\",\n"
+                        "            \"version\": 1\n"
+                        "        },\n"
+                        "        {\n"
+                        "            \"name\": \"extension\",\n"
+                        "            \"version\": 1\n"
+                        "        }\n"
+                        "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DriverExtensionPropertiesToJSON) {
+  const auto properties = fake_driver_extension_properties();
+
+  const auto json = cs::driver_extension_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"name\": \"extension\",\n"
+                        "    \"version\": 1\n"
+                        "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
-  const cs::DeviceCapabilities capabilities = {
-      {}, {}, {}, {},
-      {}, {}, {}, {cs::DeviceCapabilities{}, cs::DeviceCapabilities{}}};
+  const auto capabilities = fake_device_with_sub_devices_capabilities();
 
-  const pt::ptree json = cs::device_capabilities_to_json(capabilities);
-
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected =
+  const auto json = cs::device_capabilities_to_json(capabilities);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
       "{\n"
       "    \"ze_device_properties_t\": {\n"
-      "        \"name\": \"\",\n"
-      "        \"type\": \"Unknown ze_device_type_t value: 0\",\n"
-      "        \"vendorId\": 0,\n"
-      "        \"deviceId\": 0,\n"
-      "        \"uuid\": \"00000-00-00-00-000000\",\n"
-      "        \"isSubdevice\": false,\n"
-      "        \"subdeviceId\": 0,\n"
-      "        \"coreClockRate\": 0,\n"
-      "        \"unifiedMemorySupported\": false,\n"
-      "        \"eccMemorySupported\": false,\n"
-      "        \"onDemandPageFaultsSupported\": false,\n"
-      "        \"maxCommandQueues\": 0,\n"
-      "        \"numAsyncComputeEngines\": 0,\n"
-      "        \"numAsyncCopyEngines\": 0,\n"
-      "        \"numThreadsPerEU\": 0,\n"
-      "        \"physicalEUSimdWidth\": 0,\n"
-      "        \"numEUsPerSubslice\": 0,\n"
-      "        \"numSubslicesPerSlice\": 0,\n"
-      "        \"numSlices\": 0,\n"
-      "        \"timerResolution\": 0\n"
+      "        \"name\": \"device_name\",\n"
+      "        \"type\": \"ZE_DEVICE_TYPE_GPU\",\n"
+      "        \"vendorId\": 1,\n"
+      "        \"deviceId\": 2,\n"
+      "        \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "        \"flags\": [\n"
+      "            \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
+      "            \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "        ],\n"
+      "        \"coreClockRate\": 3,\n"
+      "        \"maxMemAllocSize\": 4,\n"
+      "        \"maxHardwareContexts\": 5,\n"
+      "        \"maxCommandQueuePriority\": 6,\n"
+      "        \"numThreadsPerEU\": 7,\n"
+      "        \"physicalEUSimdWidth\": 8,\n"
+      "        \"numEUsPerSubslice\": 9,\n"
+      "        \"numSubslicesPerSlice\": 10,\n"
+      "        \"numSlices\": 11,\n"
+      "        \"timerResolution\": 12,\n"
+      "        \"timestampValidBits\": 13,\n"
+      "        \"kernelTimestampValidBits\": 14\n"
       "    },\n"
       "    \"ze_device_compute_properties_t\": {\n"
-      "        \"maxTotalGroupSize\": 0,\n"
-      "        \"maxGroupSizeX\": 0,\n"
-      "        \"maxGroupSizeY\": 0,\n"
-      "        \"maxGroupSizeZ\": 0,\n"
-      "        \"maxGroupCountX\": 0,\n"
-      "        \"maxGroupCountY\": 0,\n"
-      "        \"maxGroupCountZ\": 0,\n"
-      "        \"maxSharedLocalMemory\": 0,\n"
-      "        \"numSubGroupSizes\": 0,\n"
-      "        \"subGroupSizes\": []\n"
-      "    },\n"
-      "    \"ze_device_kernel_properties_t\": {\n"
-      "        \"spirvVersionSupported\": false,\n"
-      "        \"nativeKernelSupported\": \"00000-00-00-00-000000\",\n"
-      "        \"fp16Supported\": false,\n"
-      "        \"fp64Supported\": false,\n"
-      "        \"int64AtomicsSupported\": false,\n"
-      "        \"dp4aSupported\": false,\n"
-      "        \"halfFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "        \"singleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "        \"doubleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "        \"maxArgumentsSize\": 0,\n"
-      "        \"printfBufferSize\": 0\n"
-      "    },\n"
-      "    \"ze_device_memory_properties_t\": [],\n"
-      "    \"ze_device_memory_access_properties_t\": {\n"
-      "        \"hostAllocCapabilities\": [\n"
-      "            \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "        ],\n"
-      "        \"deviceAllocCapabilities\": [\n"
-      "            \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "        ],\n"
-      "        \"sharedSingleDeviceAllocCapabilities\": [\n"
-      "            \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "        ],\n"
-      "        \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "            \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "        ],\n"
-      "        \"sharedSystemAllocCapabilities\": [\n"
-      "            \"ZE_MEMORY_ACCESS_NONE\"\n"
+      "        \"maxTotalGroupSize\": 1,\n"
+      "        \"maxGroupSizeX\": 2,\n"
+      "        \"maxGroupSizeY\": 3,\n"
+      "        \"maxGroupSizeZ\": 4,\n"
+      "        \"maxGroupCountX\": 5,\n"
+      "        \"maxGroupCountY\": 6,\n"
+      "        \"maxGroupCountZ\": 7,\n"
+      "        \"maxSharedLocalMemory\": 8,\n"
+      "        \"subGroupSizes\": [\n"
+      "            9,\n"
+      "            10\n"
       "        ]\n"
       "    },\n"
-      "    \"ze_device_cache_properties_t\": {\n"
-      "        \"intermediateCacheControlSupported\": false,\n"
-      "        \"intermediateCacheSize\": 0,\n"
-      "        \"intermediateCachelineSize\": 0,\n"
-      "        \"lastLevelCacheSizeControlSupported\": false,\n"
-      "        \"lastLevelCacheSize\": 0,\n"
-      "        \"lastLevelCachelineSize\": 0\n"
+      "    \"ze_device_module_properties_t\": {\n"
+      "        \"spirvVersionSupported\": 1,\n"
+      "        \"flags\": [\n"
+      "            \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
+      "            \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "        ],\n"
+      "        \"fp16flags\": [\n"
+      "            \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
+      "            \"ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST\"\n"
+      "        ],\n"
+      "        \"fp32flags\": [\n"
+      "            \"ZE_DEVICE_FP_FLAG_INF_NAN\",\n"
+      "            \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
+      "        ],\n"
+      "        \"fp64flags\": [\n"
+      "            \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
+      "            \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "        ],\n"
+      "        \"maxArgumentsSize\": 2,\n"
+      "        \"printfBufferSize\": 3,\n"
+      "        \"nativeKernelSupported\": "
+      "\"12345678-1234-5678-1234-567812345678\"\n"
       "    },\n"
+      "    \"ze_command_queue_group_properties_t\": [\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "            ],\n"
+      "            \"maxMemoryFillPatternSize\": 1,\n"
+      "            \"numQueues\": 2\n"
+      "        },\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "            ],\n"
+      "            \"maxMemoryFillPatternSize\": 1,\n"
+      "            \"numQueues\": 2\n"
+      "        }\n"
+      "    ],\n"
+      "    \"ze_device_memory_properties_t\": [\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "            ],\n"
+      "            \"maxClockRate\": 1,\n"
+      "            \"maxBusWidth\": 2,\n"
+      "            \"totalSize\": 3\n"
+      "        },\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "            ],\n"
+      "            \"maxClockRate\": 1,\n"
+      "            \"maxBusWidth\": 2,\n"
+      "            \"totalSize\": 3\n"
+      "        }\n"
+      "    ],\n"
+      "    \"ze_device_memory_access_properties_t\": {\n"
+      "        \"hostAllocCapabilities\": [\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "        ],\n"
+      "        \"deviceAllocCapabilities\": [\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "        ],\n"
+      "        \"sharedSingleDeviceAllocCapabilities\": [\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
+      "        ],\n"
+      "        \"sharedCrossDeviceAllocCapabilities\": [\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "        ],\n"
+      "        \"sharedSystemAllocCapabilities\": [\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "        ]\n"
+      "    },\n"
+      "    \"ze_device_cache_properties_t\": [\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "            ],\n"
+      "            \"cacheSize\": 1\n"
+      "        },\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "            ],\n"
+      "            \"cacheSize\": 1\n"
+      "        }\n"
+      "    ],\n"
       "    \"ze_device_image_properties_t\": {\n"
-      "        \"supported\": false,\n"
-      "        \"maxImageDims1D\": 0,\n"
-      "        \"maxImageDims2D\": 0,\n"
-      "        \"maxImageDims3D\": 0,\n"
-      "        \"maxImageBufferSize\": 0,\n"
-      "        \"maxImageArraySlices\": 0,\n"
-      "        \"maxSamplers\": 0,\n"
-      "        \"maxReadImageArgs\": 0,\n"
-      "        \"maxWriteImageArgs\": 0\n"
+      "        \"maxImageDims1D\": 1,\n"
+      "        \"maxImageDims2D\": 2,\n"
+      "        \"maxImageDims3D\": 3,\n"
+      "        \"maxImageBufferSize\": 4,\n"
+      "        \"maxImageArraySlices\": 5,\n"
+      "        \"maxSamplers\": 6,\n"
+      "        \"maxReadImageArgs\": 7,\n"
+      "        \"maxWriteImageArgs\": 8\n"
       "    },\n"
-      "    \"subDevices\": [\n"
+      "    \"ze_device_external_memory_properties_t\": {\n"
+      "        \"memoryAllocationImportTypes\": [\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "        ],\n"
+      "        \"memoryAllocationExportTypes\": [\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "        ],\n"
+      "        \"imageImportTypes\": [\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "        ],\n"
+      "        \"imageExportTypes\": [\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "        ]\n"
+      "    },\n"
+      "    \"sub_devices\": [\n"
       "        {\n"
       "            \"ze_device_properties_t\": {\n"
-      "                \"name\": \"\",\n"
-      "                \"type\": \"Unknown ze_device_type_t value: 0\",\n"
-      "                \"vendorId\": 0,\n"
-      "                \"deviceId\": 0,\n"
-      "                \"uuid\": \"00000-00-00-00-000000\",\n"
-      "                \"isSubdevice\": false,\n"
-      "                \"subdeviceId\": 0,\n"
-      "                \"coreClockRate\": 0,\n"
-      "                \"unifiedMemorySupported\": false,\n"
-      "                \"eccMemorySupported\": false,\n"
-      "                \"onDemandPageFaultsSupported\": false,\n"
-      "                \"maxCommandQueues\": 0,\n"
-      "                \"numAsyncComputeEngines\": 0,\n"
-      "                \"numAsyncCopyEngines\": 0,\n"
-      "                \"numThreadsPerEU\": 0,\n"
-      "                \"physicalEUSimdWidth\": 0,\n"
-      "                \"numEUsPerSubslice\": 0,\n"
-      "                \"numSubslicesPerSlice\": 0,\n"
-      "                \"numSlices\": 0,\n"
-      "                \"timerResolution\": 0\n"
+      "                \"name\": \"device_name\",\n"
+      "                \"type\": \"ZE_DEVICE_TYPE_GPU\",\n"
+      "                \"vendorId\": 1,\n"
+      "                \"deviceId\": 2,\n"
+      "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\",\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "                ],\n"
+      "                \"subdeviceId\": 15,\n"
+      "                \"coreClockRate\": 3,\n"
+      "                \"maxMemAllocSize\": 4,\n"
+      "                \"maxHardwareContexts\": 5,\n"
+      "                \"maxCommandQueuePriority\": 6,\n"
+      "                \"numThreadsPerEU\": 7,\n"
+      "                \"physicalEUSimdWidth\": 8,\n"
+      "                \"numEUsPerSubslice\": 9,\n"
+      "                \"numSubslicesPerSlice\": 10,\n"
+      "                \"numSlices\": 11,\n"
+      "                \"timerResolution\": 12,\n"
+      "                \"timestampValidBits\": 13,\n"
+      "                \"kernelTimestampValidBits\": 14\n"
       "            },\n"
       "            \"ze_device_compute_properties_t\": {\n"
-      "                \"maxTotalGroupSize\": 0,\n"
-      "                \"maxGroupSizeX\": 0,\n"
-      "                \"maxGroupSizeY\": 0,\n"
-      "                \"maxGroupSizeZ\": 0,\n"
-      "                \"maxGroupCountX\": 0,\n"
-      "                \"maxGroupCountY\": 0,\n"
-      "                \"maxGroupCountZ\": 0,\n"
-      "                \"maxSharedLocalMemory\": 0,\n"
-      "                \"numSubGroupSizes\": 0,\n"
-      "                \"subGroupSizes\": []\n"
-      "            },\n"
-      "            \"ze_device_kernel_properties_t\": {\n"
-      "                \"spirvVersionSupported\": false,\n"
-      "                \"nativeKernelSupported\": \"00000-00-00-00-000000\",\n"
-      "                \"fp16Supported\": false,\n"
-      "                \"fp64Supported\": false,\n"
-      "                \"int64AtomicsSupported\": false,\n"
-      "                \"dp4aSupported\": false,\n"
-      "                \"halfFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"singleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"doubleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"maxArgumentsSize\": 0,\n"
-      "                \"printfBufferSize\": 0\n"
-      "            },\n"
-      "            \"ze_device_memory_properties_t\": [],\n"
-      "            \"ze_device_memory_access_properties_t\": {\n"
-      "                \"hostAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"deviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedSingleDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedSystemAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
+      "                \"maxTotalGroupSize\": 1,\n"
+      "                \"maxGroupSizeX\": 2,\n"
+      "                \"maxGroupSizeY\": 3,\n"
+      "                \"maxGroupSizeZ\": 4,\n"
+      "                \"maxGroupCountX\": 5,\n"
+      "                \"maxGroupCountY\": 6,\n"
+      "                \"maxGroupCountZ\": 7,\n"
+      "                \"maxSharedLocalMemory\": 8,\n"
+      "                \"subGroupSizes\": [\n"
+      "                    9,\n"
+      "                    10\n"
       "                ]\n"
       "            },\n"
-      "            \"ze_device_cache_properties_t\": {\n"
-      "                \"intermediateCacheControlSupported\": false,\n"
-      "                \"intermediateCacheSize\": 0,\n"
-      "                \"intermediateCachelineSize\": 0,\n"
-      "                \"lastLevelCacheSizeControlSupported\": false,\n"
-      "                \"lastLevelCacheSize\": 0,\n"
-      "                \"lastLevelCachelineSize\": 0\n"
+      "            \"ze_device_module_properties_t\": {\n"
+      "                \"spirvVersionSupported\": 1,\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "                ],\n"
+      "                \"fp16flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST\"\n"
+      "                ],\n"
+      "                \"fp32flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_INF_NAN\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
+      "                ],\n"
+      "                \"fp64flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "                ],\n"
+      "                \"maxArgumentsSize\": 2,\n"
+      "                \"printfBufferSize\": 3,\n"
+      "                \"nativeKernelSupported\": "
+      "\"12345678-1234-5678-1234-567812345678\"\n"
       "            },\n"
+      "            \"ze_command_queue_group_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "                    ],\n"
+      "                    \"maxMemoryFillPatternSize\": 1,\n"
+      "                    \"numQueues\": 2\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "                    ],\n"
+      "                    \"maxMemoryFillPatternSize\": 1,\n"
+      "                    \"numQueues\": 2\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ze_device_memory_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "                    ],\n"
+      "                    \"maxClockRate\": 1,\n"
+      "                    \"maxBusWidth\": 2,\n"
+      "                    \"totalSize\": 3\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "                    ],\n"
+      "                    \"maxClockRate\": 1,\n"
+      "                    \"maxBusWidth\": 2,\n"
+      "                    \"totalSize\": 3\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ze_device_memory_access_properties_t\": {\n"
+      "                \"hostAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"deviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"sharedSingleDeviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
+      "                ],\n"
+      "                \"sharedCrossDeviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"sharedSystemAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_device_cache_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "                    ],\n"
+      "                    \"cacheSize\": 1\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "                    ],\n"
+      "                    \"cacheSize\": 1\n"
+      "                }\n"
+      "            ],\n"
       "            \"ze_device_image_properties_t\": {\n"
-      "                \"supported\": false,\n"
-      "                \"maxImageDims1D\": 0,\n"
-      "                \"maxImageDims2D\": 0,\n"
-      "                \"maxImageDims3D\": 0,\n"
-      "                \"maxImageBufferSize\": 0,\n"
-      "                \"maxImageArraySlices\": 0,\n"
-      "                \"maxSamplers\": 0,\n"
-      "                \"maxReadImageArgs\": 0,\n"
-      "                \"maxWriteImageArgs\": 0\n"
+      "                \"maxImageDims1D\": 1,\n"
+      "                \"maxImageDims2D\": 2,\n"
+      "                \"maxImageDims3D\": 3,\n"
+      "                \"maxImageBufferSize\": 4,\n"
+      "                \"maxImageArraySlices\": 5,\n"
+      "                \"maxSamplers\": 6,\n"
+      "                \"maxReadImageArgs\": 7,\n"
+      "                \"maxWriteImageArgs\": 8\n"
       "            },\n"
-      "            \"subDevices\": []\n"
+      "            \"ze_device_external_memory_properties_t\": {\n"
+      "                \"memoryAllocationImportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"memoryAllocationExportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"imageImportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"imageExportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"sub_devices\": []\n"
       "        },\n"
       "        {\n"
       "            \"ze_device_properties_t\": {\n"
-      "                \"name\": \"\",\n"
-      "                \"type\": \"Unknown ze_device_type_t value: 0\",\n"
-      "                \"vendorId\": 0,\n"
-      "                \"deviceId\": 0,\n"
-      "                \"uuid\": \"00000-00-00-00-000000\",\n"
-      "                \"isSubdevice\": false,\n"
-      "                \"subdeviceId\": 0,\n"
-      "                \"coreClockRate\": 0,\n"
-      "                \"unifiedMemorySupported\": false,\n"
-      "                \"eccMemorySupported\": false,\n"
-      "                \"onDemandPageFaultsSupported\": false,\n"
-      "                \"maxCommandQueues\": 0,\n"
-      "                \"numAsyncComputeEngines\": 0,\n"
-      "                \"numAsyncCopyEngines\": 0,\n"
-      "                \"numThreadsPerEU\": 0,\n"
-      "                \"physicalEUSimdWidth\": 0,\n"
-      "                \"numEUsPerSubslice\": 0,\n"
-      "                \"numSubslicesPerSlice\": 0,\n"
-      "                \"numSlices\": 0,\n"
-      "                \"timerResolution\": 0\n"
+      "                \"name\": \"device_name\",\n"
+      "                \"type\": \"ZE_DEVICE_TYPE_GPU\",\n"
+      "                \"vendorId\": 1,\n"
+      "                \"deviceId\": 2,\n"
+      "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\",\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "                ],\n"
+      "                \"subdeviceId\": 15,\n"
+      "                \"coreClockRate\": 3,\n"
+      "                \"maxMemAllocSize\": 4,\n"
+      "                \"maxHardwareContexts\": 5,\n"
+      "                \"maxCommandQueuePriority\": 6,\n"
+      "                \"numThreadsPerEU\": 7,\n"
+      "                \"physicalEUSimdWidth\": 8,\n"
+      "                \"numEUsPerSubslice\": 9,\n"
+      "                \"numSubslicesPerSlice\": 10,\n"
+      "                \"numSlices\": 11,\n"
+      "                \"timerResolution\": 12,\n"
+      "                \"timestampValidBits\": 13,\n"
+      "                \"kernelTimestampValidBits\": 14\n"
       "            },\n"
       "            \"ze_device_compute_properties_t\": {\n"
-      "                \"maxTotalGroupSize\": 0,\n"
-      "                \"maxGroupSizeX\": 0,\n"
-      "                \"maxGroupSizeY\": 0,\n"
-      "                \"maxGroupSizeZ\": 0,\n"
-      "                \"maxGroupCountX\": 0,\n"
-      "                \"maxGroupCountY\": 0,\n"
-      "                \"maxGroupCountZ\": 0,\n"
-      "                \"maxSharedLocalMemory\": 0,\n"
-      "                \"numSubGroupSizes\": 0,\n"
-      "                \"subGroupSizes\": []\n"
-      "            },\n"
-      "            \"ze_device_kernel_properties_t\": {\n"
-      "                \"spirvVersionSupported\": false,\n"
-      "                \"nativeKernelSupported\": \"00000-00-00-00-000000\",\n"
-      "                \"fp16Supported\": false,\n"
-      "                \"fp64Supported\": false,\n"
-      "                \"int64AtomicsSupported\": false,\n"
-      "                \"dp4aSupported\": false,\n"
-      "                \"halfFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"singleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"doubleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "                \"maxArgumentsSize\": 0,\n"
-      "                \"printfBufferSize\": 0\n"
-      "            },\n"
-      "            \"ze_device_memory_properties_t\": [],\n"
-      "            \"ze_device_memory_access_properties_t\": {\n"
-      "                \"hostAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"deviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedSingleDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
-      "                ],\n"
-      "                \"sharedSystemAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_NONE\"\n"
+      "                \"maxTotalGroupSize\": 1,\n"
+      "                \"maxGroupSizeX\": 2,\n"
+      "                \"maxGroupSizeY\": 3,\n"
+      "                \"maxGroupSizeZ\": 4,\n"
+      "                \"maxGroupCountX\": 5,\n"
+      "                \"maxGroupCountY\": 6,\n"
+      "                \"maxGroupCountZ\": 7,\n"
+      "                \"maxSharedLocalMemory\": 8,\n"
+      "                \"subGroupSizes\": [\n"
+      "                    9,\n"
+      "                    10\n"
       "                ]\n"
       "            },\n"
-      "            \"ze_device_cache_properties_t\": {\n"
-      "                \"intermediateCacheControlSupported\": false,\n"
-      "                \"intermediateCacheSize\": 0,\n"
-      "                \"intermediateCachelineSize\": 0,\n"
-      "                \"lastLevelCacheSizeControlSupported\": false,\n"
-      "                \"lastLevelCacheSize\": 0,\n"
-      "                \"lastLevelCachelineSize\": 0\n"
+      "            \"ze_device_module_properties_t\": {\n"
+      "                \"spirvVersionSupported\": 1,\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "                ],\n"
+      "                \"fp16flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST\"\n"
+      "                ],\n"
+      "                \"fp32flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_INF_NAN\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
+      "                ],\n"
+      "                \"fp64flags\": [\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "                ],\n"
+      "                \"maxArgumentsSize\": 2,\n"
+      "                \"printfBufferSize\": 3,\n"
+      "                \"nativeKernelSupported\": "
+      "\"12345678-1234-5678-1234-567812345678\"\n"
       "            },\n"
+      "            \"ze_command_queue_group_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "                    ],\n"
+      "                    \"maxMemoryFillPatternSize\": 1,\n"
+      "                    \"numQueues\": 2\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                        "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "                    ],\n"
+      "                    \"maxMemoryFillPatternSize\": 1,\n"
+      "                    \"numQueues\": 2\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ze_device_memory_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "                    ],\n"
+      "                    \"maxClockRate\": 1,\n"
+      "                    \"maxBusWidth\": 2,\n"
+      "                    \"totalSize\": 3\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "                    ],\n"
+      "                    \"maxClockRate\": 1,\n"
+      "                    \"maxBusWidth\": 2,\n"
+      "                    \"totalSize\": 3\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ze_device_memory_access_properties_t\": {\n"
+      "                \"hostAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"deviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"sharedSingleDeviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
+      "                ],\n"
+      "                \"sharedCrossDeviceAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                ],\n"
+      "                \"sharedSystemAllocCapabilities\": [\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_device_cache_properties_t\": [\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "                    ],\n"
+      "                    \"cacheSize\": 1\n"
+      "                },\n"
+      "                {\n"
+      "                    \"flags\": [\n"
+      "                        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "                    ],\n"
+      "                    \"cacheSize\": 1\n"
+      "                }\n"
+      "            ],\n"
       "            \"ze_device_image_properties_t\": {\n"
-      "                \"supported\": false,\n"
-      "                \"maxImageDims1D\": 0,\n"
-      "                \"maxImageDims2D\": 0,\n"
-      "                \"maxImageDims3D\": 0,\n"
-      "                \"maxImageBufferSize\": 0,\n"
-      "                \"maxImageArraySlices\": 0,\n"
-      "                \"maxSamplers\": 0,\n"
-      "                \"maxReadImageArgs\": 0,\n"
-      "                \"maxWriteImageArgs\": 0\n"
+      "                \"maxImageDims1D\": 1,\n"
+      "                \"maxImageDims2D\": 2,\n"
+      "                \"maxImageDims3D\": 3,\n"
+      "                \"maxImageBufferSize\": 4,\n"
+      "                \"maxImageArraySlices\": 5,\n"
+      "                \"maxSamplers\": 6,\n"
+      "                \"maxReadImageArgs\": 7,\n"
+      "                \"maxWriteImageArgs\": 8\n"
       "            },\n"
-      "            \"subDevices\": []\n"
+      "            \"ze_device_external_memory_properties_t\": {\n"
+      "                \"memoryAllocationImportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"memoryAllocationExportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"imageImportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ],\n"
+      "                \"imageExportTypes\": [\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"sub_devices\": []\n"
       "        }\n"
       "    ]\n"
       "}";
@@ -943,248 +1807,341 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
 }
 
 TEST(JSONFormatterTests, DevicePropertiesToJSON) {
-  const ze_device_properties_t p = {ZE_DEVICE_PROPERTIES_VERSION_CURRENT,
-                                    ZE_DEVICE_TYPE_GPU,
-                                    1,
-                                    2,
-                                    {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34,
-                                     0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56,
-                                     0x34, 0x12},
-                                    1,
-                                    3,
-                                    4,
-                                    1,
-                                    1,
-                                    1,
-                                    5,
-                                    6,
-                                    7,
-                                    8,
-                                    9,
-                                    10,
-                                    11,
-                                    12,
-                                    13,
-                                    14,
-                                    "device_name"};
+  const auto properties = fake_device_properties();
 
-  const pt::ptree json = cs::device_properties_to_json(p);
-
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected =
+  const auto json = cs::device_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
       "{\n"
       "    \"name\": \"device_name\",\n"
       "    \"type\": \"ZE_DEVICE_TYPE_GPU\",\n"
       "    \"vendorId\": 1,\n"
       "    \"deviceId\": 2,\n"
       "    \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
-      "    \"isSubdevice\": true,\n"
-      "    \"subdeviceId\": 3,\n"
-      "    \"coreClockRate\": 4,\n"
-      "    \"unifiedMemorySupported\": true,\n"
-      "    \"eccMemorySupported\": true,\n"
-      "    \"onDemandPageFaultsSupported\": true,\n"
-      "    \"maxCommandQueues\": 5,\n"
-      "    \"numAsyncComputeEngines\": 6,\n"
-      "    \"numAsyncCopyEngines\": 7,\n"
-      "    \"numThreadsPerEU\": 9,\n"
-      "    \"physicalEUSimdWidth\": 10,\n"
-      "    \"numEUsPerSubslice\": 11,\n"
-      "    \"numSubslicesPerSlice\": 12,\n"
-      "    \"numSlices\": 13,\n"
-      "    \"timerResolution\": 14\n"
+      "    \"flags\": [\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "    ],\n"
+      "    \"coreClockRate\": 3,\n"
+      "    \"maxMemAllocSize\": 4,\n"
+      "    \"maxHardwareContexts\": 5,\n"
+      "    \"maxCommandQueuePriority\": 6,\n"
+      "    \"numThreadsPerEU\": 7,\n"
+      "    \"physicalEUSimdWidth\": 8,\n"
+      "    \"numEUsPerSubslice\": 9,\n"
+      "    \"numSubslicesPerSlice\": 10,\n"
+      "    \"numSlices\": 11,\n"
+      "    \"timerResolution\": 12,\n"
+      "    \"timestampValidBits\": 13,\n"
+      "    \"kernelTimestampValidBits\": 14\n"
+      "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, SubDevicePropertiesToJSON) {
+  const auto properties = fake_sub_device_properties();
+
+  const auto json = cs::device_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "{\n"
+      "    \"name\": \"device_name\",\n"
+      "    \"type\": \"ZE_DEVICE_TYPE_GPU\",\n"
+      "    \"vendorId\": 1,\n"
+      "    \"deviceId\": 2,\n"
+      "    \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
+      "    \"flags\": [\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\",\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "    ],\n"
+      "    \"subdeviceId\": 15,\n"
+      "    \"coreClockRate\": 3,\n"
+      "    \"maxMemAllocSize\": 4,\n"
+      "    \"maxHardwareContexts\": 5,\n"
+      "    \"maxCommandQueuePriority\": 6,\n"
+      "    \"numThreadsPerEU\": 7,\n"
+      "    \"physicalEUSimdWidth\": 8,\n"
+      "    \"numEUsPerSubslice\": 9,\n"
+      "    \"numSubslicesPerSlice\": 10,\n"
+      "    \"numSlices\": 11,\n"
+      "    \"timerResolution\": 12,\n"
+      "    \"timestampValidBits\": 13,\n"
+      "    \"kernelTimestampValidBits\": 14\n"
       "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST(JSONFormatterTests, DeviceComputePropertiesToJSON) {
-  const ze_device_compute_properties_t p = {
-      ZE_DEVICE_COMPUTE_PROPERTIES_VERSION_CURRENT,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      2,
-      {8, 9, 0, 0, 0, 0, 0, 0}};
+  const auto properties = fake_device_compute_properties();
 
-  const pt::ptree json = cs::device_compute_properties_to_json(p);
-
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected = "{\n"
-                               "    \"maxTotalGroupSize\": 1,\n"
-                               "    \"maxGroupSizeX\": 2,\n"
-                               "    \"maxGroupSizeY\": 3,\n"
-                               "    \"maxGroupSizeZ\": 4,\n"
-                               "    \"maxGroupCountX\": 5,\n"
-                               "    \"maxGroupCountY\": 6,\n"
-                               "    \"maxGroupCountZ\": 7,\n"
-                               "    \"maxSharedLocalMemory\": 8,\n"
-                               "    \"numSubGroupSizes\": 2,\n"
-                               "    \"subGroupSizes\": [\n"
-                               "        8,\n"
-                               "        9\n"
-                               "    ]\n"
-                               "}";
+  const auto json = cs::device_compute_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"maxTotalGroupSize\": 1,\n"
+                        "    \"maxGroupSizeX\": 2,\n"
+                        "    \"maxGroupSizeY\": 3,\n"
+                        "    \"maxGroupSizeZ\": 4,\n"
+                        "    \"maxGroupCountX\": 5,\n"
+                        "    \"maxGroupCountY\": 6,\n"
+                        "    \"maxGroupCountZ\": 7,\n"
+                        "    \"maxSharedLocalMemory\": 8,\n"
+                        "    \"subGroupSizes\": [\n"
+                        "        9,\n"
+                        "        10\n"
+                        "    ]\n"
+                        "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
-TEST(JSONFormatterTests, DeviceKernelPropertiesToJSON) {
-  const ze_device_kernel_properties_t p = {
-      ZE_DEVICE_KERNEL_PROPERTIES_VERSION_CURRENT,
-      1,
-      {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
-       0x78, 0x56, 0x34, 0x12},
-      1,
-      0,
-      1,
-      1,
-      static_cast<ze_fp_capabilities_t>(ZE_FP_CAPS_NONE),
-      static_cast<ze_fp_capabilities_t>(ZE_FP_CAPS_NONE),
-      static_cast<ze_fp_capabilities_t>(ZE_FP_CAPS_DENORM |
-                                        ZE_FP_CAPS_ROUNDED_DIVIDE_SQRT),
-      2,
-      3};
+TEST(JSONFormatterTests, DeviceModulePropertiesToJSON) {
+  const auto properties = fake_device_module_properties();
 
-  const pt::ptree json = cs::device_kernel_properties_to_json(p);
+  const auto json = cs::device_module_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"spirvVersionSupported\": 1,\n"
+                        "    \"flags\": [\n"
+                        "        \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
+                        "        \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+                        "    ],\n"
+                        "    \"fp16flags\": [\n"
+                        "        \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
+                        "        \"ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST\"\n"
+                        "    ],\n"
+                        "    \"fp32flags\": [\n"
+                        "        \"ZE_DEVICE_FP_FLAG_INF_NAN\",\n"
+                        "        \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
+                        "    ],\n"
+                        "    \"fp64flags\": [\n"
+                        "        \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
+                        "        \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+                        "    ],\n"
+                        "    \"maxArgumentsSize\": 2,\n"
+                        "    \"printfBufferSize\": 3,\n"
+                        "    \"nativeKernelSupported\": "
+                        "\"12345678-1234-5678-1234-567812345678\"\n"
+                        "}";
 
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected =
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, AllDeviceCommandQueueGroupPropertiesToJSON) {
+  const auto properties = std::vector<ze_command_queue_group_properties_t>{
+      fake_device_command_queue_group_properties(),
+      fake_device_command_queue_group_properties()};
+
+  const auto json =
+      cs::all_device_command_queue_group_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "[\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "            ],\n"
+      "            \"maxMemoryFillPatternSize\": 1,\n"
+      "            \"numQueues\": 2\n"
+      "        },\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "                "
+      "\"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "            ],\n"
+      "            \"maxMemoryFillPatternSize\": 1,\n"
+      "            \"numQueues\": 2\n"
+      "        }\n"
+      "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceCommandQueueGroupPropertiesToJSON) {
+  const auto properties = fake_device_command_queue_group_properties();
+
+  const auto json =
+      cs::device_command_queue_group_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
       "{\n"
-      "    \"spirvVersionSupported\": true,\n"
-      "    \"nativeKernelSupported\": "
-      "\"12345678-1234-5678-1234-567812345678\",\n"
-      "    \"fp16Supported\": true,\n"
-      "    \"fp64Supported\": false,\n"
-      "    \"int64AtomicsSupported\": true,\n"
-      "    \"dp4aSupported\": true,\n"
-      "    \"halfFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "    \"singleFpCapabilities\": \"ZE_FP_CAPS_NONE\",\n"
-      "    \"doubleFpCapabilities\": \"ZE_FP_CAPS_DENORM | "
-      "ZE_FP_CAPS_ROUNDED_DIVIDE_SQRT\",\n"
-      "    \"maxArgumentsSize\": 2,\n"
-      "    \"printfBufferSize\": 3\n"
+      "    \"flags\": [\n"
+      "        \"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE\",\n"
+      "        \"ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS\"\n"
+      "    ],\n"
+      "    \"maxMemoryFillPatternSize\": 1,\n"
+      "    \"numQueues\": 2\n"
       "}";
+
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST(JSONFormatterTests, AllDeviceMemoryPropertiesToJSON) {
-  const std::vector<ze_device_memory_properties_t> p = {
-      {ZE_DEVICE_MEMORY_PROPERTIES_VERSION_CURRENT, 1, 2, 3},
-      {ZE_DEVICE_MEMORY_PROPERTIES_VERSION_CURRENT, 4, 5, 6}};
+  const auto properties = std::vector<ze_device_memory_properties_t>{
+      fake_device_memory_properties(), fake_device_memory_properties()};
 
-  const pt::ptree json = cs::all_device_memory_properties_to_json(p);
-
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected = "[\n"
-                               "        {\n"
-                               "            \"maxClockRate\": 1,\n"
-                               "            \"maxBusWidth\": 2,\n"
-                               "            \"totalSize\": 3\n"
-                               "        },\n"
-                               "        {\n"
-                               "            \"maxClockRate\": 4,\n"
-                               "            \"maxBusWidth\": 5,\n"
-                               "            \"totalSize\": 6\n"
-                               "        }\n"
-                               "]";
+  const auto json = cs::all_device_memory_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "[\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "            ],\n"
+      "            \"maxClockRate\": 1,\n"
+      "            \"maxBusWidth\": 2,\n"
+      "            \"totalSize\": 3\n"
+      "        },\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+      "            ],\n"
+      "            \"maxClockRate\": 1,\n"
+      "            \"maxBusWidth\": 2,\n"
+      "            \"totalSize\": 3\n"
+      "        }\n"
+      "]";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST(JSONFormatterTests, DeviceMemoryPropertiesToJSON) {
-  const ze_device_memory_properties_t p = {
-      ZE_DEVICE_MEMORY_PROPERTIES_VERSION_CURRENT, 1, 2, 3};
+  const auto properties = fake_device_memory_properties();
 
-  const pt::ptree json = cs::device_memory_properties_to_json(p);
-
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected = "{\n"
-                               "    \"maxClockRate\": 1,\n"
-                               "    \"maxBusWidth\": 2,\n"
-                               "    \"totalSize\": 3\n"
-                               "}";
+  const auto json = cs::device_memory_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"flags\": [\n"
+                        "        \"ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD\"\n"
+                        "    ],\n"
+                        "    \"maxClockRate\": 1,\n"
+                        "    \"maxBusWidth\": 2,\n"
+                        "    \"totalSize\": 3\n"
+                        "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST(JSONFormatterTests, DeviceMemoryAccessPropertiesToJSON) {
-  const ze_device_memory_access_properties_t p = {
-      ZE_DEVICE_MEMORY_ACCESS_PROPERTIES_VERSION_CURRENT,
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_ACCESS_NONE),
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_ACCESS),
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_ATOMIC_ACCESS),
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_CONCURRENT_ACCESS),
-      static_cast<ze_memory_access_capabilities_t>(ZE_MEMORY_ACCESS |
-                                                   ZE_MEMORY_ATOMIC_ACCESS)};
+  const auto properties = fake_device_memory_access_properties();
 
-  const pt::ptree json = cs::device_memory_access_properties_to_json(p);
-
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected =
+  const auto json = cs::device_memory_access_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
       "{\n"
       "    \"hostAllocCapabilities\": [\n"
-      "        \"ZE_MEMORY_ACCESS_NONE\"\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
       "    ],\n"
       "    \"deviceAllocCapabilities\": [\n"
-      "        \"ZE_MEMORY_ACCESS\"\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
       "    ],\n"
       "    \"sharedSingleDeviceAllocCapabilities\": [\n"
-      "        \"ZE_MEMORY_ATOMIC_ACCESS\"\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
       "    ],\n"
       "    \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "        \"ZE_MEMORY_CONCURRENT_ACCESS\"\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
       "    ],\n"
       "    \"sharedSystemAllocCapabilities\": [\n"
-      "        \"ZE_MEMORY_ACCESS\",\n"
-      "        \"ZE_MEMORY_ATOMIC_ACCESS\"\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
       "    ]\n"
       "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
-TEST(JSONFormatterTests, DeviceCachePropertiesToJSON) {
-  const ze_device_cache_properties_t p = {
-      ZE_DEVICE_CACHE_PROPERTIES_VERSION_CURRENT, 1, 2, 3, 1, 4, 5};
-  const pt::ptree json = cs::device_cache_properties_to_json(p);
+TEST(JSONFormatterTests, AllDeviceCachePropertiesToJSON) {
+  const auto properties = std::vector<ze_device_cache_properties_t>{
+      fake_device_cache_properties(), fake_device_cache_properties()};
 
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected =
+  const auto json = cs::all_device_cache_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "[\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "            ],\n"
+      "            \"cacheSize\": 1\n"
+      "        },\n"
+      "        {\n"
+      "            \"flags\": [\n"
+      "                \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "            ],\n"
+      "            \"cacheSize\": 1\n"
+      "        }\n"
+      "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceCachePropertiesToJSON) {
+  const auto properties = fake_device_cache_properties();
+
+  const auto json = cs::device_cache_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
       "{\n"
-      "    \"intermediateCacheControlSupported\": true,\n"
-      "    \"intermediateCacheSize\": 2,\n"
-      "    \"intermediateCachelineSize\": 3,\n"
-      "    \"lastLevelCacheSizeControlSupported\": true,\n"
-      "    \"lastLevelCacheSize\": 4,\n"
-      "    \"lastLevelCachelineSize\": 5\n"
+      "    \"flags\": [\n"
+      "        \"ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL\"\n"
+      "    ],\n"
+      "    \"cacheSize\": 1\n"
       "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
 TEST(JSONFormatterTests, DeviceImagePropertiesToJSON) {
-  const ze_device_image_properties_t p = {
-      ZE_DEVICE_IMAGE_PROPERTIES_VERSION_CURRENT, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  const pt::ptree json = cs::device_image_properties_to_json(p);
+  const auto properties = fake_device_image_properties();
 
-  const std::string actual = cs::ptree_to_string(json);
-  const std::string expected = "{\n"
-                               "    \"supported\": true,\n"
-                               "    \"maxImageDims1D\": 2,\n"
-                               "    \"maxImageDims2D\": 3,\n"
-                               "    \"maxImageDims3D\": 4,\n"
-                               "    \"maxImageBufferSize\": 5,\n"
-                               "    \"maxImageArraySlices\": 6,\n"
-                               "    \"maxSamplers\": 7,\n"
-                               "    \"maxReadImageArgs\": 8,\n"
-                               "    \"maxWriteImageArgs\": 9\n"
-                               "}";
+  const auto json = cs::device_image_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"maxImageDims1D\": 1,\n"
+                        "    \"maxImageDims2D\": 2,\n"
+                        "    \"maxImageDims3D\": 3,\n"
+                        "    \"maxImageBufferSize\": 4,\n"
+                        "    \"maxImageArraySlices\": 5,\n"
+                        "    \"maxSamplers\": 6,\n"
+                        "    \"maxReadImageArgs\": 7,\n"
+                        "    \"maxWriteImageArgs\": 8\n"
+                        "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceExternalMemoryPropertiesToJSON) {
+  const auto properties = fake_device_external_memory_properties();
+
+  const auto json = cs::device_external_memory_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"memoryAllocationImportTypes\": [\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+                        "    ],\n"
+                        "    \"memoryAllocationExportTypes\": [\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+                        "    ],\n"
+                        "    \"imageImportTypes\": [\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+                        "    ],\n"
+                        "    \"imageExportTypes\": [\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+                        "    ]\n"
+                        "}";
+
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 

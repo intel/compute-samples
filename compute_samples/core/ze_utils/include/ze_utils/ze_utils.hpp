@@ -12,48 +12,35 @@
 #include <string>
 
 #include "ze_api.h"
+#include "utils/utils.hpp"
 
 namespace compute_samples {
-std::string to_string(const ze_api_version_t version);
-std::string to_string(const ze_result_t result);
-std::string to_string(const ze_command_queue_desc_version_t version);
-std::string to_string(const ze_command_queue_flag_t flags);
-std::string to_string(const ze_command_queue_mode_t mode);
-std::string to_string(const ze_command_queue_priority_t priority);
-std::string to_string(const ze_image_format_layout_t layout);
-std::string to_string(const ze_image_format_type_t type);
-std::string to_string(const ze_image_format_swizzle_t swizzle);
-std::string to_string(const ze_image_flag_t flag);
-std::string to_string(const ze_image_type_t type);
-std::string to_string(const ze_image_desc_version_t version);
-std::string to_string(const ze_device_type_t type);
-std::string to_string(const ze_device_uuid_t uuid);
-std::string to_string(const ze_memory_access_capabilities_t capabilities);
-std::string to_string(const ze_driver_uuid_t uuid);
-std::string to_string(const ze_native_kernel_uuid_t uuid);
-std::string to_string(const ze_fp_capabilities_t capabilities);
-} // namespace compute_samples
+std::string to_string(ze_result_t result);
+std::string to_string(ze_device_memory_property_flag_t flag);
+std::string to_string(ze_ipc_property_flag_t flag);
+std::string to_string(ze_device_type_t type);
+std::string to_string(ze_memory_access_cap_flag_t flag);
+std::string to_string(ze_external_memory_type_flag_t flag);
+std::string to_string(ze_device_cache_property_flag_t flag);
+std::string to_string(ze_device_property_flag_t flag);
+std::string to_string(ze_device_module_flag_t flag);
+std::string to_string(ze_device_fp_flag_t flag);
+std::string to_string(ze_command_queue_group_property_flag_t flag);
 
-std::ostream &operator<<(std::ostream &os, const ze_api_version_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_result_t &x);
-std::ostream &operator<<(std::ostream &os,
-                         const ze_command_queue_desc_version_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_command_queue_flag_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_command_queue_mode_t &x);
-std::ostream &operator<<(std::ostream &os,
-                         const ze_command_queue_priority_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_image_desc_version_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_image_format_layout_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_image_format_type_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_image_format_swizzle_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_image_flag_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_image_type_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_device_type_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_device_uuid_t &x);
-std::ostream &operator<<(std::ostream &os,
-                         const ze_memory_access_capabilities_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_driver_uuid_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_native_kernel_uuid_t &x);
-std::ostream &operator<<(std::ostream &os, const ze_fp_capabilities_t &x);
+template <typename T> std::string flags_to_string(uint32_t flags) {
+  const size_t bits = 8;
+  std::vector<std::string> output;
+  for (size_t i = 0; i < sizeof(flags) * bits; ++i) {
+    const size_t mask = 1UL << i;
+    const auto flag = flags & mask;
+    if (flag != 0) {
+      output.emplace_back(to_string(static_cast<T>(flag)));
+    }
+  }
+  return join_strings(output, " | ");
+}
+
+void throw_if_failed(ze_result_t result, const std::string &function_name);
+} // namespace compute_samples
 
 #endif

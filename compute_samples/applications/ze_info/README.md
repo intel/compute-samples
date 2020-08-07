@@ -8,7 +8,7 @@ Level Zero platform consists of:
 
 Device discovery is done by calling `zeDriverGet` and `zeDeviceGet` as shown in the example below:
 
-```c
+```c++
 std::vector<ze_driver_handle_t> get_drivers() {
   uint32_t count = 0;
   zeDriverGet(&count, nullptr);
@@ -19,13 +19,14 @@ std::vector<ze_driver_handle_t> get_drivers() {
   return drivers;
 }
 
-std::vector<ze_device_handle_t>
-get_driver_devices(const ze_driver_handle_t driver) {
+std::vector<ze_device_handle_t> get_driver_devices(ze_driver_handle_t driver) {
+  auto result = ZE_RESULT_SUCCESS;
+
   uint32_t count = 0;
-  zeDeviceGet(driver, &count, nullptr);
+  result = zeDeviceGet(driver, &count, nullptr);
 
   std::vector<ze_device_handle_t> devices(count);
-  zeDeviceGet(driver, &count, devices.data());
+  result = zeDeviceGet(driver, &count, devices.data());
 
   return devices;
 }
@@ -33,10 +34,10 @@ get_driver_devices(const ze_driver_handle_t driver) {
 
 Each `driver` and `device` has its own properties that can be queried. To do so a dedicated output parameter must be passed to an appropriate Level Zero function. For example, below code snippet shows how to query `device` properties:
 
-```c
-ze_device_properties_t get_device_properties(const ze_device_handle_t device) {
-  ze_device_properties_t properties = {ZE_DEVICE_PROPERTIES_VERSION_CURRENT};
-  zeDeviceGetProperties(device, &properties);
+```c++
+ze_device_properties_t get_device_properties(ze_device_handle_t device) {
+  ze_device_properties_t properties = {ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES};
+  const auto result = zeDeviceGetProperties(device, &properties);
   return properties;
 }
 ```

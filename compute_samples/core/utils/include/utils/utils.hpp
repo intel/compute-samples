@@ -97,6 +97,16 @@ std::vector<std::tuple<In, Out>> zip(const std::vector<In> in,
   return temp;
 }
 
+std::string uuid_to_string(const uint8_t uuid[]);
+
+void erase_substring(std::string &string, const std::string &substring);
+void erase_substrings(std::string &string,
+                      const std::vector<std::string> &substrings);
+std::vector<std::string> split_string(const std::string &string,
+                                      const std::string &delimeter);
+std::string join_strings(const std::vector<std::string> &tokens,
+                         const std::string &delimeter);
+
 } // namespace compute_samples
 
 #endif

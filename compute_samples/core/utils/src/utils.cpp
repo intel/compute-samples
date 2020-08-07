@@ -10,6 +10,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 
 namespace compute_samples {
 std::string load_text_file(const std::string &file_path) {
@@ -80,6 +82,63 @@ void save_binary_file(const std::vector<uint8_t> &data,
                size_in_bytes(data));
 
   LOG_EXIT_FUNCTION
+}
+
+std::string uuid_to_string(const uint8_t uuid[]) {
+  std::stringstream ss;
+  ss << std::hex << std::setw(2) << std::setfill('0');
+  ss << +uuid[15] << +uuid[14] << +uuid[13] << +uuid[12] << '-';
+  ss << +uuid[11] << +uuid[10] << '-';
+  ss << +uuid[9] << +uuid[8] << '-';
+  ss << +uuid[7] << +uuid[6] << '-';
+  ss << +uuid[5] << +uuid[4] << +uuid[3] << +uuid[2] << +uuid[1] << +uuid[0];
+  return ss.str();
+}
+
+void erase_substring(std::string &string, const std::string &substring) {
+  if (substring.empty()) {
+    return;
+  }
+  size_t pos = std::string::npos;
+  while ((pos = string.find(substring)) != std::string::npos) {
+    string.erase(pos, substring.length());
+  }
+}
+
+void erase_substrings(std::string &string,
+                      const std::vector<std::string> &substrings) {
+  for (const auto &substring : substrings) {
+    erase_substring(string, substring);
+  }
+}
+
+std::vector<std::string> split_string(const std::string &string,
+                                      const std::string &delimeter) {
+  if (delimeter.empty()) {
+    return {string};
+  }
+  std::vector<std::string> tokens;
+  size_t start = 0U;
+  size_t end = string.find(delimeter);
+  while (end != std::string::npos) {
+    tokens.push_back(string.substr(start, end - start));
+    start = end + delimeter.length();
+    end = string.find(delimeter, start);
+  }
+  tokens.push_back(string.substr(start, string.back()));
+  return tokens;
+}
+
+std::string join_strings(const std::vector<std::string> &tokens,
+                         const std::string &delimeter) {
+  std::stringstream ss;
+  for (size_t i = 0; i < tokens.size(); ++i) {
+    ss << tokens[i];
+    if (i < tokens.size() - 1) {
+      ss << delimeter;
+    }
+  }
+  return ss.str();
 }
 
 } // namespace compute_samples

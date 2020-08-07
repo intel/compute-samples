@@ -12,6 +12,7 @@ add_core_library(ze_utils
 target_link_libraries(ze_utils
     PUBLIC
     compute_samples::logging
+    compute_samples::utils
     ze_loader
 )
 

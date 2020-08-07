@@ -18,8 +18,8 @@ add_application_library(ze_info
 target_link_libraries(ze_info_lib
     PUBLIC
     compute_samples::logging
-    compute_samples::ze_utils
     compute_samples::utils
+    compute_samples::ze_utils
     Boost::program_options
     ze_loader
 )

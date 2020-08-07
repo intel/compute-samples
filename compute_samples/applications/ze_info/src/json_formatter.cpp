@@ -7,8 +7,9 @@
 
 #include "ze_info/json_formatter.hpp"
 
-#include "ze_utils/ze_utils.hpp"
+#include "ze_api.h"
 #include "utils/utils.hpp"
+#include "ze_utils/ze_utils.hpp"
 
 #include <sstream>
 #include <string>
@@ -20,7 +21,7 @@ namespace pt = boost::property_tree;
 
 namespace compute_samples {
 
-pt::ptree drivers_capabilities_to_json(
+boost::property_tree::ptree drivers_capabilities_to_json(
     const std::vector<DriverCapabilities> &capabilities) {
   pt::ptree tree;
   if (capabilities.empty()) {
@@ -35,16 +36,21 @@ pt::ptree drivers_capabilities_to_json(
   return tree;
 }
 
-pt::ptree driver_capabilities_to_json(const DriverCapabilities &capabilities) {
+boost::property_tree::ptree
+driver_capabilities_to_json(const DriverCapabilities &capabilities) {
   pt::ptree tree;
-  const std::string version =
-      std::to_string(ZE_MAJOR_VERSION(capabilities.api_version)) + "." +
-      std::to_string(ZE_MINOR_VERSION(capabilities.api_version));
-  tree.put("ze_api_version_t", version);
+  const auto int_version = static_cast<uint32_t>(capabilities.api_version);
+  const std::string string_version =
+      std::to_string(ZE_MAJOR_VERSION(int_version)) + "." +
+      std::to_string(ZE_MINOR_VERSION(int_version));
+  tree.put("ze_api_version_t", string_version);
   tree.add_child("ze_driver_properties_t",
                  driver_properties_to_json(capabilities.driver_properties));
   tree.add_child("ze_driver_ipc_properties_t",
                  driver_ipc_properties_to_json(capabilities.ipc_properties));
+  tree.add_child("ze_driver_extension_properties_t",
+                 all_driver_extension_properties_to_json(
+                     capabilities.extension_properties));
   pt::ptree devices;
   if (capabilities.devices.empty()) {
     pt::ptree node;
@@ -59,21 +65,53 @@ pt::ptree driver_capabilities_to_json(const DriverCapabilities &capabilities) {
   return tree;
 }
 
-pt::ptree driver_properties_to_json(const ze_driver_properties_t p) {
+boost::property_tree::ptree
+driver_properties_to_json(const ze_driver_properties_t &p) {
   pt::ptree tree;
-  tree.put("uuid", to_string(p.uuid));
+  tree.put("uuid", uuid_to_string(p.uuid.id));
   tree.put("driverVersion", p.driverVersion);
   return tree;
 }
 
-pt::ptree driver_ipc_properties_to_json(const ze_driver_ipc_properties_t p) {
+boost::property_tree::ptree
+driver_ipc_properties_to_json(const ze_driver_ipc_properties_t &p) {
   pt::ptree tree;
-  tree.put("memsSupported", bool(p.memsSupported));
-  tree.put("eventsSupported", bool(p.eventsSupported));
+  pt::ptree flags_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_ipc_property_flag_t>(p.flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("flags", flags_node);
   return tree;
 }
 
-pt::ptree device_capabilities_to_json(const DeviceCapabilities &capabilities) {
+boost::property_tree::ptree all_driver_extension_properties_to_json(
+    const std::vector<ze_driver_extension_properties_t> &p) {
+  pt::ptree tree;
+  if (p.empty()) {
+    pt::ptree node;
+    tree.push_back(std::make_pair("", node));
+  } else {
+    for (const auto &properties : p) {
+      tree.push_back(
+          std::make_pair("", driver_extension_properties_to_json(properties)));
+    }
+  }
+  return tree;
+}
+
+boost::property_tree::ptree
+driver_extension_properties_to_json(const ze_driver_extension_properties_t &p) {
+  pt::ptree tree;
+  tree.put("name", p.name);
+  tree.put("version", p.version);
+  return tree;
+}
+
+boost::property_tree::ptree
+device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   pt::ptree tree;
   tree.add_child("ze_device_properties_t",
                  device_properties_to_json(capabilities.device_properties));
@@ -81,8 +119,11 @@ pt::ptree device_capabilities_to_json(const DeviceCapabilities &capabilities) {
       "ze_device_compute_properties_t",
       device_compute_properties_to_json(capabilities.compute_properties));
   tree.add_child(
-      "ze_device_kernel_properties_t",
-      device_kernel_properties_to_json(capabilities.kernel_properties));
+      "ze_device_module_properties_t",
+      device_module_properties_to_json(capabilities.module_properties));
+  tree.add_child("ze_command_queue_group_properties_t",
+                 all_device_command_queue_group_properties_to_json(
+                     capabilities.command_queue_group_properties));
   tree.add_child(
       "ze_device_memory_properties_t",
       all_device_memory_properties_to_json(capabilities.memory_properties));
@@ -91,10 +132,13 @@ pt::ptree device_capabilities_to_json(const DeviceCapabilities &capabilities) {
                      capabilities.memory_access_properties));
   tree.add_child(
       "ze_device_cache_properties_t",
-      device_cache_properties_to_json(capabilities.cache_properties));
+      all_device_cache_properties_to_json(capabilities.cache_properties));
   tree.add_child(
       "ze_device_image_properties_t",
       device_image_properties_to_json(capabilities.image_properties));
+  tree.add_child("ze_device_external_memory_properties_t",
+                 device_external_memory_properties_to_json(
+                     capabilities.external_memory_properties));
   pt::ptree sub_devices;
   if (capabilities.sub_devices.empty()) {
     pt::ptree node;
@@ -105,37 +149,46 @@ pt::ptree device_capabilities_to_json(const DeviceCapabilities &capabilities) {
           std::make_pair("", device_capabilities_to_json(sub_device)));
     }
   }
-  tree.add_child("subDevices", sub_devices);
+  tree.add_child("sub_devices", sub_devices);
   return tree;
 }
 
-pt::ptree device_properties_to_json(const ze_device_properties_t p) {
+boost::property_tree::ptree
+device_properties_to_json(const ze_device_properties_t &p) {
   pt::ptree tree;
   tree.put("name", p.name);
-  tree.put("type", p.type);
+  tree.put("type", to_string(p.type));
   tree.put("vendorId", p.vendorId);
   tree.put("deviceId", p.deviceId);
-  tree.put("uuid", to_string(p.uuid));
-  tree.put("isSubdevice", bool(p.isSubdevice));
-  tree.put("subdeviceId", p.subdeviceId);
+  tree.put("uuid", uuid_to_string(p.uuid.id));
+  pt::ptree flags_node;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_device_property_flag_t>(p.flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("flags", flags_node);
+  if ((p.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE) != 0u) {
+    tree.put("subdeviceId", p.subdeviceId);
+  }
   tree.put("coreClockRate", p.coreClockRate);
-  tree.put("unifiedMemorySupported", bool(p.unifiedMemorySupported));
-  tree.put("eccMemorySupported", bool(p.eccMemorySupported));
-  tree.put("onDemandPageFaultsSupported", bool(p.onDemandPageFaultsSupported));
-  tree.put("maxCommandQueues", p.maxCommandQueues);
-  tree.put("numAsyncComputeEngines", p.numAsyncComputeEngines);
-  tree.put("numAsyncCopyEngines", p.numAsyncCopyEngines);
+  tree.put("maxMemAllocSize", p.maxMemAllocSize);
+  tree.put("maxHardwareContexts", p.maxHardwareContexts);
+  tree.put("maxCommandQueuePriority", p.maxCommandQueuePriority);
   tree.put("numThreadsPerEU", p.numThreadsPerEU);
   tree.put("physicalEUSimdWidth", p.physicalEUSimdWidth);
   tree.put("numEUsPerSubslice", p.numEUsPerSubslice);
   tree.put("numSubslicesPerSlice", p.numSubslicesPerSlice);
   tree.put("numSlices", p.numSlices);
   tree.put("timerResolution", p.timerResolution);
+  tree.put("timestampValidBits", p.timestampValidBits);
+  tree.put("kernelTimestampValidBits", p.kernelTimestampValidBits);
   return tree;
 }
 
-pt::ptree
-device_compute_properties_to_json(const ze_device_compute_properties_t p) {
+boost::property_tree::ptree
+device_compute_properties_to_json(const ze_device_compute_properties_t &p) {
   pt::ptree tree;
   tree.put("maxTotalGroupSize", p.maxTotalGroupSize);
   tree.put("maxGroupSizeX", p.maxGroupSizeX);
@@ -145,7 +198,6 @@ device_compute_properties_to_json(const ze_device_compute_properties_t p) {
   tree.put("maxGroupCountY", p.maxGroupCountY);
   tree.put("maxGroupCountZ", p.maxGroupCountZ);
   tree.put("maxSharedLocalMemory", p.maxSharedLocalMemory);
-  tree.put("numSubGroupSizes", p.numSubGroupSizes);
   pt::ptree sub_group_sizes;
   if (p.numSubGroupSizes == 0) {
     pt::ptree node;
@@ -161,24 +213,81 @@ device_compute_properties_to_json(const ze_device_compute_properties_t p) {
   return tree;
 }
 
-pt::ptree
-device_kernel_properties_to_json(const ze_device_kernel_properties_t p) {
+boost::property_tree::ptree
+device_module_properties_to_json(const ze_device_module_properties_t &p) {
   pt::ptree tree;
-  tree.put("spirvVersionSupported", bool(p.spirvVersionSupported));
-  tree.put("nativeKernelSupported", to_string(p.nativeKernelSupported));
-  tree.put("fp16Supported", bool(p.fp16Supported));
-  tree.put("fp64Supported", bool(p.fp64Supported));
-  tree.put("int64AtomicsSupported", bool(p.int64AtomicsSupported));
-  tree.put("dp4aSupported", bool(p.dp4aSupported));
-  tree.put("halfFpCapabilities", to_string(p.halfFpCapabilities));
-  tree.put("singleFpCapabilities", to_string(p.singleFpCapabilities));
-  tree.put("doubleFpCapabilities", to_string(p.doubleFpCapabilities));
+  tree.put("spirvVersionSupported", p.spirvVersionSupported);
+  pt::ptree flags_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_device_module_flag_t>(p.flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("flags", flags_node);
+  pt::ptree fp16flags_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_device_fp_flag_t>(p.fp16flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    fp16flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("fp16flags", fp16flags_node);
+  pt::ptree fp32flags_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_device_fp_flag_t>(p.fp32flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    fp32flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("fp32flags", fp32flags_node);
+  pt::ptree fp64flags_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_device_fp_flag_t>(p.fp64flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    fp64flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("fp64flags", fp64flags_node);
   tree.put("maxArgumentsSize", p.maxArgumentsSize);
   tree.put("printfBufferSize", p.printfBufferSize);
+  tree.put("nativeKernelSupported", uuid_to_string(p.nativeKernelSupported.id));
   return tree;
 }
 
-pt::ptree all_device_memory_properties_to_json(
+boost::property_tree::ptree all_device_command_queue_group_properties_to_json(
+    const std::vector<ze_command_queue_group_properties_t> &p) {
+  pt::ptree tree;
+  if (p.empty()) {
+    pt::ptree node;
+    tree.push_back(std::make_pair("", node));
+  } else {
+    for (const auto &properties : p) {
+      tree.push_back(std::make_pair(
+          "", device_command_queue_group_properties_to_json(properties)));
+    }
+  }
+  return tree;
+}
+
+boost::property_tree::ptree device_command_queue_group_properties_to_json(
+    const ze_command_queue_group_properties_t &p) {
+  pt::ptree tree;
+  pt::ptree flags_node;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_command_queue_group_property_flag_t>(p.flags),
+           " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("flags", flags_node);
+  tree.put("maxMemoryFillPatternSize", p.maxMemoryFillPatternSize);
+  tree.put("numQueues", p.numQueues);
+  return tree;
+}
+
+boost::property_tree::ptree all_device_memory_properties_to_json(
     const std::vector<ze_device_memory_properties_t> &p) {
   pt::ptree tree;
   if (p.empty()) {
@@ -193,83 +302,114 @@ pt::ptree all_device_memory_properties_to_json(
   return tree;
 }
 
-pt::ptree
-device_memory_properties_to_json(const ze_device_memory_properties_t p) {
+boost::property_tree::ptree
+device_memory_properties_to_json(const ze_device_memory_properties_t &p) {
   pt::ptree tree;
+  pt::ptree flags_node;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_device_memory_property_flag_t>(p.flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("flags", flags_node);
   tree.put("maxClockRate", p.maxClockRate);
   tree.put("maxBusWidth", p.maxBusWidth);
   tree.put("totalSize", p.totalSize);
   return tree;
 }
 
-pt::ptree
-add_memory_access_properties(const ze_memory_access_capabilities_t c) {
+boost::property_tree::ptree device_memory_access_properties_to_json(
+    const ze_device_memory_access_properties_t &p) {
   pt::ptree tree;
-  if (c == ZE_MEMORY_ACCESS_NONE) {
+  pt::ptree host_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_memory_access_cap_flag_t>(
+                        p.hostAllocCapabilities),
+                    " | ")) {
     pt::ptree node;
-    node.put("", to_string(ZE_MEMORY_ACCESS_NONE));
+    node.put("", flag);
+    host_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("hostAllocCapabilities", host_node);
+  pt::ptree device_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_memory_access_cap_flag_t>(
+                        p.deviceAllocCapabilities),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    device_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("deviceAllocCapabilities", device_node);
+  pt::ptree shared_single_device_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_memory_access_cap_flag_t>(
+                        p.sharedSingleDeviceAllocCapabilities),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    shared_single_device_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("sharedSingleDeviceAllocCapabilities",
+                 shared_single_device_node);
+  pt::ptree shared_cross_device_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_memory_access_cap_flag_t>(
+                        p.sharedCrossDeviceAllocCapabilities),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    shared_cross_device_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("sharedCrossDeviceAllocCapabilities",
+                 shared_cross_device_node);
+  pt::ptree system_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_memory_access_cap_flag_t>(
+                        p.sharedSystemAllocCapabilities),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    system_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("sharedSystemAllocCapabilities", system_node);
+  return tree;
+}
+
+boost::property_tree::ptree all_device_cache_properties_to_json(
+    const std::vector<ze_device_cache_properties_t> &p) {
+  pt::ptree tree;
+  if (p.empty()) {
+    pt::ptree node;
     tree.push_back(std::make_pair("", node));
   } else {
-    if ((c & ZE_MEMORY_ACCESS) != 0) {
-      pt::ptree node;
-      node.put("", to_string(ZE_MEMORY_ACCESS));
-      tree.push_back(std::make_pair("", node));
-    }
-    if ((c & ZE_MEMORY_ATOMIC_ACCESS) != 0) {
-      pt::ptree node;
-      node.put("", to_string(ZE_MEMORY_ATOMIC_ACCESS));
-      tree.push_back(std::make_pair("", node));
-    }
-    if ((c & ZE_MEMORY_CONCURRENT_ACCESS) != 0) {
-      pt::ptree node;
-      node.put("", to_string(ZE_MEMORY_CONCURRENT_ACCESS));
-      tree.push_back(std::make_pair("", node));
-    }
-    if ((c & ZE_MEMORY_CONCURRENT_ATOMIC_ACCESS) != 0) {
-      pt::ptree node;
-      node.put("", to_string(ZE_MEMORY_CONCURRENT_ATOMIC_ACCESS));
-      tree.push_back(std::make_pair("", node));
+    for (const auto &properties : p) {
+      tree.push_back(
+          std::make_pair("", device_cache_properties_to_json(properties)));
     }
   }
   return tree;
 }
 
-pt::ptree device_memory_access_properties_to_json(
-    const ze_device_memory_access_properties_t p) {
+boost::property_tree::ptree
+device_cache_properties_to_json(const ze_device_cache_properties_t &p) {
   pt::ptree tree;
-  tree.add_child("hostAllocCapabilities",
-                 add_memory_access_properties(p.hostAllocCapabilities));
-  tree.add_child("deviceAllocCapabilities",
-                 add_memory_access_properties(p.deviceAllocCapabilities));
-  tree.add_child(
-      "sharedSingleDeviceAllocCapabilities",
-      add_memory_access_properties(p.sharedSingleDeviceAllocCapabilities));
-  tree.add_child(
-      "sharedCrossDeviceAllocCapabilities",
-      add_memory_access_properties(p.sharedCrossDeviceAllocCapabilities));
-  tree.add_child("sharedSystemAllocCapabilities",
-                 add_memory_access_properties(p.sharedSystemAllocCapabilities));
+  pt::ptree flags_node;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_device_cache_property_flag_t>(p.flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("flags", flags_node);
+  tree.put("cacheSize", p.cacheSize);
   return tree;
 }
 
-pt::ptree
-device_cache_properties_to_json(const ze_device_cache_properties_t p) {
+boost::property_tree::ptree
+device_image_properties_to_json(const ze_device_image_properties_t &p) {
   pt::ptree tree;
-  tree.put("intermediateCacheControlSupported",
-           bool(p.intermediateCacheControlSupported));
-  tree.put("intermediateCacheSize", p.intermediateCacheSize);
-  tree.put("intermediateCachelineSize", p.intermediateCachelineSize);
-  tree.put("lastLevelCacheSizeControlSupported",
-           bool(p.lastLevelCacheSizeControlSupported));
-  tree.put("lastLevelCacheSize", p.lastLevelCacheSize);
-  tree.put("lastLevelCachelineSize", p.lastLevelCachelineSize);
-  return tree;
-}
-
-pt::ptree
-device_image_properties_to_json(const ze_device_image_properties_t p) {
-  pt::ptree tree;
-  tree.put("supported", bool(p.supported));
   tree.put("maxImageDims1D", p.maxImageDims1D);
   tree.put("maxImageDims2D", p.maxImageDims2D);
   tree.put("maxImageDims3D", p.maxImageDims3D);
@@ -278,6 +418,50 @@ device_image_properties_to_json(const ze_device_image_properties_t p) {
   tree.put("maxSamplers", p.maxSamplers);
   tree.put("maxReadImageArgs", p.maxReadImageArgs);
   tree.put("maxWriteImageArgs", p.maxWriteImageArgs);
+  return tree;
+}
+
+boost::property_tree::ptree device_external_memory_properties_to_json(
+    const ze_device_external_memory_properties_t &p) {
+  pt::ptree tree;
+  pt::ptree memory_import_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_external_memory_type_flag_t>(
+                        p.memoryAllocationImportTypes),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    memory_import_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("memoryAllocationImportTypes", memory_import_node);
+  pt::ptree memory_export_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_external_memory_type_flag_t>(
+                        p.memoryAllocationExportTypes),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    memory_export_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("memoryAllocationExportTypes", memory_export_node);
+  pt::ptree image_import_node;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_external_memory_type_flag_t>(p.imageImportTypes),
+           " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    image_import_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("imageImportTypes", image_import_node);
+  pt::ptree image_export_node;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_external_memory_type_flag_t>(p.imageExportTypes),
+           " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    image_export_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("imageExportTypes", image_export_node);
   return tree;
 }
 
