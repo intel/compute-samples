@@ -19,6 +19,7 @@ class device_intel : public device {
   using device::device;
 
 public:
+  device_intel() = default;
   explicit device_intel(const device &other) : device(other) {}
 
   cl_unified_shared_memory_capabilities_intel host_mem_capabilities() const {
