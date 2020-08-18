@@ -86,12 +86,27 @@ void save_binary_file(const std::vector<uint8_t> &data,
 
 std::string uuid_to_string(const uint8_t uuid[]) {
   std::stringstream ss;
-  ss << std::hex << std::setw(2) << std::setfill('0');
-  ss << +uuid[15] << +uuid[14] << +uuid[13] << +uuid[12] << '-';
-  ss << +uuid[11] << +uuid[10] << '-';
-  ss << +uuid[9] << +uuid[8] << '-';
-  ss << +uuid[7] << +uuid[6] << '-';
-  ss << +uuid[5] << +uuid[4] << +uuid[3] << +uuid[2] << +uuid[1] << +uuid[0];
+  ss << std::hex << std::setfill('0') << std::uppercase;
+  ss << std::setw(2) << +uuid[15];
+  ss << std::setw(2) << +uuid[14];
+  ss << std::setw(2) << +uuid[13];
+  ss << std::setw(2) << +uuid[12];
+  ss << '-';
+  ss << std::setw(2) << +uuid[11];
+  ss << std::setw(2) << +uuid[10];
+  ss << '-';
+  ss << std::setw(2) << +uuid[9];
+  ss << std::setw(2) << +uuid[8];
+  ss << '-';
+  ss << std::setw(2) << +uuid[7];
+  ss << std::setw(2) << +uuid[6];
+  ss << '-';
+  ss << std::setw(2) << +uuid[5];
+  ss << std::setw(2) << +uuid[4];
+  ss << std::setw(2) << +uuid[3];
+  ss << std::setw(2) << +uuid[2];
+  ss << std::setw(2) << +uuid[1];
+  ss << std::setw(2) << +uuid[0];
   return ss.str();
 }
 

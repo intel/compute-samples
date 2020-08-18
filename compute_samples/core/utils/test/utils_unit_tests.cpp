@@ -242,6 +242,27 @@ TEST(UUIDToString, ValidValue) {
             compute_samples::uuid_to_string(uuid));
 }
 
+TEST(UUIDToString, OnlyZeros) {
+  const uint8_t uuid[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  EXPECT_EQ("00000000-0000-0000-0000-000000000000",
+            compute_samples::uuid_to_string(uuid));
+}
+
+TEST(UUIDToString, ZeroPrefix) {
+  const uint8_t uuid[] = {0x55, 0x44, 0x33, 0x22, 0x11, 0x00, 0x56, 0x00,
+                          0x34, 0x00, 0x12, 0x00, 0x56, 0x34, 0x12, 0x00};
+  EXPECT_EQ("00123456-0012-0034-0056-001122334455",
+            compute_samples::uuid_to_string(uuid));
+}
+
+TEST(UUIDToString, HexSpecificValues) {
+  const uint8_t uuid[] = {0xEF, 0xEE, 0xED, 0xEC, 0xEB, 0xEA, 0xDB, 0xDA,
+                          0xCB, 0xCA, 0xBB, 0xBA, 0xAD, 0xAC, 0xAB, 0xAA};
+  EXPECT_EQ("AAABACAD-BABB-CACB-DADB-EAEBECEDEEEF",
+            compute_samples::uuid_to_string(uuid));
+}
+
 TEST(EraseSubstring, EmptyString) {
   const std::string input;
   const std::string substring = ", ";
