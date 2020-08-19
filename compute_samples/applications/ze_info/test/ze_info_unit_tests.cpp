@@ -19,31 +19,29 @@ namespace cs = compute_samples;
 namespace pt = boost::property_tree;
 
 ze_device_properties_t fake_device_properties() {
-  ze_device_properties_t device_properties = {};
-  device_properties.type = ZE_DEVICE_TYPE_GPU;
-  device_properties.vendorId = 1;
-  device_properties.deviceId = 2;
-  device_properties.flags =
-      ZE_DEVICE_PROPERTY_FLAG_ECC | ZE_DEVICE_PROPERTY_FLAG_INTEGRATED;
-  device_properties.subdeviceId = 0;
-  device_properties.coreClockRate = 3;
-  device_properties.maxMemAllocSize = 4;
-  device_properties.maxHardwareContexts = 5;
-  device_properties.maxCommandQueuePriority = 6;
-  device_properties.numThreadsPerEU = 7;
-  device_properties.physicalEUSimdWidth = 8;
-  device_properties.numEUsPerSubslice = 9;
-  device_properties.numSubslicesPerSlice = 10;
-  device_properties.numSlices = 11;
-  device_properties.timerResolution = 12;
-  device_properties.timestampValidBits = 13;
-  device_properties.kernelTimestampValidBits = 14;
-  device_properties.uuid = {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
-                            0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12};
-  const std::string name = "device_name";
-  strncpy(device_properties.name, name.c_str(), sizeof(device_properties.name));
-  device_properties.name[sizeof(device_properties.name) - 1] = 0;
-  return device_properties;
+  return ze_device_properties_t{
+      ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES,
+      nullptr,
+      ZE_DEVICE_TYPE_GPU,
+      1,
+      2,
+      ZE_DEVICE_PROPERTY_FLAG_ECC | ZE_DEVICE_PROPERTY_FLAG_INTEGRATED,
+      0,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
+       0x78, 0x56, 0x34, 0x12},
+      "device_name"};
 }
 
 ze_device_properties_t fake_sub_device_properties() {
@@ -55,115 +53,100 @@ ze_device_properties_t fake_sub_device_properties() {
 }
 
 ze_device_compute_properties_t fake_device_compute_properties() {
-  ze_device_compute_properties_t compute_properties = {};
-  compute_properties.maxTotalGroupSize = 1;
-  compute_properties.maxGroupSizeX = 2;
-  compute_properties.maxGroupSizeY = 3;
-  compute_properties.maxGroupSizeZ = 4;
-  compute_properties.maxGroupCountX = 5;
-  compute_properties.maxGroupCountY = 6;
-  compute_properties.maxGroupCountZ = 7;
-  compute_properties.maxSharedLocalMemory = 8;
-  compute_properties.numSubGroupSizes = 2;
-  compute_properties.subGroupSizes[0] = 9;
-  compute_properties.subGroupSizes[1] = 10;
-  return compute_properties;
+  return ze_device_compute_properties_t{
+      ZE_STRUCTURE_TYPE_DEVICE_COMPUTE_PROPERTIES,
+      nullptr,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      2,
+      {9, 10}};
 }
 
 ze_device_module_properties_t fake_device_module_properties() {
-  ze_device_module_properties_t module_properties = {};
-  module_properties.spirvVersionSupported = 1;
-  module_properties.flags =
-      ZE_DEVICE_MODULE_FLAG_DP4A | ZE_DEVICE_MODULE_FLAG_FP16;
-  module_properties.fp16flags =
-      ZE_DEVICE_FP_FLAG_DENORM | ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST;
-  module_properties.fp32flags =
-      ZE_DEVICE_FP_FLAG_INF_NAN | ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO;
-  module_properties.fp64flags =
-      ZE_DEVICE_FP_FLAG_ROUND_TO_INF | ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT;
-  module_properties.maxArgumentsSize = 2;
-  module_properties.printfBufferSize = 3;
-  module_properties.nativeKernelSupported = {0x78, 0x56, 0x34, 0x12, 0x78, 0x56,
-                                             0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
-                                             0x78, 0x56, 0x34, 0x12};
-  return module_properties;
+  return ze_device_module_properties_t{
+      ZE_STRUCTURE_TYPE_MODULE_PROPERTIES,
+      nullptr,
+      1,
+      ZE_DEVICE_MODULE_FLAG_DP4A | ZE_DEVICE_MODULE_FLAG_FP16,
+      ZE_DEVICE_FP_FLAG_DENORM | ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST,
+      ZE_DEVICE_FP_FLAG_INF_NAN | ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO,
+      ZE_DEVICE_FP_FLAG_ROUND_TO_INF | ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT,
+      2,
+      3,
+      {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
+       0x78, 0x56, 0x34, 0x12}};
 }
 
 ze_command_queue_group_properties_t
 fake_device_command_queue_group_properties() {
-  ze_command_queue_group_properties_t command_queue_group_properties = {};
-  command_queue_group_properties.flags =
+  return ze_command_queue_group_properties_t{
+      ZE_STRUCTURE_TYPE_COMMAND_QUEUE_GROUP_PROPERTIES, nullptr,
       ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COMPUTE |
-      ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS;
-  command_queue_group_properties.maxMemoryFillPatternSize = 1;
-  command_queue_group_properties.numQueues = 2;
-  return command_queue_group_properties;
+          ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_COOPERATIVE_KERNELS,
+      1, 2};
 }
 
 ze_device_memory_properties_t fake_device_memory_properties() {
-  ze_device_memory_properties_t memory_properties = {};
-  const std::string name = "memory_name";
-  strncpy(memory_properties.name, name.c_str(), sizeof(memory_properties.name));
-  memory_properties.name[sizeof(memory_properties.name) - 1] = 0;
-  memory_properties.flags = ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD;
-  memory_properties.maxClockRate = 1;
-  memory_properties.maxBusWidth = 2;
-  memory_properties.totalSize = 3;
-  return memory_properties;
+  return ze_device_memory_properties_t{
+      ZE_STRUCTURE_TYPE_DEVICE_MEMORY_PROPERTIES,
+      nullptr,
+      ZE_DEVICE_MEMORY_PROPERTY_FLAG_TBD,
+      1,
+      2,
+      3,
+      "memory_name"};
 }
 
 ze_device_memory_access_properties_t fake_device_memory_access_properties() {
-  ze_device_memory_access_properties_t memory_access_properties = {};
-  memory_access_properties.hostAllocCapabilities =
-      ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT;
-  memory_access_properties.deviceAllocCapabilities =
-      ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT;
-  memory_access_properties.sharedSingleDeviceAllocCapabilities =
+  return ze_device_memory_access_properties_t{
+      ZE_STRUCTURE_TYPE_DEVICE_MEMORY_ACCESS_PROPERTIES,
+      nullptr,
+      ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT,
+      ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT,
       ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC |
-      ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT;
-  memory_access_properties.sharedCrossDeviceAllocCapabilities =
-      ZE_MEMORY_ACCESS_CAP_FLAG_RW | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT;
-  memory_access_properties.sharedSystemAllocCapabilities =
-      ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC | ZE_MEMORY_ACCESS_CAP_FLAG_RW;
-  return memory_access_properties;
+          ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT,
+      ZE_MEMORY_ACCESS_CAP_FLAG_RW | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT,
+      ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC | ZE_MEMORY_ACCESS_CAP_FLAG_RW};
 }
 
 ze_device_cache_properties_t fake_device_cache_properties() {
-  ze_device_cache_properties_t cache_properties = {};
-  cache_properties.flags = ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL;
-  cache_properties.cacheSize = 1;
-  return cache_properties;
+  return ze_device_cache_properties_t{
+      ZE_STRUCTURE_TYPE_DEVICE_CACHE_PROPERTIES, nullptr,
+      ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL, 1};
 }
 
 ze_device_image_properties_t fake_device_image_properties() {
-  ze_device_image_properties_t image_properties = {};
-  image_properties.maxImageDims1D = 1;
-  image_properties.maxImageDims2D = 2;
-  image_properties.maxImageDims3D = 3;
-  image_properties.maxImageBufferSize = 4;
-  image_properties.maxImageArraySlices = 5;
-  image_properties.maxSamplers = 6;
-  image_properties.maxReadImageArgs = 7;
-  image_properties.maxWriteImageArgs = 8;
-  return image_properties;
+  return ze_device_image_properties_t{ZE_STRUCTURE_TYPE_DEVICE_IMAGE_PROPERTIES,
+                                      nullptr,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8};
 }
 
 ze_device_external_memory_properties_t
 fake_device_external_memory_properties() {
-  ze_device_external_memory_properties_t external_memory_properties = {};
-  external_memory_properties.memoryAllocationImportTypes =
+  return ze_device_external_memory_properties_t{
+      ZE_STRUCTURE_TYPE_DEVICE_EXTERNAL_MEMORY_PROPERTIES,
+      nullptr,
       ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF |
-      ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD;
-  external_memory_properties.memoryAllocationExportTypes =
+          ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD,
       ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF |
-      ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD;
-  external_memory_properties.imageImportTypes =
+          ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD,
       ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF |
-      ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD;
-  external_memory_properties.imageExportTypes =
+          ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD,
       ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF |
-      ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD;
-  return external_memory_properties;
+          ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD};
 }
 
 cs::DeviceCapabilities fake_device_capabilities() {
@@ -202,28 +185,22 @@ cs::DeviceCapabilities fake_device_with_sub_devices_capabilities() {
 ze_api_version_t fake_driver_api_version() { return ZE_API_VERSION_1_0; }
 
 ze_driver_properties_t fake_driver_properties() {
-  ze_driver_properties_t driver_properties = {};
-  driver_properties.uuid = {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
-                            0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12};
-  driver_properties.driverVersion = 123;
-  return driver_properties;
+  return ze_driver_properties_t{ZE_STRUCTURE_TYPE_DRIVER_PROPERTIES,
+                                nullptr,
+                                {0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12,
+                                 0x78, 0x56, 0x34, 0x12, 0x78, 0x56, 0x34,
+                                 0x12},
+                                123};
 }
 
 ze_driver_ipc_properties_t fake_driver_ipc_properties() {
-  ze_driver_ipc_properties_t ipc_properties = {};
-  ipc_properties.flags =
-      ZE_IPC_PROPERTY_FLAG_EVENT_POOL | ZE_IPC_PROPERTY_FLAG_MEMORY;
-  return ipc_properties;
+  return ze_driver_ipc_properties_t{
+      ZE_STRUCTURE_TYPE_DRIVER_IPC_PROPERTIES, nullptr,
+      ZE_IPC_PROPERTY_FLAG_EVENT_POOL | ZE_IPC_PROPERTY_FLAG_MEMORY};
 }
 
 ze_driver_extension_properties_t fake_driver_extension_properties() {
-  ze_driver_extension_properties_t extension_properties = {};
-  const std::string name = "extension";
-  strncpy(extension_properties.name, name.c_str(),
-          sizeof(extension_properties.name));
-  extension_properties.name[sizeof(extension_properties.name) - 1] = 0;
-  extension_properties.version = 1;
-  return extension_properties;
+  return ze_driver_extension_properties_t{"extension", 1};
 }
 
 cs::DriverCapabilities fake_driver_capabilities() {
