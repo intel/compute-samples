@@ -268,7 +268,9 @@ std::string to_string(const ze_command_queue_group_property_flag_t flag) {
 }
 
 void throw_if_failed(ze_result_t result, const std::string &function_name) {
-  throw std::runtime_error(function_name + " failed: " + to_string(result));
+  if (result != ZE_RESULT_SUCCESS) {
+    throw std::runtime_error(function_name + " failed: " + to_string(result));
+  }
 }
 
 } // namespace compute_samples
