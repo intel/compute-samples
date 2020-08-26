@@ -41,10 +41,6 @@ if(WITH_OCL)
 endif()
 
 option(WITH_L0 "Build L0 Samples" ON)
-if(WIN32)
-    set(WITH_L0 OFF)
-endif()
-
 if(WITH_L0)
     include(import_level_zero)
 endif()
