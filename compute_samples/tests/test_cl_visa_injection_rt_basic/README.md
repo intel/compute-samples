@@ -199,6 +199,20 @@ This feature is experimental and may not be supported on our drivers or with a l
 2. Extended coverage
    - [x] Comparison results of function written in OpenCL vs inline assembler
      - FunctionBody [test_cl_visa_injection_rt_basic_func_body.cl](test_cl_visa_injection_rt_basic_func_body.cl)
+   - [x] Assembler in loops with loop unroll via pragma
+     - PragmaUnroll [test_cl_visa_injection_rt_basic_pragma_unroll.cl](test_cl_visa_injection_rt_basic_pragma_unroll.cl)
+   - [x] Replace the whole kernel bodies with their corresponding inline assembler
+     - WholeKernel [test_cl_visa_injection_rt_basic_whole_kernel.cl](test_cl_visa_injection_rt_basic_whole_kernel.cl)
+   - [x] Replace small sections of code (e.g., read/write or single BB) with their corresponding inline assembler
+     - SingleBasicBlock [test_cl_visa_injection_rt_basic_single_basic_block.cl](test_cl_visa_injection_rt_basic_single_basic_block.cl)
+   - [x] Replace a region of vISA code (region means with control flow) with its corresponding inline assembler
+     - Region [test_cl_visa_injection_rt_basic_region.cl](test_cl_visa_injection_rt_basic_region.cl)
+   - [x] Replace a for loop w/ its body with its corresponding inline assembler
+     - ForLoop [test_cl_visa_injection_rt_basic_for_loop.cl](test_cl_visa_injection_rt_basic_for_loop.cl)
+   - [x] Naive implementation GEMM in visa
+     - SGEMM [test_cl_visa_injection_rt_basic_gemm.cl](test_cl_visa_injection_rt_basic_gemm.cl)
+   - [x] 2D 5 points stencil operation in assembler
+     - StensilFloat [test_cl_visa_injection_rt_basic_stencil_5_point.cl](test_cl_visa_injection_rt_basic_stencil_5_point.cl)
 
 ## Selecting tests
 

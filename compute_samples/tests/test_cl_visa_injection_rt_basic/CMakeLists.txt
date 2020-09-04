@@ -34,6 +34,14 @@ set(KERNEL_LIST
   "test_cl_visa_injection_rt_basic_constraints_load_store_pointer.cl"
   "test_cl_visa_injection_rt_basic_constraints_float.cl"
   "test_cl_visa_injection_rt_basic_func_body.cl"
+  "test_cl_visa_injection_rt_basic_pragma_unroll.cl"
+  "test_cl_visa_injection_rt_basic_median_filter.cl"
+  "test_cl_visa_injection_rt_basic_whole_kernel.cl"
+  "test_cl_visa_injection_rt_basic_single_basic_block.cl"
+  "test_cl_visa_injection_rt_basic_region.cl"
+  "test_cl_visa_injection_rt_basic_for_loop.cl"
+  "test_cl_visa_injection_rt_basic_gemm.cl"
+  "test_cl_visa_injection_rt_basic_stencil_5_point.cl"
   )
 
 add_kernels(test_cl_visa_injection_rt_basic ${KERNEL_LIST})

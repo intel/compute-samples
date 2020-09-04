@@ -10,6 +10,7 @@
 #include "ocl_utils/ocl_utils.hpp"
 
 #include <boost/compute/core.hpp>
+#include <boost/compute/utility.hpp>
 namespace compute = boost::compute;
 
 #include "logging/logging.hpp"
@@ -495,30 +496,31 @@ HWTEST(TestCLVisaInjectionRtBasic, ConstraintsImmediateOperand) {
     EXPECT_THAT(result, ::testing::ElementsAreArray(expected));
   }
 
-  EXPECT_TRUE(check_supported_subgroup_size(8));
+  if (check_supported_subgroup_size(8)) {
+    kernel = program.create_kernel("test_constraints_immediate_simd8");
 
-  kernel = program.create_kernel("test_constraints_immediate_simd8");
+    auto src = cs::generate_vector<int>(size, seed);
+    compute::buffer in_buffer(context, cs::size_in_bytes(src),
+                              compute::memory_object::read_only |
+                                  compute::memory_object::use_host_ptr,
+                              src.data());
+    kernel.set_args(in_buffer, out_buffer);
 
-  auto src = cs::generate_vector<int>(size, seed);
-  compute::buffer in_buffer(context, cs::size_in_bytes(src),
-                            compute::memory_object::read_only |
-                                compute::memory_object::use_host_ptr,
-                            src.data());
-  kernel.set_args(in_buffer, out_buffer);
+    queue.enqueue_write_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                               dst.data());
+    queue.enqueue_1d_range_kernel(kernel, 0, size, 0);
 
-  queue.enqueue_write_buffer(out_buffer, 0, cs::size_in_bytes(dst), dst.data());
-  queue.enqueue_1d_range_kernel(kernel, 0, size, 0);
+    {
+      std::vector<int> result(size, 0);
+      queue.enqueue_read_buffer(out_buffer, 0, cs::size_in_bytes(result),
+                                result.data());
+      std::vector<int> expected(size);
+      for (size_t i = 0; i < size; ++i) {
+        expected[i] = src[i] + const_argument;
+      }
 
-  {
-    std::vector<int> result(size, 0);
-    queue.enqueue_read_buffer(out_buffer, 0, cs::size_in_bytes(result),
-                              result.data());
-    std::vector<int> expected(size);
-    for (size_t i = 0; i < size; ++i) {
-      expected[i] = src[i] + const_argument;
+      EXPECT_THAT(result, ::testing::ElementsAreArray(expected));
     }
-
-    EXPECT_THAT(result, ::testing::ElementsAreArray(expected));
   }
 }
 
@@ -819,6 +821,311 @@ HWTEST(TestCLVisaInjectionRtBasic, FunctionBody) {
   run_kernel("test_call_func2", dst2);
 
   EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst2));
+}
+
+HWTEST(TestCLVisaInjectionRtBasic, PragmaUnroll) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t width = 64;
+  const size_t height = 64;
+  const size_t size = width * height;
+  const int seed = 0;
+
+  auto src_mx = cs::generate_vector<uint32_t>(size, seed);
+  auto src_vec = cs::generate_vector<uint32_t>(width, src_mx[0]);
+  auto dst1 = cs::generate_vector<uint32_t>(height, src_vec[0]);
+  auto dst2 = cs::generate_vector<uint32_t>(height, dst1[0]);
+  auto dst3 = cs::generate_vector<uint32_t>(height, dst2[0]);
+
+  const compute::context context = compute::system::default_context();
+
+  auto src_mx_buffer = create_input_buffer(context, src_mx);
+  auto src_vec_buffer = create_input_buffer(context, src_vec);
+
+  compute::buffer out_buffer(context, size * 4,
+                             compute::memory_object::read_write);
+
+  compute::program program = compute_samples::build_program(
+      context, "test_cl_visa_injection_rt_basic_pragma_unroll.cl");
+  compute::command_queue queue = compute::system::default_queue();
+
+  auto run_kernel = [&](const char *kernel_name,
+                        std::vector<uint32_t> &dst) -> void {
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(src_mx_buffer, src_vec_buffer, out_buffer);
+    queue.enqueue_write_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                               dst.data());
+    queue.enqueue_1d_range_kernel(kernel, 0, width, 0);
+    queue.enqueue_read_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                              dst.data());
+  };
+
+  run_kernel("test_kernel", dst1);
+
+  run_kernel("test_kernel_unroll", dst2);
+  EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst2));
+
+  run_kernel("test_kernel_unroll_with_asm", dst3);
+  EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst3));
+}
+
+HWTEST(TestCLVisaInjectionRtBasic, WholeKernel) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t width = 64;
+  const size_t height = 64;
+  const size_t size = width * height;
+  const int seed = 0;
+
+  auto dst1 = cs::generate_vector<uint32_t>(size, seed);
+  auto dst2 = cs::generate_vector<uint32_t>(size, dst1[0]);
+  auto src = cs::generate_vector<uint32_t>(size, dst2[0]);
+
+  const compute::context context = compute::system::default_context();
+
+  auto src_buffer = create_input_buffer(context, src);
+
+  compute::buffer out_buffer(context, size * 4,
+                             compute::memory_object::read_write);
+
+  auto run_kernel = [&](const char *file_name, const char *kernel_name,
+                        std::vector<uint32_t> &dst) -> void {
+    compute::program program =
+        compute_samples::build_program(context, file_name);
+    compute::command_queue queue = compute::system::default_queue();
+
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(src_buffer, out_buffer);
+    queue.enqueue_write_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                               dst.data());
+    queue.enqueue_nd_range_kernel(kernel, 2, nullptr,
+                                  compute::dim(width, height).data(), nullptr);
+    queue.enqueue_read_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                              dst.data());
+  };
+
+  run_kernel("test_cl_visa_injection_rt_basic_median_filter.cl",
+             "median_filter", dst1);
+  run_kernel("test_cl_visa_injection_rt_basic_whole_kernel.cl",
+             "test_whole_kernel", dst2);
+
+  EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst2));
+}
+
+HWTEST(TestCLVisaInjectionRtBasic, SingleBasicBlock) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t width = 64;
+  const size_t height = 64;
+  const size_t size = width * height;
+  const int seed = 0;
+
+  auto dst1 = cs::generate_vector<uint32_t>(size, seed);
+  auto dst2 = cs::generate_vector<uint32_t>(size, dst1[0]);
+  auto src = cs::generate_vector<uint32_t>(size, dst2[0]);
+
+  const compute::context context = compute::system::default_context();
+
+  auto src_buffer = create_input_buffer(context, src);
+
+  compute::buffer out_buffer(context, size * 4,
+                             compute::memory_object::read_write);
+
+  auto run_kernel = [&](const char *file_name, const char *kernel_name,
+                        std::vector<uint32_t> &dst) -> void {
+    compute::program program =
+        compute_samples::build_program(context, file_name);
+    compute::command_queue queue = compute::system::default_queue();
+
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(src_buffer, out_buffer);
+    queue.enqueue_write_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                               dst.data());
+    queue.enqueue_nd_range_kernel(kernel, 2, nullptr,
+                                  compute::dim(width, height).data(), nullptr);
+    queue.enqueue_read_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                              dst.data());
+  };
+
+  run_kernel("test_cl_visa_injection_rt_basic_median_filter.cl",
+             "median_filter", dst1);
+  run_kernel("test_cl_visa_injection_rt_basic_single_basic_block.cl",
+             "test_single_basic_block", dst2);
+
+  EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst2));
+}
+
+HWTEST(TestCLVisaInjectionRtBasic, Region) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t width = 64;
+  const size_t height = 64;
+  const size_t size = width * height;
+  const int seed = 0;
+
+  auto dst1 = cs::generate_vector<uint32_t>(size, seed);
+  auto dst2 = cs::generate_vector<uint32_t>(size, dst1[0]);
+  auto src = cs::generate_vector<uint32_t>(size, dst2[0]);
+
+  const compute::context context = compute::system::default_context();
+
+  auto src_buffer = create_input_buffer(context, src);
+
+  compute::buffer out_buffer(context, size * 4,
+                             compute::memory_object::read_write);
+
+  auto run_kernel = [&](const char *file_name, const char *kernel_name,
+                        std::vector<uint32_t> &dst) -> void {
+    compute::program program =
+        compute_samples::build_program(context, file_name);
+    compute::command_queue queue = compute::system::default_queue();
+
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(src_buffer, out_buffer);
+    queue.enqueue_write_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                               dst.data());
+    queue.enqueue_nd_range_kernel(kernel, 2, nullptr,
+                                  compute::dim(width, height).data(), nullptr);
+    queue.enqueue_read_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                              dst.data());
+  };
+
+  run_kernel("test_cl_visa_injection_rt_basic_median_filter.cl",
+             "median_filter", dst1);
+  run_kernel("test_cl_visa_injection_rt_basic_region.cl", "test_region", dst2);
+
+  EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst2));
+}
+
+HWTEST(TestCLVisaInjectionRtBasic, ForLoop) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t width = 64;
+  const size_t height = 64;
+  const size_t size = width * height;
+  const int seed = 0;
+
+  auto dst1 = cs::generate_vector<uint32_t>(size, seed);
+  auto dst2 = cs::generate_vector<uint32_t>(size, dst1[0]);
+  auto src = cs::generate_vector<uint32_t>(size, dst2[0]);
+
+  const compute::context context = compute::system::default_context();
+
+  auto src_buffer = create_input_buffer(context, src);
+
+  compute::buffer out_buffer(context, size * 4,
+                             compute::memory_object::read_write);
+
+  auto run_kernel = [&](const char *file_name, const char *kernel_name,
+                        std::vector<uint32_t> &dst) -> void {
+    compute::program program =
+        compute_samples::build_program(context, file_name);
+    compute::command_queue queue = compute::system::default_queue();
+
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(src_buffer, out_buffer);
+    queue.enqueue_write_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                               dst.data());
+    queue.enqueue_nd_range_kernel(kernel, 2, nullptr,
+                                  compute::dim(width, height).data(), nullptr);
+    queue.enqueue_read_buffer(out_buffer, 0, cs::size_in_bytes(dst),
+                              dst.data());
+  };
+
+  run_kernel("test_cl_visa_injection_rt_basic_median_filter.cl",
+             "median_filter", dst1);
+  run_kernel("test_cl_visa_injection_rt_basic_for_loop.cl", "test_for_loop",
+             dst2);
+
+  EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst2));
+}
+
+HWTEST(TestCLVisaInjectionRtBasic, SGEMM) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t m = 16 * 16;
+  const size_t n = 16 * 16;
+  const size_t p = 16 * 16;
+  const int seed = 0;
+
+  auto a = cs::generate_vector<float>(m * n, 0, 128, seed);
+  auto b = cs::generate_vector<float>(n * p, 0, 128, seed + 1);
+  auto c = cs::generate_vector<float>(m * p, 0, 128, seed + 2);
+
+  const float alpha = cs::generate_value(0, 128, seed + 3);
+  const float beta = cs::generate_value(0, 128, seed + 4);
+
+  const compute::context context = compute::system::default_context();
+
+  auto a_buff = create_input_buffer(context, a);
+  auto b_buff = create_input_buffer(context, b);
+
+  compute::buffer c_buff(context, cs::size_in_bytes(c),
+                         compute::memory_object::read_write);
+
+  compute::program program = compute_samples::build_program(
+      context, "test_cl_visa_injection_rt_basic_gemm.cl", "-DTYPE=float");
+  compute::command_queue queue = compute::system::default_queue();
+
+  auto run_kernel = [&](const char *kernel_name,
+                        std::vector<float> &dst) -> void {
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(a_buff, b_buff, c_buff, alpha, beta, n, m);
+    queue.enqueue_write_buffer(c_buff, 0, cs::size_in_bytes(c), c.data());
+    queue.enqueue_nd_range_kernel(kernel, 2, nullptr, compute::dim(m, p).data(),
+                                  nullptr);
+    queue.enqueue_read_buffer(c_buff, 0, cs::size_in_bytes(c), dst.data());
+  };
+
+  decltype(c) dst1(m * p);
+  run_kernel("test_gemm", dst1);
+
+  decltype(c) dst2(m * p);
+  run_kernel("test_asm_sgemm", dst2);
+
+  EXPECT_THAT(dst1, ::testing::Pointwise(::testing::FloatEq(), dst2));
+}
+
+HWTEST(TestCLVisaInjectionRtBasic, StencilFloat) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t size = 256;
+  const int seed = 0;
+
+  auto input = cs::generate_vector<float>(size * size, 0, 128, seed);
+  auto output = cs::generate_vector<float>(size * size, 0, 128, seed + 1);
+
+  const compute::context context = compute::system::default_context();
+
+  auto input_buff = create_input_buffer(context, input);
+
+  compute::buffer output_buff(context, cs::size_in_bytes(output),
+                              compute::memory_object::read_write);
+
+  compute::program program = compute_samples::build_program(
+      context, "test_cl_visa_injection_rt_basic_stencil_5_point.cl",
+      "-DTYPE=float");
+  compute::command_queue queue = compute::system::default_queue();
+
+  auto run_kernel = [&](const char *kernel_name,
+                        std::vector<float> &dst) -> void {
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(size, input_buff, output_buff);
+    queue.enqueue_write_buffer(output_buff, 0, cs::size_in_bytes(output),
+                               output.data());
+    queue.enqueue_nd_range_kernel(kernel, 2, nullptr,
+                                  compute::dim(size, size).data(), nullptr);
+    queue.enqueue_read_buffer(output_buff, 0, cs::size_in_bytes(output),
+                              dst.data());
+  };
+
+  decltype(output) dst1(size * size);
+  run_kernel("test_stencil_5_point", dst1);
+
+  decltype(output) dst2(size * size);
+  run_kernel("test_asm_stencil_5_point", dst2);
+
+  EXPECT_THAT(dst1, ::testing::Pointwise(::testing::FloatNear(0.00001f), dst2));
 }
 
 } // namespace
