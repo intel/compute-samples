@@ -5,5 +5,6 @@
 #
 
 if(WITH_OCL)
+    add_subdirectory(test_cl_unified_shared_memory)
     add_subdirectory(test_cl_visa_injection_rt_basic)
 endif()
