@@ -8,6 +8,9 @@ All tests are self-checking, i.e. the host code should check results of executio
 A documentation on how to inline Intel Virtual ISA (vISA) assembly language into user compute program code, and compiled into GenX binary using the Intel Graphics Compiler (IGC) is available at:
     https://github.com/intel/intel-graphics-compiler
 
+Intel GEN Virtual ISA specification:
+    https://github.com/intel/intel-graphics-compiler/blob/master/documentation/visa/index.md
+
 The inline assembler will use the GNU extended-asm syntax:
 https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html
 ```
@@ -212,7 +215,32 @@ This feature is experimental and may not be supported on our drivers or with a l
    - [x] Naive implementation GEMM in visa
      - SGEMM [test_cl_visa_injection_rt_basic_gemm.cl](test_cl_visa_injection_rt_basic_gemm.cl)
    - [x] 2D 5 points stencil operation in assembler
-     - StensilFloat [test_cl_visa_injection_rt_basic_stencil_5_point.cl](test_cl_visa_injection_rt_basic_stencil_5_point.cl)
+     - StencilFloat [test_cl_visa_injection_rt_basic_stencil_5_point.cl](test_cl_visa_injection_rt_basic_stencil_5_point.cl)
+3. Negative test cases (TestCLVisaInjectionRtNegativeCases)
+   - [x] Simple test case with illegal input
+    - [x] Simple (string under test `@@`)
+   - [x] Illegal exec size
+    - [x] IllegalExecSize (string under test `mov (M1_NM, 6) tmp1(0,1)<1>  tmp2(0,0)<1;1,0>`)
+   - [x] Missing regioning
+    - [x] MissingRegion (string under test `mov (M1_NM, 8) tmp1(0,1)<1>  tmp2(0,0)`)
+   - [x] Bad opcode
+    - [x] BadOpcode (string under test `movi (M1_NM, 8) tmp1(0,1)<1>  tmp2(0,0)`)
+   - [x] Undefined declaration
+    - [x] UndefinedDecl (string under test `mov (M1_NM, 8) tmp1(0,1)<1>  my_super_var(0,0)`)
+   - [x] Undefined predicate
+    - [x] UndefinedPred (string under test `cmp.lt (M1_NM, 8) P3 tmp1(0,0)<0;1,0> 0x3:ud`)
+   - [x] Bad operand syntax
+    - [x] BadOperandSyntax (string under test `mov (M1_NM, 8) tmp1(0,1)<1>:f tmp2(0,0)<1;1,0>`)
+   - [x] Wrong declare
+    - [x] WrongDeclare (string under test `.decl TMP v_type=G type=f`)
+   - [x] Missing label
+    - [x] MissingLabel (string under test `goto (M1, 16) check_label0`)
+   - [x] Duplicate labels
+    - [x] (string under test `check_label0:\ncheck_label0:`)
+   - [x] Unsupported instruction ICLLP vs SKL
+    - [x] UnsupportedInstructionDIVM (string under test `divm (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:f`)
+   - [x] Unsupported instruction SKL vs TGLLP
+    - [x] UnsupportedInstructionROL (string under test `rol (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:d`)
 
 ## Selecting tests
 

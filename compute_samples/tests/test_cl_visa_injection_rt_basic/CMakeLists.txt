@@ -7,6 +7,7 @@
 add_test_suite(test_cl_visa_injection_rt_basic
   SOURCE
   "src/test_cl_visa_injection_rt_basic.cpp"
+  "src/test_cl_visa_injection_rt_negative_cases.cpp"
   "src/main.cpp")
 
 target_link_libraries(test_cl_visa_injection_rt_basic

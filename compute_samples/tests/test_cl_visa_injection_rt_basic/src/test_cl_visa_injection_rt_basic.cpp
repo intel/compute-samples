@@ -5,6 +5,8 @@
  *
  */
 
+#include "test_cl_visa_injection_rt_basic/test_cl_visa_injection_rt.hpp"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "ocl_utils/ocl_utils.hpp"
@@ -22,20 +24,6 @@ namespace cs = compute_samples;
 namespace {
 
 #define CL_DEVICE_SUB_GROUP_SIZES_INTEL 0x4108
-
-bool check_supported_subgroup_size(size_t sz) {
-  compute::device device = compute::system::default_device();
-  std::vector<size_t> intel_sg_sizes =
-      device.get_info<std::vector<size_t>>(CL_DEVICE_SUB_GROUP_SIZES_INTEL);
-
-  for (const auto s : intel_sg_sizes) {
-    if (sz == s) {
-      return true;
-    }
-  }
-
-  return false;
-}
 
 HWTEST(TestCLVisaInjectionRtBasic, TemplateEmpty) {
   EXPECT_TRUE(check_supported_subgroup_size(16));
