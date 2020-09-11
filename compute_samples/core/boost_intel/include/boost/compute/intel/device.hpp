@@ -10,6 +10,7 @@
 
 #include <boost/compute/device.hpp>
 
+#include <CL/cl_ext_intel.h>
 #include "ocl_entrypoints/cl_intel_unified_shared_memory.h"
 
 namespace boost {
@@ -48,6 +49,10 @@ public:
   shared_system_mem_capabilities() const {
     return get_info<cl_unified_shared_memory_capabilities_intel>(
         CL_DEVICE_SHARED_SYSTEM_MEM_CAPABILITIES_INTEL);
+  }
+
+  std::vector<size_t> sub_group_sizes() const {
+    return get_info<std::vector<size_t>>(CL_DEVICE_SUB_GROUP_SIZES_INTEL);
   }
 };
 
