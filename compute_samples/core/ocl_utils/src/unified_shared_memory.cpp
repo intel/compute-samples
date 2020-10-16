@@ -39,6 +39,8 @@ std::istream &operator>>(std::istream &is, compute::usm_type &x) {
     x = compute::usm_type::device;
   } else if (s == "shared") {
     x = compute::usm_type::shared;
+  } else if (s == "unknown") {
+    x = compute::usm_type::unknown;
   } else {
     is.setstate(std::ios_base::failbit);
   }

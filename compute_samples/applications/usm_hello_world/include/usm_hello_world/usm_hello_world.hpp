@@ -24,13 +24,15 @@ private:
     bool help = false;
     boost::compute::usm_type type = boost::compute::usm_type::host;
     size_t size = 0;
+    size_t device = 0;
   };
   Arguments
   parse_command_line(const std::vector<std::string> &command_line) const;
 };
 
 std::vector<cl_uint> copy_buffer(const std::vector<cl_uint> &input,
-                                 const boost::compute::usm_type type);
+                                 const boost::compute::usm_type type,
+                                 const size_t device_num);
 
 } // namespace compute_samples
 

@@ -24,7 +24,7 @@ HWTEST(UsmHelloWorldIntegrationTests, CopyBufferWithHostUsm) {
   std::vector<cl_uint> input(1024);
   std::iota(input.begin(), input.end(), 0u);
   const std::vector<cl_uint> output =
-      cs::copy_buffer(input, compute::usm_type::host);
+      cs::copy_buffer(input, compute::usm_type::host, (size_t)0);
   EXPECT_EQ(input, output);
 }
 
@@ -32,7 +32,7 @@ HWTEST(UsmHelloWorldIntegrationTests, CopyBufferWithDeviceUsm) {
   std::vector<cl_uint> input(1024);
   std::iota(input.begin(), input.end(), 0u);
   const std::vector<cl_uint> output =
-      cs::copy_buffer(input, compute::usm_type::device);
+      cs::copy_buffer(input, compute::usm_type::device, (size_t)0);
   EXPECT_EQ(input, output);
 }
 
@@ -40,6 +40,6 @@ HWTEST(UsmHelloWorldIntegrationTests, CopyBufferWithSharedUsm) {
   std::vector<cl_uint> input(1024);
   std::iota(input.begin(), input.end(), 0u);
   const std::vector<cl_uint> output =
-      cs::copy_buffer(input, compute::usm_type::shared);
+      cs::copy_buffer(input, compute::usm_type::shared, (size_t)0);
   EXPECT_EQ(input, output);
 }
