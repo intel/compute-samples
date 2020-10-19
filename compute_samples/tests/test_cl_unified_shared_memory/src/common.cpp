@@ -11,11 +11,11 @@
 
 namespace compute = boost::compute;
 
-cl_unified_shared_memory_capabilities_intel
+cl_device_unified_shared_memory_capabilities_intel
 get_capabilities(const compute::usm_type t) {
   const compute::device_intel device(compute::system::default_device());
 
-  cl_unified_shared_memory_capabilities_intel capabilities = 0;
+  cl_device_unified_shared_memory_capabilities_intel capabilities = 0;
   if (t == compute::usm_type::host) {
     capabilities = device.host_mem_capabilities();
   } else if (t == compute::usm_type::device) {

@@ -22,7 +22,7 @@ HWTEST(clGetDeviceInfo, GivenHostMemoryParameterThenNoExceptionIsThrown) {
 HWTEST(clGetDeviceInfo,
        GivenDeviceMemoryParameterThenRequiredCapabilitiesAreReturned) {
   compute::device_intel device(compute::system::default_device());
-  const cl_unified_shared_memory_capabilities_intel capabilities =
+  const cl_device_unified_shared_memory_capabilities_intel capabilities =
       device.device_mem_capabilities();
   EXPECT_TRUE(capabilities & CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL);
 }

@@ -70,7 +70,8 @@ UsmQueriesApplication::Arguments UsmQueriesApplication::parse_command_line(
   return args;
 }
 
-std::string to_string(const cl_unified_shared_memory_capabilities_intel &x) {
+std::string
+to_string(const cl_device_unified_shared_memory_capabilities_intel &x) {
   std::vector<std::string> v;
   if ((x & CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL) != 0u) {
     v.emplace_back("CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL");

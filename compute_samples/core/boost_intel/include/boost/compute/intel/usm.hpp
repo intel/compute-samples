@@ -10,7 +10,7 @@
 
 #include <boost/compute/context.hpp>
 
-#include "ocl_entrypoints/cl_intel_unified_shared_memory.h"
+#include <CL/cl_ext_intel.h>
 
 namespace boost {
 namespace compute {
@@ -63,7 +63,7 @@ T *shared_mem_alloc(const context &context, const device &device,
   return ptr;
 }
 
-template <typename T> void mem_free(const context &context, const T *ptr) {
+template <typename T> void mem_free(const context &context, T *ptr) {
   cl_int error = clMemFreeINTEL(context.get(), ptr);
   if (error != CL_SUCCESS) {
     BOOST_THROW_EXCEPTION(opencl_error(error));

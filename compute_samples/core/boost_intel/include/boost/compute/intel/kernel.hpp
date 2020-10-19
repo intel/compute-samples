@@ -13,8 +13,6 @@
 #include <boost/compute/device.hpp>
 #include <CL/cl_ext_intel.h>
 
-#include "ocl_entrypoints/cl_intel_unified_shared_memory.h"
-
 namespace boost {
 namespace compute {
 

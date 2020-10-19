@@ -40,7 +40,7 @@ Application::Status UsmHelloWorldApplication::run_implementation(
     return Status::SKIP;
   }
 
-  cl_unified_shared_memory_capabilities_intel capabilities = 0;
+  cl_device_unified_shared_memory_capabilities_intel capabilities = 0;
   if (args.type == compute::usm_type::host) {
     capabilities = device.host_mem_capabilities();
   } else if (args.type == compute::usm_type::device) {

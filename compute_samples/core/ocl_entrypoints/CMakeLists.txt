@@ -7,7 +7,6 @@
 add_core_library(ocl_entrypoints
     SOURCE
     "include/ocl_entrypoints/loader.hpp"
-    "include/ocl_entrypoints/cl_intel_unified_shared_memory.h"
     "include/ocl_entrypoints/cl_intel_aubs.h"
     "src/loader.cpp"
     "src/cl_intel_unified_shared_memory.cpp"

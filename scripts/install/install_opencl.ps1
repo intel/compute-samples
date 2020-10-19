@@ -5,7 +5,7 @@
 #
 
 echo "Downloading OpenCL Headers"
-$openclHeadersHash = "0d5f18c6e7196863bc1557a693f1509adfcee056"
+$openclHeadersHash = "9fac4e9866a961f66bdd72fa2bff50145512f972"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 wget -Uri "https://github.com/KhronosGroup/OpenCL-Headers/archive/$openclHeadersHash.zip" -OutFile "OpenCL-Headers-$openclHeadersHash.zip"
 
@@ -18,7 +18,6 @@ $installPath = $rootPath + "/third_party"
 mkdir $installPath -Force
 $openclPath = $installPath + "/opencl"
 $openclIncludePath = $openclPath + "/include"
-$openclLibPath = $openclPath + "/lib"
 
 cp -Recurse "OpenCL-Headers-$openclHeadersHash/CL" "$openclIncludePath/CL"
 
@@ -27,7 +26,7 @@ rm -R "OpenCL-Headers-$openclHeadersHash"
 rm "OpenCL-Headers-$openclHeadersHash.zip"
 
 echo "Downloading OpenCL ICD"
-$openclICDHash = "b342ff7b7f70a4b3f2cfc53215af8fa20adc3d86"
+$openclICDHash = "b3b483303b160db080857288c1b53e8152f62b98"
 wget -Uri "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/$openclICDHash.zip" -OutFile "OpenCL-ICD-Loader-$openclICDHash.zip"
 
 echo "Extracting OpenCL ICD"
@@ -39,8 +38,8 @@ cd "OpenCL-ICD-Loader-$openclICDHash"
 mkdir build | Out-Null
 cd build
 
-cmake .. -A x64 -DOPENCL_INCLUDE_DIRS="$openclIncludePath" -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY="$openclLibPath" -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE="$openclLibPath"
-cmake --build . --config Release
+cmake .. -A x64 -DOPENCL_ICD_LOADER_HEADERS_DIR="$openclIncludePath" -DCMAKE_INSTALL_PREFIX="$openclPath"
+cmake --build . --target install --config Release
 popd
 
 echo "Cleaning OpenCL ICD"

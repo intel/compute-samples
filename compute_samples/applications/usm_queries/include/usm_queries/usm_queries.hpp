@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "application/application.hpp"
-#include "ocl_entrypoints/cl_intel_unified_shared_memory.h"
+#include <CL/cl_ext_intel.h>
 
 namespace compute_samples {
 class UsmQueriesApplication : public Application {
@@ -23,7 +23,8 @@ private:
   Arguments
   parse_command_line(const std::vector<std::string> &command_line) const;
 };
-std::string to_string(const cl_unified_shared_memory_capabilities_intel &x);
+std::string
+to_string(const cl_device_unified_shared_memory_capabilities_intel &x);
 } // namespace compute_samples
 
 #endif

@@ -11,7 +11,7 @@
 #include <boost/compute/command_queue.hpp>
 
 #include "ocl_entrypoints/cl_intel_aubs.h"
-#include "ocl_entrypoints/cl_intel_unified_shared_memory.h"
+#include <CL/cl_ext_intel.h>
 
 namespace boost {
 namespace compute {

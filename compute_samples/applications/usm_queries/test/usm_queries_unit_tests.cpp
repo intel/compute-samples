@@ -10,21 +10,21 @@
 namespace cs = compute_samples;
 
 TEST(ToStringTest, UnifiedSharedMemoryAccess) {
-  const cl_unified_shared_memory_capabilities_intel c =
+  const cl_device_unified_shared_memory_capabilities_intel c =
       CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL;
   const std::string expected = "CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL";
   EXPECT_EQ(expected, cs::to_string(c));
 }
 
 TEST(ToStringTest, UnifiedSharedMemoryAtomicAccess) {
-  const cl_unified_shared_memory_capabilities_intel c =
+  const cl_device_unified_shared_memory_capabilities_intel c =
       CL_UNIFIED_SHARED_MEMORY_ATOMIC_ACCESS_INTEL;
   const std::string expected = "CL_UNIFIED_SHARED_MEMORY_ATOMIC_ACCESS_INTEL";
   EXPECT_EQ(expected, cs::to_string(c));
 }
 
 TEST(ToStringTest, UnifiedSharedMemoryConcurrentAccess) {
-  const cl_unified_shared_memory_capabilities_intel c =
+  const cl_device_unified_shared_memory_capabilities_intel c =
       CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ACCESS_INTEL;
   const std::string expected =
       "CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ACCESS_INTEL";
@@ -32,7 +32,7 @@ TEST(ToStringTest, UnifiedSharedMemoryConcurrentAccess) {
 }
 
 TEST(ToStringTest, UnifiedSharedMemoryConcurrentAtomicAccess) {
-  const cl_unified_shared_memory_capabilities_intel c =
+  const cl_device_unified_shared_memory_capabilities_intel c =
       CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ATOMIC_ACCESS_INTEL;
   const std::string expected =
       "CL_UNIFIED_SHARED_MEMORY_CONCURRENT_ATOMIC_ACCESS_INTEL";
@@ -40,7 +40,7 @@ TEST(ToStringTest, UnifiedSharedMemoryConcurrentAtomicAccess) {
 }
 
 TEST(ToStringTest, UnifiedSharedMemoryAccessAndAtomicAccess) {
-  const cl_unified_shared_memory_capabilities_intel c =
+  const cl_device_unified_shared_memory_capabilities_intel c =
       CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL |
       CL_UNIFIED_SHARED_MEMORY_ATOMIC_ACCESS_INTEL;
   const std::string expected = "CL_UNIFIED_SHARED_MEMORY_ACCESS_INTEL | "

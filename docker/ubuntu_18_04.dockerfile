@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
     libx11-dev \
     libva-dev \
     libpng-dev \
-    ocl-icd-opencl-dev \
     wget \
     unzip
 
