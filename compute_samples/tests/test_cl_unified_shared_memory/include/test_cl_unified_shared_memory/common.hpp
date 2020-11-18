@@ -44,7 +44,7 @@ public:
 template <typename T> class HostMemoryWrapper : public MemoryWrapper<T> {
 public:
   HostMemoryWrapper(const boost::compute::context &context)
-      : context_(context) {}
+      : context_(context), data_(nullptr), count_(0) {}
 
   void allocate(const int count,
                 const std::vector<cl_mem_properties_intel> properties = {
@@ -80,7 +80,7 @@ template <typename T> class DeviceMemoryWrapper : public MemoryWrapper<T> {
 public:
   DeviceMemoryWrapper(const boost::compute::context &context,
                       const boost::compute::device &device)
-      : context_(context), device_(device) {}
+      : context_(context), device_(device), data_(nullptr), count_(0) {}
 
   void allocate(const int count,
                 const std::vector<cl_mem_properties_intel> properties = {
@@ -157,7 +157,7 @@ template <typename T> class SharedMemoryWrapper : public MemoryWrapper<T> {
 public:
   SharedMemoryWrapper(const boost::compute::context &context,
                       const boost::compute::device &device)
-      : context_(context), device_(device) {}
+      : context_(context), device_(device), data_(nullptr), count_(0) {}
 
   void allocate(const int count,
                 const std::vector<cl_mem_properties_intel> properties = {
