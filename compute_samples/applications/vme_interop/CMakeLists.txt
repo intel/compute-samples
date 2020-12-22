@@ -22,16 +22,7 @@ target_link_libraries(vme_interop_lib
 add_kernels(vme_interop_lib "vme_interop.cl")
 if(UNIX)
     target_sources(vme_interop_lib PRIVATE "include/vme_interop/vme_interop_linux.hpp" "src/vme_interop_linux.cpp")
-    target_link_libraries(vme_interop_lib
-        PUBLIC
-        X11
-        dl
-    )
-    include(import_libva)
-    target_include_directories(vme_interop_lib
-        PUBLIC
-        VA::VA
-    )
+    target_link_libraries(vme_interop_lib PUBLIC compute_samples::va_utils)
 endif()
 if(WIN32)
     target_sources(vme_interop_lib PRIVATE "src/vme_interop_windows.cpp")
