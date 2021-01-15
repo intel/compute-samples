@@ -209,7 +209,6 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
 
 void VmeInteropApplication::run_os_specific_implementation(
     const Arguments &args, const compute::device &device) const {
-  compute_samples::VAManager vamanager;
   int drm_fd = -1;
 
   VADisplay va_display = vamanager.get_va_display(drm_fd);

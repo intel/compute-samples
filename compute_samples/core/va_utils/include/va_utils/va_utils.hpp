@@ -12,8 +12,6 @@
 #include <dlfcn.h>
 #include <boost/compute/core.hpp>
 
-namespace compute = boost::compute;
-
 namespace compute_samples {
 
 typedef VAStatus (*vaInitializeFPTR)(VADisplay, int *, int *);
@@ -46,17 +44,20 @@ public:
   vaQueryImageFormatsPFN vaQueryImageFormats;
   vaMaxNumImageFormatsPFN vaMaxNumImageFormats;
   VADisplay get_va_display(int &);
-  compute::device get_va_device(const compute::platform &, const VADisplay);
+  boost::compute::device get_va_device(const boost::compute::platform &,
+                                       const VADisplay);
 
   void create_va_surface(uint32_t, uint32_t, const VADisplay, VASurfaceID &);
 
-  void acquire_va_surfaces(const compute::platform &,
-                           const compute::command_queue &, compute::image2d &,
-                           compute::image2d &);
+  void acquire_va_surfaces(const boost::compute::platform &,
+                           const boost::compute::command_queue &,
+                           boost::compute::image2d &,
+                           boost::compute::image2d &);
 
-  void release_va_surfaces(const compute::platform &,
-                           const compute::command_queue &, compute::image2d &,
-                           compute::image2d &);
+  void release_va_surfaces(const boost::compute::platform &,
+                           const boost::compute::command_queue &,
+                           boost::compute::image2d &,
+                           boost::compute::image2d &);
 
   ~VAManager();
 
