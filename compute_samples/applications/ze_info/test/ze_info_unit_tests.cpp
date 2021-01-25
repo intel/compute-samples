@@ -72,7 +72,7 @@ ze_device_module_properties_t fake_device_module_properties() {
   return ze_device_module_properties_t{
       ZE_STRUCTURE_TYPE_MODULE_PROPERTIES,
       nullptr,
-      1,
+      ZE_API_VERSION_1_0,
       ZE_DEVICE_MODULE_FLAG_DP4A | ZE_DEVICE_MODULE_FLAG_FP16,
       ZE_DEVICE_FP_FLAG_DENORM | ZE_DEVICE_FP_FLAG_ROUND_TO_NEAREST,
       ZE_DEVICE_FP_FLAG_INF_NAN | ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO,
@@ -200,7 +200,7 @@ ze_driver_ipc_properties_t fake_driver_ipc_properties() {
 }
 
 ze_driver_extension_properties_t fake_driver_extension_properties() {
-  return ze_driver_extension_properties_t{"extension", 1};
+  return ze_driver_extension_properties_t{"extension", ZE_API_VERSION_1_0};
 }
 
 cs::DriverCapabilities fake_driver_capabilities() {
@@ -363,7 +363,7 @@ TEST_F(TextFormatterTests, DriverExtensionPropertiesToText) {
 
   std::stringstream ss;
   ss << cs::key_value_to_text("Name", "extension", indentation_level_);
-  ss << cs::key_value_to_text("Version", "1", indentation_level_);
+  ss << cs::key_value_to_text("Version", "1.0", indentation_level_);
   const auto expected = ss.str();
   const auto actual =
       cs::driver_extension_properties_to_text(properties, indentation_level_);
@@ -516,7 +516,7 @@ TEST_F(TextFormatterTests, DeviceModulePropertiesToText) {
   const auto properties = fake_device_module_properties();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("SPIR-V version", "1", indentation_level_);
+  ss << cs::key_value_to_text("SPIR-V version", "1.0", indentation_level_);
   ss << cs::key_value_to_text(
       "Module flags", "ZE_DEVICE_MODULE_FLAG_FP16 | ZE_DEVICE_MODULE_FLAG_DP4A",
       indentation_level_);
@@ -771,11 +771,11 @@ TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
       "            \"ze_driver_extension_properties_t\": [\n"
       "                {\n"
       "                    \"name\": \"extension\",\n"
-      "                    \"version\": 1\n"
+      "                    \"version\": 1.0\n"
       "                },\n"
       "                {\n"
       "                    \"name\": \"extension\",\n"
-      "                    \"version\": 1\n"
+      "                    \"version\": 1.0\n"
       "                }\n"
       "            ],\n"
       "            \"devices\": []\n"
@@ -795,11 +795,11 @@ TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
       "            \"ze_driver_extension_properties_t\": [\n"
       "                {\n"
       "                    \"name\": \"extension\",\n"
-      "                    \"version\": 1\n"
+      "                    \"version\": 1.0\n"
       "                },\n"
       "                {\n"
       "                    \"name\": \"extension\",\n"
-      "                    \"version\": 1\n"
+      "                    \"version\": 1.0\n"
       "                }\n"
       "            ],\n"
       "            \"devices\": []\n"
@@ -830,11 +830,11 @@ TEST(JSONFormatterTests, DriverCapabilitiesToJSON) {
       "    \"ze_driver_extension_properties_t\": [\n"
       "        {\n"
       "            \"name\": \"extension\",\n"
-      "            \"version\": 1\n"
+      "            \"version\": 1.0\n"
       "        },\n"
       "        {\n"
       "            \"name\": \"extension\",\n"
-      "            \"version\": 1\n"
+      "            \"version\": 1.0\n"
       "        }\n"
       "    ],\n"
       "    \"devices\": []\n"
@@ -864,11 +864,11 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "    \"ze_driver_extension_properties_t\": [\n"
       "        {\n"
       "            \"name\": \"extension\",\n"
-      "            \"version\": 1\n"
+      "            \"version\": 1.0\n"
       "        },\n"
       "        {\n"
       "            \"name\": \"extension\",\n"
-      "            \"version\": 1\n"
+      "            \"version\": 1.0\n"
       "        }\n"
       "    ],\n"
       "    \"devices\": [\n"
@@ -911,7 +911,7 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                ]\n"
       "            },\n"
       "            \"ze_device_module_properties_t\": {\n"
-      "                \"spirvVersionSupported\": 1,\n"
+      "                \"spirvVersionSupported\": 1.0,\n"
       "                \"flags\": [\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1077,7 +1077,7 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                ]\n"
       "            },\n"
       "            \"ze_device_module_properties_t\": {\n"
-      "                \"spirvVersionSupported\": 1,\n"
+      "                \"spirvVersionSupported\": 1.0,\n"
       "                \"flags\": [\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1248,11 +1248,11 @@ TEST(JSONFormatterTests, AllDriverExtensionPropertiesToJSON) {
   const auto expected = "[\n"
                         "        {\n"
                         "            \"name\": \"extension\",\n"
-                        "            \"version\": 1\n"
+                        "            \"version\": 1.0\n"
                         "        },\n"
                         "        {\n"
                         "            \"name\": \"extension\",\n"
-                        "            \"version\": 1\n"
+                        "            \"version\": 1.0\n"
                         "        }\n"
                         "]";
 
@@ -1266,7 +1266,7 @@ TEST(JSONFormatterTests, DriverExtensionPropertiesToJSON) {
   const auto actual = cs::ptree_to_string(json);
   const auto expected = "{\n"
                         "    \"name\": \"extension\",\n"
-                        "    \"version\": 1\n"
+                        "    \"version\": 1.0\n"
                         "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
@@ -1317,7 +1317,7 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "        ]\n"
       "    },\n"
       "    \"ze_device_module_properties_t\": {\n"
-      "        \"spirvVersionSupported\": 1,\n"
+      "        \"spirvVersionSupported\": 1.0,\n"
       "        \"flags\": [\n"
       "            \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "            \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1482,7 +1482,7 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                ]\n"
       "            },\n"
       "            \"ze_device_module_properties_t\": {\n"
-      "                \"spirvVersionSupported\": 1,\n"
+      "                \"spirvVersionSupported\": 1.0,\n"
       "                \"flags\": [\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1650,7 +1650,7 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                ]\n"
       "            },\n"
       "            \"ze_device_module_properties_t\": {\n"
-      "                \"spirvVersionSupported\": 1,\n"
+      "                \"spirvVersionSupported\": 1.0,\n"
       "                \"flags\": [\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1880,7 +1880,7 @@ TEST(JSONFormatterTests, DeviceModulePropertiesToJSON) {
   const auto json = cs::device_module_properties_to_json(properties);
   const auto actual = cs::ptree_to_string(json);
   const auto expected = "{\n"
-                        "    \"spirvVersionSupported\": 1,\n"
+                        "    \"spirvVersionSupported\": 1.0,\n"
                         "    \"flags\": [\n"
                         "        \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
                         "        \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"

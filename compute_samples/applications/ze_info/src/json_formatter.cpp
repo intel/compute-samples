@@ -106,7 +106,11 @@ boost::property_tree::ptree
 driver_extension_properties_to_json(const ze_driver_extension_properties_t &p) {
   pt::ptree tree;
   tree.put("name", p.name);
-  tree.put("version", p.version);
+  const auto int_version = p.version;
+  const std::string string_version =
+      std::to_string(ZE_MAJOR_VERSION(int_version)) + "." +
+      std::to_string(ZE_MINOR_VERSION(int_version));
+  tree.put("version", string_version);
   return tree;
 }
 
@@ -216,7 +220,11 @@ device_compute_properties_to_json(const ze_device_compute_properties_t &p) {
 boost::property_tree::ptree
 device_module_properties_to_json(const ze_device_module_properties_t &p) {
   pt::ptree tree;
-  tree.put("spirvVersionSupported", p.spirvVersionSupported);
+  const auto int_version = p.spirvVersionSupported;
+  const std::string string_version =
+      std::to_string(ZE_MAJOR_VERSION(int_version)) + "." +
+      std::to_string(ZE_MINOR_VERSION(int_version));
+  tree.put("spirvVersionSupported", string_version);
   pt::ptree flags_node;
   for (const auto &flag :
        split_string(flags_to_string<ze_device_module_flag_t>(p.flags), " | ")) {

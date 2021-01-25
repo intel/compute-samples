@@ -100,8 +100,11 @@ driver_extension_properties_to_text(const ze_driver_extension_properties_t &p,
                                     int indentation_level) {
   std::stringstream ss;
   ss << key_value_to_text("Name", p.name, indentation_level);
-  ss << key_value_to_text("Version", std::to_string(p.version),
-                          indentation_level);
+  const auto int_version = p.version;
+  const std::string string_version =
+      std::to_string(ZE_MAJOR_VERSION(int_version)) + "." +
+      std::to_string(ZE_MINOR_VERSION(int_version));
+  ss << key_value_to_text("Version", string_version, indentation_level);
   return ss.str();
 }
 
@@ -226,9 +229,11 @@ std::string
 device_module_properties_to_text(const ze_device_module_properties_t &p,
                                  const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("SPIR-V version",
-                          std::to_string(p.spirvVersionSupported),
-                          indentation_level);
+  const auto int_version = p.spirvVersionSupported;
+  const std::string string_version =
+      std::to_string(ZE_MAJOR_VERSION(int_version)) + "." +
+      std::to_string(ZE_MINOR_VERSION(int_version));
+  ss << key_value_to_text("SPIR-V version", string_version, indentation_level);
   ss << key_value_to_text("Module flags",
                           flags_to_string<ze_device_module_flag_t>(p.flags),
                           indentation_level);
