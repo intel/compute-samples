@@ -313,6 +313,7 @@ boost::property_tree::ptree all_device_memory_properties_to_json(
 boost::property_tree::ptree
 device_memory_properties_to_json(const ze_device_memory_properties_t &p) {
   pt::ptree tree;
+  tree.put("name", p.name);
   pt::ptree flags_node;
   for (const auto &flag : split_string(
            flags_to_string<ze_device_memory_property_flag_t>(p.flags), " | ")) {
