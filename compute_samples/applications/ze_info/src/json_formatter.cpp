@@ -500,7 +500,7 @@ std::string ptree_to_string(const pt::ptree tree) {
 
   // Boost.PropertyTree does not support other JSON types than strings -
   // https://svn.boost.org/trac10/ticket/9721
-  reg = std::regex(R"(\"([0-9]+\.{0,1}[0-9]*)\")");
+  reg = std::regex(R"(\"([0-9]+)\")");
   output = std::regex_replace(output, reg, "$1");
   reg = std::regex(R"(\"(true|false)\")");
   output = std::regex_replace(output, reg, "$1");

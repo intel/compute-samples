@@ -757,7 +757,7 @@ TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
   const auto expected =
       "[\n"
       "        {\n"
-      "            \"ze_api_version_t\": 1.0,\n"
+      "            \"ze_api_version_t\": \"1.0\",\n"
       "            \"ze_driver_properties_t\": {\n"
       "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "                \"driverVersion\": 123\n"
@@ -771,17 +771,17 @@ TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
       "            \"ze_driver_extension_properties_t\": [\n"
       "                {\n"
       "                    \"name\": \"extension\",\n"
-      "                    \"version\": 1.0\n"
+      "                    \"version\": \"1.0\"\n"
       "                },\n"
       "                {\n"
       "                    \"name\": \"extension\",\n"
-      "                    \"version\": 1.0\n"
+      "                    \"version\": \"1.0\"\n"
       "                }\n"
       "            ],\n"
       "            \"devices\": []\n"
       "        },\n"
       "        {\n"
-      "            \"ze_api_version_t\": 1.0,\n"
+      "            \"ze_api_version_t\": \"1.0\",\n"
       "            \"ze_driver_properties_t\": {\n"
       "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "                \"driverVersion\": 123\n"
@@ -795,11 +795,11 @@ TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
       "            \"ze_driver_extension_properties_t\": [\n"
       "                {\n"
       "                    \"name\": \"extension\",\n"
-      "                    \"version\": 1.0\n"
+      "                    \"version\": \"1.0\"\n"
       "                },\n"
       "                {\n"
       "                    \"name\": \"extension\",\n"
-      "                    \"version\": 1.0\n"
+      "                    \"version\": \"1.0\"\n"
       "                }\n"
       "            ],\n"
       "            \"devices\": []\n"
@@ -816,7 +816,7 @@ TEST(JSONFormatterTests, DriverCapabilitiesToJSON) {
   const auto actual = cs::ptree_to_string(json);
   const auto expected =
       "{\n"
-      "    \"ze_api_version_t\": 1.0,\n"
+      "    \"ze_api_version_t\": \"1.0\",\n"
       "    \"ze_driver_properties_t\": {\n"
       "        \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "        \"driverVersion\": 123\n"
@@ -830,11 +830,11 @@ TEST(JSONFormatterTests, DriverCapabilitiesToJSON) {
       "    \"ze_driver_extension_properties_t\": [\n"
       "        {\n"
       "            \"name\": \"extension\",\n"
-      "            \"version\": 1.0\n"
+      "            \"version\": \"1.0\"\n"
       "        },\n"
       "        {\n"
       "            \"name\": \"extension\",\n"
-      "            \"version\": 1.0\n"
+      "            \"version\": \"1.0\"\n"
       "        }\n"
       "    ],\n"
       "    \"devices\": []\n"
@@ -850,7 +850,7 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
   const auto actual = cs::ptree_to_string(json);
   const auto expected =
       "{\n"
-      "    \"ze_api_version_t\": 1.0,\n"
+      "    \"ze_api_version_t\": \"1.0\",\n"
       "    \"ze_driver_properties_t\": {\n"
       "        \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "        \"driverVersion\": 123\n"
@@ -864,11 +864,11 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "    \"ze_driver_extension_properties_t\": [\n"
       "        {\n"
       "            \"name\": \"extension\",\n"
-      "            \"version\": 1.0\n"
+      "            \"version\": \"1.0\"\n"
       "        },\n"
       "        {\n"
       "            \"name\": \"extension\",\n"
-      "            \"version\": 1.0\n"
+      "            \"version\": \"1.0\"\n"
       "        }\n"
       "    ],\n"
       "    \"devices\": [\n"
@@ -911,7 +911,7 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                ]\n"
       "            },\n"
       "            \"ze_device_module_properties_t\": {\n"
-      "                \"spirvVersionSupported\": 1.0,\n"
+      "                \"spirvVersionSupported\": \"1.0\",\n"
       "                \"flags\": [\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1077,7 +1077,7 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                ]\n"
       "            },\n"
       "            \"ze_device_module_properties_t\": {\n"
-      "                \"spirvVersionSupported\": 1.0,\n"
+      "                \"spirvVersionSupported\": \"1.0\",\n"
       "                \"flags\": [\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1248,11 +1248,11 @@ TEST(JSONFormatterTests, AllDriverExtensionPropertiesToJSON) {
   const auto expected = "[\n"
                         "        {\n"
                         "            \"name\": \"extension\",\n"
-                        "            \"version\": 1.0\n"
+                        "            \"version\": \"1.0\"\n"
                         "        },\n"
                         "        {\n"
                         "            \"name\": \"extension\",\n"
-                        "            \"version\": 1.0\n"
+                        "            \"version\": \"1.0\"\n"
                         "        }\n"
                         "]";
 
@@ -1266,7 +1266,7 @@ TEST(JSONFormatterTests, DriverExtensionPropertiesToJSON) {
   const auto actual = cs::ptree_to_string(json);
   const auto expected = "{\n"
                         "    \"name\": \"extension\",\n"
-                        "    \"version\": 1.0\n"
+                        "    \"version\": \"1.0\"\n"
                         "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
@@ -1317,7 +1317,7 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "        ]\n"
       "    },\n"
       "    \"ze_device_module_properties_t\": {\n"
-      "        \"spirvVersionSupported\": 1.0,\n"
+      "        \"spirvVersionSupported\": \"1.0\",\n"
       "        \"flags\": [\n"
       "            \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "            \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1482,7 +1482,7 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                ]\n"
       "            },\n"
       "            \"ze_device_module_properties_t\": {\n"
-      "                \"spirvVersionSupported\": 1.0,\n"
+      "                \"spirvVersionSupported\": \"1.0\",\n"
       "                \"flags\": [\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1650,7 +1650,7 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                ]\n"
       "            },\n"
       "            \"ze_device_module_properties_t\": {\n"
-      "                \"spirvVersionSupported\": 1.0,\n"
+      "                \"spirvVersionSupported\": \"1.0\",\n"
       "                \"flags\": [\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
       "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -1880,7 +1880,7 @@ TEST(JSONFormatterTests, DeviceModulePropertiesToJSON) {
   const auto json = cs::device_module_properties_to_json(properties);
   const auto actual = cs::ptree_to_string(json);
   const auto expected = "{\n"
-                        "    \"spirvVersionSupported\": 1.0,\n"
+                        "    \"spirvVersionSupported\": \"1.0\",\n"
                         "    \"flags\": [\n"
                         "        \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
                         "        \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
@@ -2148,7 +2148,7 @@ TEST(JSONFormatterTests, PtreeToStringFloatValue) {
   tree.put("value", 1.5);
 
   const std::string actual = cs::ptree_to_string(tree);
-  const std::string expected = "{\n    \"value\": 1.5\n}";
+  const std::string expected = "{\n    \"value\": \"1.5\"\n}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
