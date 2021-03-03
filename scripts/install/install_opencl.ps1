@@ -5,7 +5,7 @@
 #
 
 echo "Downloading OpenCL Headers"
-$openclHeadersHash = "9fac4e9866a961f66bdd72fa2bff50145512f972"
+$openclHeadersHash = "23710f1b99186065c1768fc3098ba681adc0f253"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 wget -Uri "https://github.com/KhronosGroup/OpenCL-Headers/archive/$openclHeadersHash.zip" -OutFile "OpenCL-Headers-$openclHeadersHash.zip"
 
@@ -26,7 +26,7 @@ rm -R "OpenCL-Headers-$openclHeadersHash"
 rm "OpenCL-Headers-$openclHeadersHash.zip"
 
 echo "Downloading OpenCL ICD"
-$openclICDHash = "b3b483303b160db080857288c1b53e8152f62b98"
+$openclICDHash = "5f8249691ec8c25775789498951f8e9eb62c201d"
 wget -Uri "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/$openclICDHash.zip" -OutFile "OpenCL-ICD-Loader-$openclICDHash.zip"
 
 echo "Extracting OpenCL ICD"

@@ -10,7 +10,7 @@
 
 #include <boost/compute/device.hpp>
 
-#include <CL/cl_ext_intel.h>
+#include <CL/cl_ext.h>
 
 namespace boost {
 namespace compute {
@@ -54,6 +54,26 @@ public:
 
   std::vector<size_t> sub_group_sizes() const {
     return get_info<std::vector<size_t>>(CL_DEVICE_SUB_GROUP_SIZES_INTEL);
+  }
+
+  cl_uint num_queue_families() { return get_number_of_families(*this); }
+
+  std::vector<cl_queue_family_properties_intel>
+  queue_family_properties() const {
+    return get_queue_family_properties(*this);
+  }
+
+  static cl_uint get_number_of_families(const compute::device &device) {
+    auto queue_family_properties =
+        device.get_info<std::vector<cl_queue_family_properties_intel>>(
+            CL_DEVICE_QUEUE_FAMILY_PROPERTIES_INTEL);
+    return static_cast<cl_uint>(queue_family_properties.size());
+  }
+
+  static std::vector<cl_queue_family_properties_intel>
+  get_queue_family_properties(const compute::device &device) {
+    return device.get_info<std::vector<cl_queue_family_properties_intel>>(
+        CL_DEVICE_QUEUE_FAMILY_PROPERTIES_INTEL);
   }
 };
 

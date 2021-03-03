@@ -10,7 +10,7 @@
 
 #include <boost/compute/context.hpp>
 
-#include <CL/cl_ext_intel.h>
+#include <CL/cl_ext.h>
 
 namespace boost {
 namespace compute {

@@ -7,7 +7,7 @@
 #
 
 echo "Downloading OpenCL Headers"
-OPENCL_HEADERS_HASH="9fac4e9866a961f66bdd72fa2bff50145512f972"
+OPENCL_HEADERS_HASH="23710f1b99186065c1768fc3098ba681adc0f253"
 wget "https://github.com/KhronosGroup/OpenCL-Headers/archive/$OPENCL_HEADERS_HASH.zip" -O "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
 
 echo "Extracting OpenCL Headers"
@@ -28,7 +28,7 @@ rm -rf "OpenCL-Headers-$OPENCL_HEADERS_HASH"
 rm "OpenCL-Headers-$OPENCL_HEADERS_HASH.zip"
 
 echo "Downloading OpenCL ICD"
-OPENCL_ICD_HASH="b3b483303b160db080857288c1b53e8152f62b98"
+OPENCL_ICD_HASH="5f8249691ec8c25775789498951f8e9eb62c201d"
 wget "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/$OPENCL_ICD_HASH.zip" -O "OpenCL-ICD-Loader-$OPENCL_ICD_HASH.zip"
 
 echo "Extracting OpenCL ICD"

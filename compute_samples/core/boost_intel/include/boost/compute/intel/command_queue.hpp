@@ -9,9 +9,10 @@
 #define BOOST_COMPUTE_INTEL_COMMAND_QUEUE_HPP
 
 #include <boost/compute/command_queue.hpp>
+#include <boost/compute/intel/device.hpp>
 
 #include "ocl_entrypoints/cl_intel_aubs.h"
-#include <CL/cl_ext_intel.h>
+#include <CL/cl_ext.h>
 
 namespace boost {
 namespace compute {
@@ -24,6 +25,12 @@ public:
 
   explicit command_queue_intel(const command_queue &other)
       : command_queue(other) {}
+
+  command_queue_intel(const context &context, const device &device,
+                      const cl_queue_properties *queue_properties)
+      : command_queue(create_command_queue_with_properties(context, device,
+                                                           queue_properties),
+                      false) {}
 
   void enqueue_verify_memory(const void *actual_data, const void *expected_data,
                              size_t size_of_comparison,
@@ -123,7 +130,38 @@ public:
     return event_;
   }
 
+  cl_uint family() const { return get_info<cl_uint>(CL_QUEUE_FAMILY_INTEL); }
+  cl_uint index() const { return get_info<cl_uint>(CL_QUEUE_INDEX_INTEL); }
+
+  cl_queue_family_properties_intel queue_family_properties() const {
+    const device_intel device(get_device());
+    const std::vector<cl_queue_family_properties_intel> families =
+        device.queue_family_properties();
+    return families[family()];
+  }
+
+  bool are_capabilities_supported(
+      const cl_command_queue_capabilities_intel capabilities) const {
+    const cl_queue_family_properties_intel properties =
+        queue_family_properties();
+    return (properties.capabilities == CL_QUEUE_DEFAULT_CAPABILITIES_INTEL) ||
+           ((properties.capabilities & capabilities) == capabilities);
+  }
+
   operator command_queue() const { return command_queue(get(), false); }
+
+private:
+  static cl_command_queue create_command_queue_with_properties(
+      const context &context, const device &device,
+      const cl_queue_properties *queue_properties) {
+    cl_int error = CL_SUCCESS;
+    cl_command_queue q = clCreateCommandQueueWithProperties(
+        context, device.id(), queue_properties, &error);
+    if (!q) {
+      BOOST_THROW_EXCEPTION(opencl_error(error));
+    }
+    return q;
+  }
 };
 
 } // namespace compute

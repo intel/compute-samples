@@ -5,7 +5,7 @@
  *
  */
 
-#include <CL/cl_ext_intel.h>
+#include <CL/cl_ext.h>
 #include "ocl_entrypoints/loader.hpp"
 
 namespace cs = compute_samples;

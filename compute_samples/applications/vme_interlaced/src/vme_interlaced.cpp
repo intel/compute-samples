@@ -20,7 +20,7 @@
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
 
-#include <CL/cl_ext_intel.h>
+#include <CL/cl_ext.h>
 #include <thread>
 
 #include "ocl_utils/ocl_utils.hpp"

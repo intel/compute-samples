@@ -11,7 +11,7 @@
 #include <boost/compute/kernel.hpp>
 
 #include <boost/compute/device.hpp>
-#include <CL/cl_ext_intel.h>
+#include <CL/cl_ext.h>
 
 namespace boost {
 namespace compute {

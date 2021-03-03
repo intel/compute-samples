@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "application/application.hpp"
-#include <CL/cl_ext_intel.h>
+#include <CL/cl_ext.h>
 
 namespace compute_samples {
 class UsmQueriesApplication : public Application {

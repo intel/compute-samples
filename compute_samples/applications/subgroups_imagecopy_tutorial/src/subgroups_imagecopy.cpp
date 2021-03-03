@@ -20,7 +20,7 @@
 #include <boost/compute/image.hpp>
 #include <boost/compute/utility.hpp>
 
-#include <CL/cl_ext_intel.h>
+#include <CL/cl_ext.h>
 
 #include "image/image.hpp"
 #include "timer/timer.hpp"
