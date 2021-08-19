@@ -144,6 +144,8 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
                  device_external_memory_properties_to_json(
                      capabilities.external_memory_properties));
   pt::ptree sub_devices;
+  tree.put("sub_devices_count",
+           std::to_string(capabilities.sub_devices.size()));
   if (capabilities.sub_devices.empty()) {
     pt::ptree node;
     sub_devices.push_back(std::make_pair("", node));
