@@ -459,8 +459,13 @@ HWTEST(TestCLVisaInjectionRtBasic, ConstraintsImmediateOperand) {
   compute::buffer out_buffer(context, size * 4,
                              compute::memory_object::read_write);
 
-  const std::string build_options =
+  std::string build_options =
       "-DCONST_ARGUMENT=" + std::to_string(const_argument);
+
+  if (check_supported_subgroup_size(8)) {
+    build_options += " -DHAVE_SIMD8";
+  }
+
   compute::program program = compute_samples::build_program(
       context, "test_cl_visa_injection_rt_basic_constraints_immediate.cl",
       build_options);

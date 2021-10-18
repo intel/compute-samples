@@ -19,6 +19,7 @@ test_constraints_immediate(global int *const d0) {
   d0[tid] = dst;
 }
 
+#ifdef HAVE_SIMD8
 __attribute__((intel_reqd_sub_group_size(8))) kernel void
 test_constraints_immediate_simd8(global const int *const A,
                                  global int *const B) {
@@ -28,3 +29,4 @@ test_constraints_immediate_simd8(global const int *const A,
           : "=rw"(B[wiID])
           : "rw"(A[wiID]), "i"(CONST_ARGUMENT));
 }
+#endif // HAVE_SIMD8
