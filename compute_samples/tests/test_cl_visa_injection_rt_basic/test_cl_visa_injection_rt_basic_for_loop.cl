@@ -157,17 +157,17 @@ test_for_loop(const global uint *pSrc, global uint *pDst) {
         "    max (M1, 16) cond_i95_0(0,0)<1> cond_i101_0(0,0)<1;1,0> cond_i84_0(0,0)<1;1,0>\n"
         "    min (M1, 16) cond_i95_0(0,0)<1> cond_i95_0(0,0)<1;1,0> cond_i99_0(0,0)<1;1,0>\n"
         "    or (M1, 16) %[uiResult](0,0)<1> %[uiResult](0,0)<1;1,0> cond_i95(0,0)<1;1,0>\n"
-        ".decl P3 v_type=P num_elts=16\n"
+        ".decl my_P3 v_type=P num_elts=16\n"
         ".decl ch_069_0 v_type=G type=ud num_elts=1 align=dword alias=<ch_069, 0>\n"
-        "    cmp.lt (M1_NM, 16) P3 ch_069_0(0,0)<0;1,0> 0x3:ud\n"
-        "    (!P3) goto (M1, 1) my_label5\n"
+        "    cmp.lt (M1_NM, 16) my_P3 ch_069_0(0,0)<0;1,0> 0x3:ud\n"
+        "    (!my_P3) goto (M1, 1) my_label5\n"
         "my_label6:\n"
         "    shl (M1_NM, 1) %[uiMask](0,0)<1> %[uiMask](0,0)<0;1,0> 0x8:d\n"
         "    add (M1_NM, 1) ch_069(0,0)<1> ch_069(0,0)<0;1,0> 0x1:w\n"
         "    goto (M1, 1) my_label4\n"
         // clang-format on
         : [uiResult] "+rw"(uiResult)
-        : [uiMask] "+rw"(uiMask), [uiRGBA0] "rw"(uiRGBA[0]),
+        : [uiMask] "rw.u"(uiMask), [uiRGBA0] "rw"(uiRGBA[0]),
           [uiRGBA1] "rw"(uiRGBA[1]), [uiRGBA2] "rw"(uiRGBA[2]),
           [uiRGBA3] "rw"(uiRGBA[3]), [uiRGBA4] "rw"(uiRGBA[4]),
           [uiRGBA5] "rw"(uiRGBA[5]), [uiRGBA6] "rw"(uiRGBA[6]),

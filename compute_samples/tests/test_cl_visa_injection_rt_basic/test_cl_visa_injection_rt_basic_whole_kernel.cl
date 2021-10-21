@@ -15,15 +15,15 @@ test_whole_kernel(const global uint *pSrc, global uint *pDst) {
 
   __asm__ volatile(
       // clang-format off
-      ".decl P1 v_type=P num_elts=16\n"
-      "    cmp.gt (M1, 16) P1 %[iPrev_p_x](0,0)<1;1,0> 0x0:d\n"
-      "    (!P1) goto (M1, 16) label0\n"
+      ".decl my_P1 v_type=P num_elts=16\n"
+      "    cmp.gt (M1, 16) my_P1 %[iPrev_p_x](0,0)<1;1,0> 0x0:d\n"
+      "    (!my_P1) goto (M1, 16) label0\n"
       "label1:\n"
       ".decl add33 v_type=G type=d num_elts=16 align=hword\n"
       "    add (M1, 16) add33(0,0)<1> %[iNext_p_x](0,0)<1;1,0> 0x1:w\n"
-      ".decl P2 v_type=P num_elts=16\n"
-      "    cmp.lt (M1, 16) P2 add33(0,0)<1;1,0> %[hxw](0,0)<0;1,0>\n"
-      "    (!P2) goto (M1, 16) label0\n"
+      ".decl my_P2 v_type=P num_elts=16\n"
+      "    cmp.lt (M1, 16) my_P2 add33(0,0)<1;1,0> %[hxw](0,0)<0;1,0>\n"
+      "    (!my_P2) goto (M1, 16) label0\n"
       "label2:\n"
       ".decl VV0048 v_type=G type=d num_elts=48 align=hword\n"
       "    svm_gather4scaled.RGB (M1, 16) 0x0:ud %[pSrc_iPrev_x_m_1].0 VV0048.0\n"
