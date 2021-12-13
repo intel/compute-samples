@@ -135,6 +135,11 @@ DeviceCapabilities get_device_capabilities(ze_device_handle_t device) {
       get_device_external_memory_properties(device);
   capabilities.sub_devices =
       get_device_sub_devices_capabilities(get_device_sub_devices(device));
+  capabilities.scheduling_hint_properties =
+      get_device_kernel_schedule_hint_properties(device);
+  capabilities.float_atomics_properties =
+      get_float_atomic_ext_properties(device);
+  capabilities.ray_tracing_properties = get_raytracing_ext_properties(device);
   return capabilities;
 }
 
@@ -164,6 +169,49 @@ get_device_module_properties(ze_device_handle_t device) {
   throw_if_failed(result, "zeDeviceGetModuleProperties");
   LOG_DEBUG << "Device module properties retrieved";
   return properties;
+}
+
+ze_scheduling_hint_exp_properties_t
+get_device_kernel_schedule_hint_properties(ze_device_handle_t device) {
+  ze_device_module_properties_t properties;
+  properties = {ZE_STRUCTURE_TYPE_DEVICE_MODULE_PROPERTIES};
+
+  ze_scheduling_hint_exp_properties_t hints = {};
+  properties.pNext = &hints;
+  hints.stype = ZE_STRUCTURE_TYPE_SCHEDULING_HINT_EXP_PROPERTIES;
+  const auto result = zeDeviceGetModuleProperties(device, &properties);
+  throw_if_failed(result, "zeDeviceGetModuleProperties");
+  LOG_DEBUG << "Device module properties scheduling hints retrieved";
+  return hints;
+}
+
+ze_float_atomic_ext_properties_t
+get_float_atomic_ext_properties(ze_device_handle_t device) {
+  ze_device_module_properties_t properties;
+  properties = {ZE_STRUCTURE_TYPE_DEVICE_MODULE_PROPERTIES};
+
+  ze_float_atomic_ext_properties_t float_atomic = {};
+  properties.pNext = &float_atomic;
+  float_atomic.stype = ZE_STRUCTURE_TYPE_FLOAT_ATOMIC_EXT_PROPERTIES;
+  const auto result = zeDeviceGetModuleProperties(device, &properties);
+  throw_if_failed(result, "zeDeviceGetModuleProperties");
+  LOG_DEBUG << "Device module properties float atomics retrieved";
+  return float_atomic;
+}
+
+ze_device_raytracing_ext_properties_t
+get_raytracing_ext_properties(ze_device_handle_t device) {
+  ze_device_module_properties_t properties;
+  properties = {ZE_STRUCTURE_TYPE_DEVICE_MODULE_PROPERTIES};
+
+  ze_device_raytracing_ext_properties_t device_raytracing = {};
+  properties.pNext = &device_raytracing;
+  device_raytracing.stype = ZE_STRUCTURE_TYPE_DEVICE_RAYTRACING_EXT_PROPERTIES;
+  const auto result = zeDeviceGetModuleProperties(device, &properties);
+  throw_if_failed(result, "zeDeviceGetModuleProperties");
+  LOG_DEBUG
+      << "Device module properties device raytracing ext propertie retrieved";
+  return device_raytracing;
 }
 
 std::vector<ze_command_queue_group_properties_t>

@@ -25,6 +25,9 @@ std::string to_string(ze_device_cache_property_flag_t flag);
 std::string to_string(ze_device_property_flag_t flag);
 std::string to_string(ze_device_module_flag_t flag);
 std::string to_string(ze_device_fp_flag_t flag);
+std::string to_string(ze_scheduling_hint_exp_flag_t flag);
+std::string to_string(ze_device_fp_atomic_ext_flag_t flag);
+std::string to_string(ze_device_raytracing_ext_flag_t flag);
 std::string to_string(ze_command_queue_group_property_flag_t flag);
 
 template <typename T> std::string flags_to_string(uint32_t flags) {

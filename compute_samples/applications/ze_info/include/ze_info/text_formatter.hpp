@@ -86,6 +86,17 @@ std::string device_external_memory_properties_to_text(
 std::string key_value_to_text(const std::string key, const std::string value,
                               int indentation_level);
 
+std::string kernel_scheduling_hint_properties_to_text(
+    const ze_scheduling_hint_exp_properties_t &p, const int indentation_level);
+
+std::string
+float_atomics_properties_to_text(const ze_float_atomic_ext_properties_t &p,
+                                 const int indentation_level);
+
+std::string device_raytracing_properties_to_text(
+    const ze_device_raytracing_ext_properties_t &p,
+    const int indentation_level);
+
 } // namespace compute_samples
 
 #endif

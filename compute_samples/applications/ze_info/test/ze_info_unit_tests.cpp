@@ -149,11 +149,40 @@ fake_device_external_memory_properties() {
           ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD};
 }
 
+ze_scheduling_hint_exp_properties_t
+fake_device_kernel_schedule_hint_properties() {
+  return ze_scheduling_hint_exp_properties_t{
+      ZE_STRUCTURE_TYPE_SCHEDULING_HINT_EXP_PROPERTIES, nullptr,
+      ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN |
+          ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN};
+}
+
+ze_float_atomic_ext_properties_t fake_float_atomic_ext_properties() {
+  return ze_float_atomic_ext_properties_t{
+      ZE_STRUCTURE_TYPE_FLOAT_ATOMIC_EXT_PROPERTIES, nullptr,
+      ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE |
+          ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD |
+          ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX,
+      ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE |
+          ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX,
+      ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE};
+}
+
+ze_device_raytracing_ext_properties_t fake_raytracing_ext_properties() {
+  return ze_device_raytracing_ext_properties_t{
+      ZE_STRUCTURE_TYPE_DEVICE_RAYTRACING_EXT_PROPERTIES, nullptr,
+      ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY, 1};
+}
+
 cs::DeviceCapabilities fake_device_capabilities() {
   cs::DeviceCapabilities capabilities = {};
   capabilities.device_properties = fake_device_properties();
   capabilities.compute_properties = fake_device_compute_properties();
   capabilities.module_properties = fake_device_module_properties();
+  capabilities.scheduling_hint_properties =
+      fake_device_kernel_schedule_hint_properties();
+  capabilities.float_atomics_properties = fake_float_atomic_ext_properties();
+  capabilities.ray_tracing_properties = fake_raytracing_ext_properties();
   capabilities.command_queue_group_properties = {
       fake_device_command_queue_group_properties(),
       fake_device_command_queue_group_properties()};
@@ -381,6 +410,12 @@ TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
                                               indentation_level_);
   ss << cs::device_module_properties_to_text(capabilities.module_properties,
                                              indentation_level_);
+  ss << cs::kernel_scheduling_hint_properties_to_text(
+      capabilities.scheduling_hint_properties, indentation_level_);
+  ss << cs::float_atomics_properties_to_text(
+      capabilities.float_atomics_properties, indentation_level_);
+  ss << cs::device_raytracing_properties_to_text(
+      capabilities.ray_tracing_properties, indentation_level_);
   ss << cs::all_device_command_queue_group_properties_to_text(
       capabilities.command_queue_group_properties, indentation_level_);
   ss << cs::all_device_memory_properties_to_text(capabilities.memory_properties,
@@ -748,6 +783,60 @@ TEST_F(TextFormatterTests, KeyValueToText) {
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
+TEST_F(TextFormatterTests, KernelHintsPropertiesToText) {
+  const auto properties = fake_device_kernel_schedule_hint_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text(
+      "Kernel scheduling hints flags",
+      "ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN | "
+      "ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN",
+      indentation_level_);
+  const auto expected = ss.str();
+  const auto actual = cs::kernel_scheduling_hint_properties_to_text(
+      properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, FloatAtomicsPropertiesToText) {
+  const auto properties = fake_float_atomic_ext_properties();
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Float atomics FP16 flags",
+                              "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE "
+                              "| ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD | "
+                              "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Float atomics FP32 flags",
+                              "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE "
+                              "| ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Float atomics FP64 flags",
+                              "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE",
+                              indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::float_atomics_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, RaytracingPropertiesToText) {
+  const auto properties = fake_raytracing_ext_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Raytracing properties",
+                              "ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Raytracing maxBVHLevels", "1",
+                              indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_raytracing_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
 TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
   const auto capabilities = std::vector<cs::DriverCapabilities>{
       fake_driver_capabilities(), fake_driver_capabilities()};
@@ -955,6 +1044,35 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"numQueues\": 2\n"
       "                }\n"
       "            ],\n"
+      "            \"ze_scheduling_hint_exp_properties_t\": {\n"
+      "                \"schedulingHintFlags\": [\n"
+      "                    \"ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN\",\n"
+      "                    "
+      "\"ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_float_atomic_ext_properties_t\": {\n"
+      "                \"fp16Flags\": [\n"
+      "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "                ],\n"
+      "                \"fp32Flags\": [\n"
+      "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "                ],\n"
+      "                \"fp64Flags\": [\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_device_raytracing_ext_properties_t\": {\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY\"\n"
+      "                ],\n"
+      "                \"maxBVHLevels\": 1\n"
+      "            },\n"
       "            \"ze_device_memory_properties_t\": [\n"
       "                {\n"
       "                    \"name\": \"memory_name\",\n"
@@ -1124,6 +1242,35 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"numQueues\": 2\n"
       "                }\n"
       "            ],\n"
+      "            \"ze_scheduling_hint_exp_properties_t\": {\n"
+      "                \"schedulingHintFlags\": [\n"
+      "                    \"ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN\",\n"
+      "                    "
+      "\"ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_float_atomic_ext_properties_t\": {\n"
+      "                \"fp16Flags\": [\n"
+      "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "                ],\n"
+      "                \"fp32Flags\": [\n"
+      "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "                ],\n"
+      "                \"fp64Flags\": [\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_device_raytracing_ext_properties_t\": {\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY\"\n"
+      "                ],\n"
+      "                \"maxBVHLevels\": 1\n"
+      "            },\n"
       "            \"ze_device_memory_properties_t\": [\n"
       "                {\n"
       "                    \"name\": \"memory_name\",\n"
@@ -1365,6 +1512,35 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"numQueues\": 2\n"
       "        }\n"
       "    ],\n"
+      "    \"ze_scheduling_hint_exp_properties_t\": {\n"
+      "        \"schedulingHintFlags\": [\n"
+      "            \"ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN\",\n"
+      "            "
+      "\"ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN\"\n"
+      "        ]\n"
+      "    },\n"
+      "    \"ze_float_atomic_ext_properties_t\": {\n"
+      "        \"fp16Flags\": [\n"
+      "            "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "            \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "            \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "        ],\n"
+      "        \"fp32Flags\": [\n"
+      "            "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "            \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "        ],\n"
+      "        \"fp64Flags\": [\n"
+      "            \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\"\n"
+      "        ]\n"
+      "    },\n"
+      "    \"ze_device_raytracing_ext_properties_t\": {\n"
+      "        \"flags\": [\n"
+      "            \"ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY\"\n"
+      "        ],\n"
+      "        \"maxBVHLevels\": 1\n"
+      "    },\n"
       "    \"ze_device_memory_properties_t\": [\n"
       "        {\n"
       "            \"name\": \"memory_name\",\n"
@@ -1535,6 +1711,35 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"numQueues\": 2\n"
       "                }\n"
       "            ],\n"
+      "            \"ze_scheduling_hint_exp_properties_t\": {\n"
+      "                \"schedulingHintFlags\": [\n"
+      "                    \"ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN\",\n"
+      "                    "
+      "\"ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_float_atomic_ext_properties_t\": {\n"
+      "                \"fp16Flags\": [\n"
+      "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "                ],\n"
+      "                \"fp32Flags\": [\n"
+      "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "                ],\n"
+      "                \"fp64Flags\": [\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_device_raytracing_ext_properties_t\": {\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY\"\n"
+      "                ],\n"
+      "                \"maxBVHLevels\": 1\n"
+      "            },\n"
       "            \"ze_device_memory_properties_t\": [\n"
       "                {\n"
       "                    \"name\": \"memory_name\",\n"
@@ -1706,6 +1911,35 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"numQueues\": 2\n"
       "                }\n"
       "            ],\n"
+      "            \"ze_scheduling_hint_exp_properties_t\": {\n"
+      "                \"schedulingHintFlags\": [\n"
+      "                    \"ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN\",\n"
+      "                    "
+      "\"ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_float_atomic_ext_properties_t\": {\n"
+      "                \"fp16Flags\": [\n"
+      "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "                ],\n"
+      "                \"fp32Flags\": [\n"
+      "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
+      "                ],\n"
+      "                \"fp64Flags\": [\n"
+      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_device_raytracing_ext_properties_t\": {\n"
+      "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY\"\n"
+      "                ],\n"
+      "                \"maxBVHLevels\": 1\n"
+      "            },\n"
       "            \"ze_device_memory_properties_t\": [\n"
       "                {\n"
       "                    \"name\": \"memory_name\",\n"

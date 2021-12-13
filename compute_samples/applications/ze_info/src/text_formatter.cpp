@@ -117,6 +117,12 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
                                           indentation_level);
   ss << device_module_properties_to_text(capabilities.module_properties,
                                          indentation_level);
+  ss << kernel_scheduling_hint_properties_to_text(
+      capabilities.scheduling_hint_properties, indentation_level);
+  ss << float_atomics_properties_to_text(capabilities.float_atomics_properties,
+                                         indentation_level);
+  ss << device_raytracing_properties_to_text(
+      capabilities.ray_tracing_properties, indentation_level);
   ss << all_device_command_queue_group_properties_to_text(
       capabilities.command_queue_group_properties, indentation_level);
   ss << all_device_memory_properties_to_text(capabilities.memory_properties,
@@ -255,6 +261,48 @@ device_module_properties_to_text(const ze_device_module_properties_t &p,
   ss << key_value_to_text("Native kernel supported",
                           uuid_to_string(p.nativeKernelSupported.id),
                           indentation_level);
+  return ss.str();
+}
+
+std::string kernel_scheduling_hint_properties_to_text(
+    const ze_scheduling_hint_exp_properties_t &p, const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text(
+      "Kernel scheduling hints flags",
+      flags_to_string<ze_scheduling_hint_exp_flag_t>(p.schedulingHintFlags),
+      indentation_level);
+  return ss.str();
+}
+
+std::string
+float_atomics_properties_to_text(const ze_float_atomic_ext_properties_t &p,
+                                 const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text(
+      "Float atomics FP16 flags",
+      flags_to_string<ze_device_fp_atomic_ext_flag_t>(p.fp16Flags),
+      indentation_level);
+  ss << key_value_to_text(
+      "Float atomics FP32 flags",
+      flags_to_string<ze_device_fp_atomic_ext_flag_t>(p.fp32Flags),
+      indentation_level);
+  ss << key_value_to_text(
+      "Float atomics FP64 flags",
+      flags_to_string<ze_device_fp_atomic_ext_flag_t>(p.fp64Flags),
+      indentation_level);
+  return ss.str();
+}
+
+std::string device_raytracing_properties_to_text(
+    const ze_device_raytracing_ext_properties_t &p,
+    const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text(
+      "Raytracing properties",
+      flags_to_string<ze_device_raytracing_ext_flag_t>(p.flags),
+      indentation_level);
+  ss << key_value_to_text("Raytracing maxBVHLevels",
+                          std::to_string(p.maxBVHLevels), indentation_level);
   return ss.str();
 }
 

@@ -24,6 +24,9 @@ struct DeviceCapabilities {
   ze_device_image_properties_t image_properties;
   ze_device_external_memory_properties_t external_memory_properties;
   std::vector<DeviceCapabilities> sub_devices;
+  ze_scheduling_hint_exp_properties_t scheduling_hint_properties;
+  ze_float_atomic_ext_properties_t float_atomics_properties;
+  ze_device_raytracing_ext_properties_t ray_tracing_properties;
 };
 
 struct DriverCapabilities {
@@ -85,6 +88,15 @@ get_device_external_memory_properties(ze_device_handle_t device);
 
 std::vector<ze_device_handle_t>
 get_device_sub_devices(ze_device_handle_t device);
+
+ze_scheduling_hint_exp_properties_t
+get_device_kernel_schedule_hint_properties(ze_device_handle_t device);
+
+ze_float_atomic_ext_properties_t
+get_float_atomic_ext_properties(ze_device_handle_t device);
+
+ze_device_raytracing_ext_properties_t
+get_raytracing_ext_properties(ze_device_handle_t device);
 
 std::vector<DeviceCapabilities> get_device_sub_devices_capabilities(
     const std::vector<ze_device_handle_t> &sub_devices);

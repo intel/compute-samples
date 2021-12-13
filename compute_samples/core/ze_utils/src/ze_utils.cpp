@@ -31,6 +31,10 @@ std::string to_string(const ze_result_t result) {
     return "ZE_RESULT_ERROR_MODULE_BUILD_FAILURE";
   case ZE_RESULT_ERROR_MODULE_LINK_FAILURE:
     return "ZE_RESULT_ERROR_MODULE_LINK_FAILURE";
+  case ZE_RESULT_ERROR_DEVICE_REQUIRES_RESET:
+    return "ZE_RESULT_ERROR_DEVICE_REQUIRES_RESET";
+  case ZE_RESULT_ERROR_DEVICE_IN_LOW_POWER_STATE:
+    return "ZE_RESULT_ERROR_DEVICE_IN_LOW_POWER_STATE";
   case ZE_RESULT_ERROR_INSUFFICIENT_PERMISSIONS:
     return "ZE_RESULT_ERROR_INSUFFICIENT_PERMISSIONS";
   case ZE_RESULT_ERROR_NOT_AVAILABLE:
@@ -135,6 +139,8 @@ std::string to_string(const ze_device_type_t type) {
     return "ZE_DEVICE_TYPE_FPGA";
   case ZE_DEVICE_TYPE_MCA:
     return "ZE_DEVICE_TYPE_MCA";
+  case ZE_DEVICE_TYPE_VPU:
+    return "ZE_DEVICE_TYPE_VPU";
   case ZE_DEVICE_TYPE_FORCE_UINT32:
     return "ZE_DEVICE_TYPE_FORCE_UINT32";
   default:
@@ -167,6 +173,18 @@ std::string to_string(const ze_external_memory_type_flag_t flag) {
     return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD";
   case ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF:
     return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF";
+  case ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_WIN32:
+    return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_WIN32";
+  case ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_WIN32_KMT:
+    return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_WIN32_KMT";
+  case ZE_EXTERNAL_MEMORY_TYPE_FLAG_D3D11_TEXTURE:
+    return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_D3D11_TEXTURE";
+  case ZE_EXTERNAL_MEMORY_TYPE_FLAG_D3D11_TEXTURE_KMT:
+    return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_D3D11_TEXTURE_KMT";
+  case ZE_EXTERNAL_MEMORY_TYPE_FLAG_D3D12_HEAP:
+    return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_D3D12_HEAP";
+  case ZE_EXTERNAL_MEMORY_TYPE_FLAG_D3D12_RESOURCE:
+    return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_D3D12_RESOURCE";
   case ZE_EXTERNAL_MEMORY_TYPE_FLAG_FORCE_UINT32:
     return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_FORCE_UINT32";
   default:
@@ -263,6 +281,56 @@ std::string to_string(const ze_command_queue_group_property_flag_t flag) {
     return "ZE_COMMAND_QUEUE_GROUP_PROPERTY_FLAG_FORCE_UINT32";
   default:
     return "Unknown ze_command_queue_group_property_flag_t value: " +
+           std::to_string(static_cast<int>(flag));
+  }
+}
+
+std::string to_string(const ze_scheduling_hint_exp_flag_t flag) {
+  switch (flag) {
+  case ZE_SCHEDULING_HINT_EXP_FLAG_OLDEST_FIRST:
+    return "ZE_SCHEDULING_HINT_EXP_FLAG_OLDEST_FIRST";
+  case ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN:
+    return "ZE_SCHEDULING_HINT_EXP_FLAG_ROUND_ROBIN";
+  case ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN:
+    return "ZE_SCHEDULING_HINT_EXP_FLAG_STALL_BASED_ROUND_ROBIN";
+  case ZE_SCHEDULING_HINT_EXP_FLAG_FORCE_UINT32:
+    return "ZE_SCHEDULING_HINT_EXP_FLAG_FORCE_UINT32";
+  default:
+    return "Unknown ze_scheduling_hint_exp_flag_t value: " +
+           std::to_string(static_cast<int>(flag));
+  }
+}
+
+std::string to_string(const ze_device_fp_atomic_ext_flag_t flag) {
+  switch (flag) {
+  case ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE:
+    return "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE";
+  case ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD:
+    return "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD";
+  case ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX:
+    return "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX";
+  case ZE_DEVICE_FP_ATOMIC_EXT_FLAG_LOCAL_LOAD_STORE:
+    return "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_LOCAL_LOAD_STORE";
+  case ZE_DEVICE_FP_ATOMIC_EXT_FLAG_LOCAL_ADD:
+    return "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_LOCAL_ADD";
+  case ZE_DEVICE_FP_ATOMIC_EXT_FLAG_LOCAL_MIN_MAX:
+    return "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_LOCAL_MIN_MAX";
+  case ZE_DEVICE_FP_ATOMIC_EXT_FLAG_FORCE_UINT32:
+    return "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_FORCE_UINT32";
+  default:
+    return "Unknown ze_device_fp_atomic_ext_flag_t value: " +
+           std::to_string(static_cast<int>(flag));
+  }
+}
+
+std::string to_string(const ze_device_raytracing_ext_flag_t flag) {
+  switch (flag) {
+  case ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY:
+    return "ZE_DEVICE_RAYTRACING_EXT_FLAG_RAYQUERY";
+  case ZE_DEVICE_RAYTRACING_EXT_FLAG_FORCE_UINT32:
+    return "ZE_DEVICE_RAYTRACING_EXT_FLAG_FORCE_UINT32";
+  default:
+    return "Unknown ze_raytracing_mem_alloc_ext_flag_t value: " +
            std::to_string(static_cast<int>(flag));
   }
 }

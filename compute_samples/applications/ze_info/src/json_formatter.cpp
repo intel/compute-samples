@@ -114,6 +114,70 @@ driver_extension_properties_to_json(const ze_driver_extension_properties_t &p) {
   return tree;
 }
 
+boost::property_tree::ptree kernel_scheduling_hint_properties_to_json(
+    const ze_scheduling_hint_exp_properties_t &p) {
+  pt::ptree tree;
+  pt::ptree flags_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_scheduling_hint_exp_flag_t>(
+                        p.schedulingHintFlags),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("schedulingHintFlags", flags_node);
+  return tree;
+}
+
+boost::property_tree::ptree
+float_atomics_properties_to_json(const ze_float_atomic_ext_properties_t &p) {
+  pt::ptree tree;
+  pt::ptree fp16flags;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_device_fp_atomic_ext_flag_t>(p.fp16Flags),
+           " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    fp16flags.push_back(std::make_pair("", node));
+  }
+  tree.add_child("fp16Flags", fp16flags);
+  pt::ptree fp32flags;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_device_fp_atomic_ext_flag_t>(p.fp32Flags),
+           " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    fp32flags.push_back(std::make_pair("", node));
+  }
+  tree.add_child("fp32Flags", fp32flags);
+  pt::ptree fp64flags;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_device_fp_atomic_ext_flag_t>(p.fp64Flags),
+           " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    fp64flags.push_back(std::make_pair("", node));
+  }
+  tree.add_child("fp64Flags", fp64flags);
+  return tree;
+}
+
+boost::property_tree::ptree device_raytracing_properties_to_json(
+    const ze_device_raytracing_ext_properties_t &p) {
+  pt::ptree tree;
+  pt::ptree flags_node;
+  for (const auto &flag : split_string(
+           flags_to_string<ze_device_raytracing_ext_flag_t>(p.flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    flags_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("flags", flags_node);
+  tree.put("maxBVHLevels", p.maxBVHLevels);
+  return tree;
+}
+
 boost::property_tree::ptree
 device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   pt::ptree tree;
@@ -128,6 +192,15 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   tree.add_child("ze_command_queue_group_properties_t",
                  all_device_command_queue_group_properties_to_json(
                      capabilities.command_queue_group_properties));
+  tree.add_child("ze_scheduling_hint_exp_properties_t",
+                 kernel_scheduling_hint_properties_to_json(
+                     capabilities.scheduling_hint_properties));
+  tree.add_child(
+      "ze_float_atomic_ext_properties_t",
+      float_atomics_properties_to_json(capabilities.float_atomics_properties));
+  tree.add_child("ze_device_raytracing_ext_properties_t",
+                 device_raytracing_properties_to_json(
+                     capabilities.ray_tracing_properties));
   tree.add_child(
       "ze_device_memory_properties_t",
       all_device_memory_properties_to_json(capabilities.memory_properties));
