@@ -388,10 +388,6 @@ HWTEST(clGetMemAllocInfoINTELTests,
 HWTEST(clGetMemAllocInfoINTELTests,
        GivenSharedSystemAllocationAndDeviceParameterThenNullIsReturned) {
   const compute::usm_type memory_type = compute::usm_type::unknown;
-  if (!is_memory_access_supported(memory_type)) {
-    REPORT_UNSUPPORTED_SCENARIO("Memory access is not supported for: " +
-                                cs::to_string(memory_type));
-  }
 
   std::unique_ptr<cl_int> p(new cl_int);
 
