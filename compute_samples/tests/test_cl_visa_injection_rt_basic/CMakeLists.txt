@@ -43,6 +43,8 @@ set(KERNEL_LIST
   "test_cl_visa_injection_rt_basic_for_loop.cl"
   "test_cl_visa_injection_rt_basic_gemm.cl"
   "test_cl_visa_injection_rt_basic_stencil_5_point.cl"
+  "test_cl_visa_injection_rt_basic_tf32_cvt.cl"
+  "test_cl_visa_injection_rt_basic_bf8_srnd.cl"
   )
 
 add_kernels(test_cl_visa_injection_rt_basic ${KERNEL_LIST})

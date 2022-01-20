@@ -1121,4 +1121,92 @@ HWTEST(TestCLVisaInjectionRtBasic, StencilFloat) {
   EXPECT_THAT(dst1, ::testing::Pointwise(::testing::FloatNear(0.00001f), dst2));
 }
 
+HWTEST(TestCLVisaInjectionRtBasic, F32ToTf32) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t size = 64;
+  const int seed = 0;
+
+  auto input = cs::generate_vector<float>(size, seed);
+  auto output = cs::generate_vector<int>(size, seed + 1);
+
+  const compute::context context = compute::system::default_context();
+
+  auto input_buff = create_input_buffer(context, input);
+
+  compute::buffer output_buff(context, cs::size_in_bytes(output),
+                              compute::memory_object::read_write);
+
+  compute::program program = compute_samples::build_program(
+      context, "test_cl_visa_injection_rt_basic_tf32_cvt.cl",
+      "-Dcl_intel_subgroup_matrix_multiply_accumulate "
+      "-Dcl_intel_subgroup_matrix_multiply_accumulate_tf32");
+  compute::command_queue queue = compute::system::default_queue();
+
+  auto run_kernel = [&](const char *kernel_name,
+                        std::vector<int> &dst) -> void {
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(output_buff, input_buff);
+    queue.enqueue_write_buffer(output_buff, 0, cs::size_in_bytes(output),
+                               output.data());
+    queue.enqueue_1d_range_kernel(kernel, 0, size, 0);
+    queue.enqueue_read_buffer(output_buff, 0, cs::size_in_bytes(output),
+                              dst.data());
+  };
+
+  decltype(output) dst1(size);
+  run_kernel("test_tf32_cvt", dst1);
+
+  decltype(output) dst2(size);
+  run_kernel("test_asm_tf32_cvt", dst2);
+
+  EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst2));
+}
+
+HWTEST(TestCLVisaInjectionRtBasic, Fp16ToBf8Srnd) {
+  EXPECT_TRUE(check_supported_subgroup_size(16));
+
+  const size_t size = 64;
+  const int seed = 0;
+
+  auto input = cs::generate_vector<uint16_t>(size, seed);
+  auto random = cs::generate_vector<uint16_t>(size, seed + 1);
+  auto output = cs::generate_vector<uint16_t>(size >> 1, seed + 2);
+
+  const compute::context context = compute::system::default_context();
+
+  auto input_buff = create_input_buffer(context, input);
+  auto random_buff = create_input_buffer(context, random);
+
+  compute::buffer output_buff(context, cs::size_in_bytes(output),
+                              compute::memory_object::read_write);
+
+  compute::program program = compute_samples::build_program(
+      context, "test_cl_visa_injection_rt_basic_bf8_srnd.cl",
+      "-Dcl_intel_subgroup_matrix_multiply_accumulate "
+      "-Dcl_intel_subgroup_matrix_multiply_accumulate_bf8 "
+      "-Dcl_khr_fp16 "
+      "-Dcl_intel_stochastic_rounding");
+  compute::command_queue queue = compute::system::default_queue();
+
+  auto run_kernel = [&](const char *kernel_name,
+                        std::vector<uint16_t> &dst) -> void {
+    compute::kernel kernel = program.create_kernel(kernel_name);
+    kernel.set_args(output_buff, input_buff, random_buff);
+    queue.enqueue_write_buffer(output_buff, 0, cs::size_in_bytes(output),
+                               output.data());
+    queue.enqueue_1d_range_kernel(kernel, 0, size, 0);
+    queue.enqueue_read_buffer(output_buff, 0, cs::size_in_bytes(output),
+                              dst.data());
+  };
+
+  decltype(output) dst1(size);
+  run_kernel("test_bf8_srnd", dst1);
+
+  decltype(output) dst2(size);
+  run_kernel("test_asm_bf8_srnd", dst2);
+
+  EXPECT_THAT(dst1, ::testing::ElementsAreArray(dst2));
+}
+
 } // namespace

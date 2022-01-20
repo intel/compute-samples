@@ -216,6 +216,9 @@ This feature is experimental and may not be supported on our drivers or with a l
      - SGEMM [test_cl_visa_injection_rt_basic_gemm.cl](test_cl_visa_injection_rt_basic_gemm.cl)
    - [x] 2D 5 points stencil operation in assembler
      - StencilFloat [test_cl_visa_injection_rt_basic_stencil_5_point.cl](test_cl_visa_injection_rt_basic_stencil_5_point.cl)
+   - [x] Conversions
+     - FP16->BF8 with stochastic rounding [test_cl_visa_injection_rt_basic_bf8_srnd.cl](test_cl_visa_injection_rt_basic_bf8_srnd.cl)
+     - FP32->TF32 [test_cl_visa_injection_rt_basic_tf32_cvt.cl](test_cl_visa_injection_rt_basic_tf32_cvt.cl)
 3. Negative test cases (TestCLVisaInjectionRtNegativeCases)
    - [x] Simple test case with illegal input
     - [x] Simple (string under test `@@`)
