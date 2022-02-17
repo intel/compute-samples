@@ -40,6 +40,7 @@ test_for_loop(const global uint *pSrc, global uint *pDst) {
 
     __asm__ volatile(
         // clang-format off
+        "{\n"
         ".decl ch_069 v_type=G type=d num_elts=1 align=dword\n"
         "mov (M1_NM, 1) ch_069(0,0)<1> 0x0:d\n"
         "my_label4:\n"
@@ -48,19 +49,22 @@ test_for_loop(const global uint *pSrc, global uint *pDst) {
         ".decl and59 v_type=G type=d num_elts=16 align=hword\n"
         "    and (M1, 16) and59(0,0)<1> %[uiRGBA1](0,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
         ".decl and61 v_type=G type=d num_elts=16 align=hword\n"
-        "    and (M1, 16) and61(0,0)<1> %[uiRGBA2](4,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
+        ".decl tmp1  v_type=G type=d num_elts=16 align=hword alias=<%[uiRGBA2], 128>\n"
+        "    and (M1, 16) and61(0,0)<1> tmp1(0,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
         ".decl and63 v_type=G type=d num_elts=16 align=hword\n"
         "    and (M1, 16) and63(0,0)<1> %[uiRGBA3](0,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
         ".decl and65 v_type=G type=d num_elts=16 align=hword\n"
         "    and (M1, 16) and65(0,0)<1> %[uiRGBA4](0,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
         ".decl and67 v_type=G type=d num_elts=16 align=hword\n"
-        "    and (M1, 16) and67(0,0)<1> %[uiRGBA5](4,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
+        ".decl tmp2  v_type=G type=d num_elts=16 align=hword alias=<%[uiRGBA5], 128>\n"
+        "    and (M1, 16) and67(0,0)<1> tmp2(0,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
         ".decl and69 v_type=G type=d num_elts=16 align=hword\n"
         "    and (M1, 16) and69(0,0)<1> %[uiRGBA6](0,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
         ".decl and71 v_type=G type=d num_elts=16 align=hword\n"
         "    and (M1, 16) and71(0,0)<1> %[uiRGBA7](0,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
         ".decl and73 v_type=G type=d num_elts=16 align=hword\n"
-        "    and (M1, 16) and73(0,0)<1> %[uiRGBA8](4,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
+        ".decl tmp3  v_type=G type=d num_elts=16 align=hword alias=<%[uiRGBA8], 128>\n"
+        "    and (M1, 16) and73(0,0)<1> tmp3(0,0)<1;1,0> %[uiMask](0,0)<0;1,0>\n"
         ".decl cond_i v_type=G type=d num_elts=16 align=hword\n"
         ".decl and59_0 v_type=G type=ud num_elts=16 align=hword alias=<and59, 0>\n"
         ".decl and__0 v_type=G type=ud num_elts=16 align=hword alias=<and_, 0>\n"
@@ -165,6 +169,7 @@ test_for_loop(const global uint *pSrc, global uint *pDst) {
         "    shl (M1_NM, 1) %[uiMask](0,0)<1> %[uiMask](0,0)<0;1,0> 0x8:d\n"
         "    add (M1_NM, 1) ch_069(0,0)<1> ch_069(0,0)<0;1,0> 0x1:w\n"
         "    goto (M1, 1) my_label4\n"
+        "}\n"
         // clang-format on
         : [uiResult] "+rw"(uiResult)
         : [uiMask] "rw.u"(uiMask), [uiRGBA0] "rw"(uiRGBA[0]),
