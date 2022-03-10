@@ -19,9 +19,6 @@ asm [qualifiers] ([Assembler Template]
     : Constraint (Input Operands));
 ```
 
-**NB**
-This feature is experimental and may not be supported on our drivers or with a limited support.
-
 ## Test cases examples
 
 - Empty template
@@ -216,34 +213,36 @@ This feature is experimental and may not be supported on our drivers or with a l
      - SGEMM [test_cl_visa_injection_rt_basic_gemm.cl](test_cl_visa_injection_rt_basic_gemm.cl)
    - [x] 2D 5 points stencil operation in assembler
      - StencilFloat [test_cl_visa_injection_rt_basic_stencil_5_point.cl](test_cl_visa_injection_rt_basic_stencil_5_point.cl)
-   - [x] Conversions
-     - FP16->BF8 with stochastic rounding [test_cl_visa_injection_rt_basic_bf8_srnd.cl](test_cl_visa_injection_rt_basic_bf8_srnd.cl)
-     - FP32->TF32 [test_cl_visa_injection_rt_basic_tf32_cvt.cl](test_cl_visa_injection_rt_basic_tf32_cvt.cl)
+   - Conversions
+     - [x] FP16->BF8 with stochastic rounding (PVC+)
+       - Fp16ToBf8Srnd [test_cl_visa_injection_rt_basic_bf8_srnd.cl](test_cl_visa_injection_rt_basic_bf8_srnd.cl)
+     - [x] FP32->TF32 (PVC+)
+       - F32ToTf32 [test_cl_visa_injection_rt_basic_tf32_cvt.cl](test_cl_visa_injection_rt_basic_tf32_cvt.cl)
 3. Negative test cases (TestCLVisaInjectionRtNegativeCases)
    - [x] Simple test case with illegal input
-    - [x] Simple (string under test `@@`)
+     - Simple (string under test `@@`)
    - [x] Illegal exec size
-    - [x] IllegalExecSize (string under test `mov (M1_NM, 6) tmp1(0,1)<1>  tmp2(0,0)<1;1,0>`)
+     - IllegalExecSize (string under test `mov (M1_NM, 6) tmp1(0,1)<1>  tmp2(0,0)<1;1,0>`)
    - [x] Missing regioning
-    - [x] MissingRegion (string under test `mov (M1_NM, 8) tmp1(0,1)<1>  tmp2(0,0)`)
+     - MissingRegion (string under test `mov (M1_NM, 8) tmp1(0,1)<1>  tmp2(0,0)`)
    - [x] Bad opcode
-    - [x] BadOpcode (string under test `movi (M1_NM, 8) tmp1(0,1)<1>  tmp2(0,0)`)
+     - BadOpcode (string under test `movi (M1_NM, 8) tmp1(0,1)<1>  tmp2(0,0)`)
    - [x] Undefined declaration
-    - [x] UndefinedDecl (string under test `mov (M1_NM, 8) tmp1(0,1)<1>  my_super_var(0,0)`)
+     - UndefinedDecl (string under test `mov (M1_NM, 8) tmp1(0,1)<1>  my_super_var(0,0)`)
    - [x] Undefined predicate
-    - [x] UndefinedPred (string under test `cmp.lt (M1_NM, 8) P3 tmp1(0,0)<0;1,0> 0x3:ud`)
+     - UndefinedPred (string under test `cmp.lt (M1_NM, 8) P3 tmp1(0,0)<0;1,0> 0x3:ud`)
    - [x] Bad operand syntax
-    - [x] BadOperandSyntax (string under test `mov (M1_NM, 8) tmp1(0,1)<1>:f tmp2(0,0)<1;1,0>`)
+     - BadOperandSyntax (string under test `mov (M1_NM, 8) tmp1(0,1)<1>:f tmp2(0,0)<1;1,0>`)
    - [x] Wrong declare
-    - [x] WrongDeclare (string under test `.decl TMP v_type=G type=f`)
+     - WrongDeclare (string under test `.decl TMP v_type=G type=f`)
    - [x] Missing label
-    - [x] MissingLabel (string under test `goto (M1, 16) check_label0`)
+     - MissingLabel (string under test `goto (M1, 16) check_label0`)
    - [x] Duplicate labels
-    - [x] (string under test `check_label0:\ncheck_label0:`)
+     - (string under test `check_label0:\ncheck_label0:`)
    - [x] Unsupported instruction ICLLP vs SKL
-    - [x] UnsupportedInstructionDIVM (string under test `divm (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:f`)
+     - UnsupportedInstructionDIVM (string under test `divm (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:f`)
    - [x] Unsupported instruction SKL vs TGLLP
-    - [x] UnsupportedInstructionROL (string under test `rol (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:d`)
+     - UnsupportedInstructionROL (string under test `rol (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:d`)
 
 ## Selecting tests
 
