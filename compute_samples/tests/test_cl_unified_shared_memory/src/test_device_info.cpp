@@ -47,8 +47,7 @@ HWTEST(clGetDeviceInfo,
 
 HWTEST(clGetDeviceInfo, ExtensionIsSupported) {
   compute::device device = compute::system::default_device();
-  EXPECT_TRUE(
-      device.supports_extension("cl_intel_unified_shared_memory_preview"));
+  EXPECT_TRUE(device.supports_extension("cl_intel_unified_shared_memory"));
 }
 
 } // namespace

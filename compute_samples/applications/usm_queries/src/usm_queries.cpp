@@ -28,9 +28,8 @@ Application::Status UsmQueriesApplication::run_implementation(
   const compute::device_intel device(compute::system::default_device());
   LOG_INFO << "OpenCL device: " << device.name();
 
-  LOG_INFO << "cl_intel_unified_shared_memory_preview extension supported: "
-           << device.supports_extension(
-                  "cl_intel_unified_shared_memory_preview");
+  LOG_INFO << "cl_intel_unified_shared_memory extension supported: "
+           << device.supports_extension("cl_intel_unified_shared_memory");
   LOG_INFO << "CL_DEVICE_HOST_MEM_CAPABILITIES_INTEL: "
            << to_string(device.host_mem_capabilities());
   LOG_INFO << "CL_DEVICE_DEVICE_MEM_CAPABILITIES_INTEL: "

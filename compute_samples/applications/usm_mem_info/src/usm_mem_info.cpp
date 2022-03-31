@@ -27,8 +27,8 @@ Application::Status UsmMemInfoApplication::run_implementation(
   const compute::device device = compute::system::default_device();
   LOG_INFO << "OpenCL device: " << device.name();
 
-  if (!device.supports_extension("cl_intel_unified_shared_memory_preview")) {
-    LOG_ERROR << "cl_intel_unified_shared_memory_preview extension is required";
+  if (!device.supports_extension("cl_intel_unified_shared_memory")) {
+    LOG_ERROR << "cl_intel_unified_shared_memory extension is required";
     return Status::SKIP;
   }
 
