@@ -9,7 +9,7 @@ Source code is organized in a way to highlight similarities and differences betw
 It is also possible to change allocation size simply by passing `--size N` option from a command line. `N` is a number of elements to allocate and each element has 4 bytes (`cl_uint`).
 
 Basic structure of an application using USM is presented below:
-1. Check if `cl_intel_unified_shared_memory_preview` extension is reported by a device.
+1. Check if `cl_intel_unified_shared_memory` extension is reported by a device.
 1. Check if all required USM capabilities are supported.
 1. Allocate memory using:
     1. `clHostMemAllocINTEL`;

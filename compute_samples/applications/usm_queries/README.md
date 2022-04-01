@@ -1,7 +1,7 @@
 # usm_queries
 Sample demonstrating how to query OpenCL device capabilities related to [Unified Shared Memory](https://github.com/intel/llvm/blob/863887687681f9fcd51b03572b2df470ebc1498f/sycl/doc/extensions/usm/cl_intel_unified_shared_memory.asciidoc).
 
-To check if your device supports Unified Shared Memory you should verify if `cl_intel_unified_shared_memory_preview` extension string is present in `CL_DEVICE_EXTENSIONS`.
+To check if your device supports Unified Shared Memory you should verify if `cl_intel_unified_shared_memory` extension string is present in `CL_DEVICE_EXTENSIONS`.
 
 Unified Shared Memory specification defines five different allocation types that you can use:
 1. `Host`;
