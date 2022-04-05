@@ -903,7 +903,7 @@ protected:
 HWTEST_F(TestConcurrentExecution, clEnqueueReadWriteBuffer) {
   for (int iteration = 0; iteration < iterations_; ++iteration) {
     for (size_t id = 0; id < command_queues_.size(); ++id) {
-      const int offset = id * command_queues_.size() + iteration;
+      const int offset = id * iterations_ + iteration;
       command_queues_[id].enqueue_write_buffer_async(
           buffers_[offset], 0, sizeof(cl_int), &input_[offset]);
       command_queues_[id].enqueue_read_buffer_async(
