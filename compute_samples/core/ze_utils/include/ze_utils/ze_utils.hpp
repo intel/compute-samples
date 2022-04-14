@@ -40,6 +40,7 @@ template <typename T> std::string flags_to_string(uint32_t flags) {
       output.emplace_back(to_string(static_cast<T>(flag)));
     }
   }
+  std::sort(output.begin(), output.end());
   return join_strings(output, " | ");
 }
 

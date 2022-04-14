@@ -15,6 +15,7 @@
 #include <string>
 #include <iomanip>
 #include <regex>
+#include <map>
 
 #include <boost/property_tree/json_parser.hpp>
 namespace pt = boost::property_tree;
@@ -94,23 +95,22 @@ boost::property_tree::ptree all_driver_extension_properties_to_json(
     pt::ptree node;
     tree.push_back(std::make_pair("", node));
   } else {
+    std::map<std::string, std::string> extensions;
     for (const auto &properties : p) {
-      tree.push_back(
-          std::make_pair("", driver_extension_properties_to_json(properties)));
+      const auto int_version = properties.version;
+      const std::string string_version =
+          std::to_string(ZE_MAJOR_VERSION(int_version)) + "." +
+          std::to_string(ZE_MINOR_VERSION(int_version));
+      extensions[properties.name] = string_version;
+    }
+
+    for (const auto &item : extensions) {
+      pt::ptree extensions_tree;
+      extensions_tree.put("name", item.first);
+      extensions_tree.put("version", item.second);
+      tree.push_back(std::make_pair("", extensions_tree));
     }
   }
-  return tree;
-}
-
-boost::property_tree::ptree
-driver_extension_properties_to_json(const ze_driver_extension_properties_t &p) {
-  pt::ptree tree;
-  tree.put("name", p.name);
-  const auto int_version = p.version;
-  const std::string string_version =
-      std::to_string(ZE_MAJOR_VERSION(int_version)) + "." +
-      std::to_string(ZE_MINOR_VERSION(int_version));
-  tree.put("version", string_version);
   return tree;
 }
 

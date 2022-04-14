@@ -229,7 +229,7 @@ ze_driver_ipc_properties_t fake_driver_ipc_properties() {
 }
 
 ze_driver_extension_properties_t fake_driver_extension_properties() {
-  return ze_driver_extension_properties_t{"extension", ZE_API_VERSION_1_0};
+  return ze_driver_extension_properties_t{"extension_a", ZE_API_VERSION_1_0};
 }
 
 cs::DriverCapabilities fake_driver_capabilities() {
@@ -238,7 +238,8 @@ cs::DriverCapabilities fake_driver_capabilities() {
   driver_capabilities.driver_properties = fake_driver_properties();
   driver_capabilities.ipc_properties = fake_driver_ipc_properties();
   driver_capabilities.extension_properties = {
-      fake_driver_extension_properties(), fake_driver_extension_properties()};
+      fake_driver_extension_properties(),
+      ze_driver_extension_properties_t{"extension_b", ZE_API_VERSION_1_0}};
   return driver_capabilities;
 }
 
@@ -359,7 +360,7 @@ TEST_F(TextFormatterTests, DriverIpcPropertiesToText) {
   std::stringstream ss;
   ss << cs::key_value_to_text(
       "IPC flags",
-      "ZE_IPC_PROPERTY_FLAG_MEMORY | ZE_IPC_PROPERTY_FLAG_EVENT_POOL",
+      "ZE_IPC_PROPERTY_FLAG_EVENT_POOL | ZE_IPC_PROPERTY_FLAG_MEMORY",
       indentation_level_);
   const auto expected = ss.str();
   const auto actual =
@@ -370,7 +371,8 @@ TEST_F(TextFormatterTests, DriverIpcPropertiesToText) {
 
 TEST_F(TextFormatterTests, AllDriverExtensionPropertiesToText) {
   const auto properties = std::vector<ze_driver_extension_properties_t>{
-      fake_driver_extension_properties(), fake_driver_extension_properties()};
+      fake_driver_extension_properties(),
+      ze_driver_extension_properties_t{"extension_b", ZE_API_VERSION_1_0}};
 
   std::stringstream ss;
   ss << cs::key_value_to_text("Number of extensions", "2", indentation_level_);
@@ -391,7 +393,7 @@ TEST_F(TextFormatterTests, DriverExtensionPropertiesToText) {
   const auto properties = fake_driver_extension_properties();
 
   std::stringstream ss;
-  ss << cs::key_value_to_text("Name", "extension", indentation_level_);
+  ss << cs::key_value_to_text("Name", "extension_a", indentation_level_);
   ss << cs::key_value_to_text("Version", "1.0", indentation_level_);
   const auto expected = ss.str();
   const auto actual =
@@ -454,7 +456,7 @@ TEST_F(TextFormatterTests, DevicePropertiesToText) {
                               indentation_level_);
   ss << cs::key_value_to_text(
       "Device flags",
-      "ZE_DEVICE_PROPERTY_FLAG_INTEGRATED | ZE_DEVICE_PROPERTY_FLAG_ECC",
+      "ZE_DEVICE_PROPERTY_FLAG_ECC | ZE_DEVICE_PROPERTY_FLAG_INTEGRATED",
       indentation_level_);
   ss << cs::key_value_to_text("Core clock rate", "3", indentation_level_);
   ss << cs::key_value_to_text("Maximum memory allocation size", "4",
@@ -495,8 +497,8 @@ TEST_F(TextFormatterTests, SubDevicePropertiesToText) {
                               indentation_level_);
   ss << cs::key_value_to_text(
       "Device flags",
-      "ZE_DEVICE_PROPERTY_FLAG_INTEGRATED | ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE "
-      "| ZE_DEVICE_PROPERTY_FLAG_ECC",
+      "ZE_DEVICE_PROPERTY_FLAG_ECC | ZE_DEVICE_PROPERTY_FLAG_INTEGRATED "
+      "| ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE",
       indentation_level_);
   ss << cs::key_value_to_text("Sub-device ID", "15", indentation_level_);
   ss << cs::key_value_to_text("Core clock rate", "3", indentation_level_);
@@ -553,7 +555,7 @@ TEST_F(TextFormatterTests, DeviceModulePropertiesToText) {
   std::stringstream ss;
   ss << cs::key_value_to_text("SPIR-V version", "1.0", indentation_level_);
   ss << cs::key_value_to_text(
-      "Module flags", "ZE_DEVICE_MODULE_FLAG_FP16 | ZE_DEVICE_MODULE_FLAG_DP4A",
+      "Module flags", "ZE_DEVICE_MODULE_FLAG_DP4A | ZE_DEVICE_MODULE_FLAG_FP16",
       indentation_level_);
   ss << cs::key_value_to_text(
       "FP16 flags",
@@ -565,7 +567,7 @@ TEST_F(TextFormatterTests, DeviceModulePropertiesToText) {
       indentation_level_);
   ss << cs::key_value_to_text(
       "FP64 flags",
-      "ZE_DEVICE_FP_FLAG_ROUND_TO_INF | ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT",
+      "ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT | ZE_DEVICE_FP_FLAG_ROUND_TO_INF",
       indentation_level_);
   ss << cs::key_value_to_text("Maximum argument size", "2", indentation_level_);
   ss << cs::key_value_to_text("printf buffer size", "3", indentation_level_);
@@ -674,11 +676,11 @@ TEST_F(TextFormatterTests, DeviceMemoryAccessPropertiesToText) {
                               indentation_level_);
   ss << cs::key_value_to_text(
       "Shared cross-device allocation capabilities",
-      "ZE_MEMORY_ACCESS_CAP_FLAG_RW | ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT",
+      "ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT | ZE_MEMORY_ACCESS_CAP_FLAG_RW",
       indentation_level_);
   ss << cs::key_value_to_text(
       "Shared system allocation capabilities",
-      "ZE_MEMORY_ACCESS_CAP_FLAG_RW | ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC",
+      "ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC | ZE_MEMORY_ACCESS_CAP_FLAG_RW",
       indentation_level_);
   const auto expected = ss.str();
   const auto actual = cs::device_memory_access_properties_to_text(
@@ -751,20 +753,20 @@ TEST_F(TextFormatterTests, DeviceExternalMemoryPropertiesToText) {
 
   std::stringstream ss;
   ss << cs::key_value_to_text("Memory allocation import types",
-                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD | "
-                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF",
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF | "
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD",
                               indentation_level_);
   ss << cs::key_value_to_text("Memory allocation import types",
-                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD | "
-                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF",
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF | "
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD",
                               indentation_level_);
   ss << cs::key_value_to_text("Image import types",
-                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD | "
-                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF",
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF | "
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD",
                               indentation_level_);
   ss << cs::key_value_to_text("Image export types",
-                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD | "
-                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF",
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF | "
+                              "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD",
                               indentation_level_);
   const auto expected = ss.str();
   const auto actual = cs::device_external_memory_properties_to_text(
@@ -802,11 +804,12 @@ TEST_F(TextFormatterTests, KernelHintsPropertiesToText) {
 TEST_F(TextFormatterTests, FloatAtomicsPropertiesToText) {
   const auto properties = fake_float_atomic_ext_properties();
   std::stringstream ss;
-  ss << cs::key_value_to_text("Float atomics FP16 flags",
-                              "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE "
-                              "| ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD | "
-                              "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX",
-                              indentation_level_);
+  ss << cs::key_value_to_text(
+      "Float atomics FP16 flags",
+      "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD "
+      "| ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE | "
+      "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX",
+      indentation_level_);
   ss << cs::key_value_to_text("Float atomics FP32 flags",
                               "ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE "
                               "| ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX",
@@ -853,17 +856,17 @@ TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
       "            },\n"
       "            \"ze_driver_ipc_properties_t\": {\n"
       "                \"flags\": [\n"
-      "                    \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
-      "                    \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+      "                    \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\",\n"
+      "                    \"ZE_IPC_PROPERTY_FLAG_MEMORY\"\n"
       "                ]\n"
       "            },\n"
       "            \"ze_driver_extension_properties_t\": [\n"
       "                {\n"
-      "                    \"name\": \"extension\",\n"
+      "                    \"name\": \"extension_a\",\n"
       "                    \"version\": \"1.0\"\n"
       "                },\n"
       "                {\n"
-      "                    \"name\": \"extension\",\n"
+      "                    \"name\": \"extension_b\",\n"
       "                    \"version\": \"1.0\"\n"
       "                }\n"
       "            ],\n"
@@ -877,17 +880,17 @@ TEST(JSONFormatterTests, DriversCapabilitiesToJSON) {
       "            },\n"
       "            \"ze_driver_ipc_properties_t\": {\n"
       "                \"flags\": [\n"
-      "                    \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
-      "                    \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+      "                    \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\",\n"
+      "                    \"ZE_IPC_PROPERTY_FLAG_MEMORY\"\n"
       "                ]\n"
       "            },\n"
       "            \"ze_driver_extension_properties_t\": [\n"
       "                {\n"
-      "                    \"name\": \"extension\",\n"
+      "                    \"name\": \"extension_a\",\n"
       "                    \"version\": \"1.0\"\n"
       "                },\n"
       "                {\n"
-      "                    \"name\": \"extension\",\n"
+      "                    \"name\": \"extension_b\",\n"
       "                    \"version\": \"1.0\"\n"
       "                }\n"
       "            ],\n"
@@ -912,17 +915,17 @@ TEST(JSONFormatterTests, DriverCapabilitiesToJSON) {
       "    },\n"
       "    \"ze_driver_ipc_properties_t\": {\n"
       "        \"flags\": [\n"
-      "            \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
-      "            \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+      "            \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\",\n"
+      "            \"ZE_IPC_PROPERTY_FLAG_MEMORY\"\n"
       "        ]\n"
       "    },\n"
       "    \"ze_driver_extension_properties_t\": [\n"
       "        {\n"
-      "            \"name\": \"extension\",\n"
+      "            \"name\": \"extension_a\",\n"
       "            \"version\": \"1.0\"\n"
       "        },\n"
       "        {\n"
-      "            \"name\": \"extension\",\n"
+      "            \"name\": \"extension_b\",\n"
       "            \"version\": \"1.0\"\n"
       "        }\n"
       "    ],\n"
@@ -946,17 +949,17 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "    },\n"
       "    \"ze_driver_ipc_properties_t\": {\n"
       "        \"flags\": [\n"
-      "            \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
-      "            \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+      "            \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\",\n"
+      "            \"ZE_IPC_PROPERTY_FLAG_MEMORY\"\n"
       "        ]\n"
       "    },\n"
       "    \"ze_driver_extension_properties_t\": [\n"
       "        {\n"
-      "            \"name\": \"extension\",\n"
+      "            \"name\": \"extension_a\",\n"
       "            \"version\": \"1.0\"\n"
       "        },\n"
       "        {\n"
-      "            \"name\": \"extension\",\n"
+      "            \"name\": \"extension_b\",\n"
       "            \"version\": \"1.0\"\n"
       "        }\n"
       "    ],\n"
@@ -969,8 +972,8 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                \"deviceId\": 2,\n"
       "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "                \"flags\": [\n"
-      "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
-      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\",\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\"\n"
       "                ],\n"
       "                \"coreClockRate\": 3,\n"
       "                \"maxMemAllocSize\": 4,\n"
@@ -1002,8 +1005,8 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "            \"ze_device_module_properties_t\": {\n"
       "                \"spirvVersionSupported\": \"1.0\",\n"
       "                \"flags\": [\n"
-      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
-      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\",\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\"\n"
       "                ],\n"
       "                \"fp16flags\": [\n"
       "                    \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
@@ -1014,8 +1017,8 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
       "                ],\n"
       "                \"fp64flags\": [\n"
-      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
-      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\"\n"
       "                ],\n"
       "                \"maxArgumentsSize\": 2,\n"
       "                \"printfBufferSize\": 3,\n"
@@ -1054,8 +1057,9 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "            \"ze_float_atomic_ext_properties_t\": {\n"
       "                \"fp16Flags\": [\n"
       "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "                    "
       "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
-      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
       "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
       "                ],\n"
       "                \"fp32Flags\": [\n"
@@ -1106,12 +1110,12 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
       "                ],\n"
       "                \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "                ],\n"
       "                \"sharedSystemAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "                ]\n"
       "            },\n"
       "            \"ze_device_cache_properties_t\": [\n"
@@ -1140,20 +1144,20 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "            },\n"
       "            \"ze_device_external_memory_properties_t\": {\n"
       "                \"memoryAllocationImportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"memoryAllocationExportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"imageImportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"imageExportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -1167,8 +1171,8 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                \"deviceId\": 2,\n"
       "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "                \"flags\": [\n"
-      "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
-      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\",\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\"\n"
       "                ],\n"
       "                \"coreClockRate\": 3,\n"
       "                \"maxMemAllocSize\": 4,\n"
@@ -1200,8 +1204,8 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "            \"ze_device_module_properties_t\": {\n"
       "                \"spirvVersionSupported\": \"1.0\",\n"
       "                \"flags\": [\n"
-      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
-      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\",\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\"\n"
       "                ],\n"
       "                \"fp16flags\": [\n"
       "                    \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
@@ -1212,8 +1216,8 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
       "                ],\n"
       "                \"fp64flags\": [\n"
-      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
-      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\"\n"
       "                ],\n"
       "                \"maxArgumentsSize\": 2,\n"
       "                \"printfBufferSize\": 3,\n"
@@ -1252,8 +1256,9 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "            \"ze_float_atomic_ext_properties_t\": {\n"
       "                \"fp16Flags\": [\n"
       "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "                    "
       "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
-      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
       "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
       "                ],\n"
       "                \"fp32Flags\": [\n"
@@ -1304,12 +1309,12 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
       "                ],\n"
       "                \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "                ],\n"
       "                \"sharedSystemAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "                ]\n"
       "            },\n"
       "            \"ze_device_cache_properties_t\": [\n"
@@ -1338,20 +1343,20 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "            },\n"
       "            \"ze_device_external_memory_properties_t\": {\n"
       "                \"memoryAllocationImportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"memoryAllocationExportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"imageImportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"imageExportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -1384,8 +1389,8 @@ TEST(JSONFormatterTests, DriverIpcPropertiesToJSON) {
   const auto actual = cs::ptree_to_string(json);
   const auto expected = "{\n"
                         "    \"flags\": [\n"
-                        "        \"ZE_IPC_PROPERTY_FLAG_MEMORY\",\n"
-                        "        \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\"\n"
+                        "        \"ZE_IPC_PROPERTY_FLAG_EVENT_POOL\",\n"
+                        "        \"ZE_IPC_PROPERTY_FLAG_MEMORY\"\n"
                         "    ]\n"
                         "}";
 
@@ -1394,33 +1399,21 @@ TEST(JSONFormatterTests, DriverIpcPropertiesToJSON) {
 
 TEST(JSONFormatterTests, AllDriverExtensionPropertiesToJSON) {
   const auto properties = std::vector<ze_driver_extension_properties_t>{
-      fake_driver_extension_properties(), fake_driver_extension_properties()};
+      fake_driver_extension_properties(),
+      ze_driver_extension_properties_t{"extension_b", ZE_API_VERSION_1_0}};
 
   const auto json = cs::all_driver_extension_properties_to_json(properties);
   const auto actual = cs::ptree_to_string(json);
   const auto expected = "[\n"
                         "        {\n"
-                        "            \"name\": \"extension\",\n"
+                        "            \"name\": \"extension_a\",\n"
                         "            \"version\": \"1.0\"\n"
                         "        },\n"
                         "        {\n"
-                        "            \"name\": \"extension\",\n"
+                        "            \"name\": \"extension_b\",\n"
                         "            \"version\": \"1.0\"\n"
                         "        }\n"
                         "]";
-
-  EXPECT_THAT(actual, ::testing::StrEq(expected));
-}
-
-TEST(JSONFormatterTests, DriverExtensionPropertiesToJSON) {
-  const auto properties = fake_driver_extension_properties();
-
-  const auto json = cs::driver_extension_properties_to_json(properties);
-  const auto actual = cs::ptree_to_string(json);
-  const auto expected = "{\n"
-                        "    \"name\": \"extension\",\n"
-                        "    \"version\": \"1.0\"\n"
-                        "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
@@ -1439,8 +1432,8 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "        \"deviceId\": 2,\n"
       "        \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "        \"flags\": [\n"
-      "            \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
-      "            \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "            \"ZE_DEVICE_PROPERTY_FLAG_ECC\",\n"
+      "            \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\"\n"
       "        ],\n"
       "        \"coreClockRate\": 3,\n"
       "        \"maxMemAllocSize\": 4,\n"
@@ -1472,8 +1465,8 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "    \"ze_device_module_properties_t\": {\n"
       "        \"spirvVersionSupported\": \"1.0\",\n"
       "        \"flags\": [\n"
-      "            \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
-      "            \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "            \"ZE_DEVICE_MODULE_FLAG_DP4A\",\n"
+      "            \"ZE_DEVICE_MODULE_FLAG_FP16\"\n"
       "        ],\n"
       "        \"fp16flags\": [\n"
       "            \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
@@ -1484,8 +1477,8 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
       "        ],\n"
       "        \"fp64flags\": [\n"
-      "            \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
-      "            \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "            \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\",\n"
+      "            \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\"\n"
       "        ],\n"
       "        \"maxArgumentsSize\": 2,\n"
       "        \"printfBufferSize\": 3,\n"
@@ -1522,8 +1515,8 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "    \"ze_float_atomic_ext_properties_t\": {\n"
       "        \"fp16Flags\": [\n"
       "            "
-      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
-      "            \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "            \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
       "            \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
       "        ],\n"
       "        \"fp32Flags\": [\n"
@@ -1574,12 +1567,12 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
       "        ],\n"
       "        \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "        ],\n"
       "        \"sharedSystemAllocCapabilities\": [\n"
-      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "            \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "        ]\n"
       "    },\n"
       "    \"ze_device_cache_properties_t\": [\n"
@@ -1608,20 +1601,20 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "    },\n"
       "    \"ze_device_external_memory_properties_t\": {\n"
       "        \"memoryAllocationImportTypes\": [\n"
-      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "        ],\n"
       "        \"memoryAllocationExportTypes\": [\n"
-      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "        ],\n"
       "        \"imageImportTypes\": [\n"
-      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "        ],\n"
       "        \"imageExportTypes\": [\n"
-      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "        ]\n"
       "    },\n"
       "    \"sub_devices_count\": 2,\n"
@@ -1634,9 +1627,9 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                \"deviceId\": 2,\n"
       "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\",\n"
       "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
-      "                    \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\",\n"
-      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\"\n"
       "                ],\n"
       "                \"subdeviceId\": 15,\n"
       "                \"coreClockRate\": 3,\n"
@@ -1669,8 +1662,8 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ze_device_module_properties_t\": {\n"
       "                \"spirvVersionSupported\": \"1.0\",\n"
       "                \"flags\": [\n"
-      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
-      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\",\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\"\n"
       "                ],\n"
       "                \"fp16flags\": [\n"
       "                    \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
@@ -1681,8 +1674,8 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
       "                ],\n"
       "                \"fp64flags\": [\n"
-      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
-      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\"\n"
       "                ],\n"
       "                \"maxArgumentsSize\": 2,\n"
       "                \"printfBufferSize\": 3,\n"
@@ -1721,8 +1714,9 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ze_float_atomic_ext_properties_t\": {\n"
       "                \"fp16Flags\": [\n"
       "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "                    "
       "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
-      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
       "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
       "                ],\n"
       "                \"fp32Flags\": [\n"
@@ -1773,12 +1767,12 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
       "                ],\n"
       "                \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "                ],\n"
       "                \"sharedSystemAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "                ]\n"
       "            },\n"
       "            \"ze_device_cache_properties_t\": [\n"
@@ -1807,20 +1801,20 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            },\n"
       "            \"ze_device_external_memory_properties_t\": {\n"
       "                \"memoryAllocationImportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"memoryAllocationExportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"imageImportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"imageExportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -1834,9 +1828,9 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                \"deviceId\": 2,\n"
       "                \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "                \"flags\": [\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\",\n"
       "                    \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
-      "                    \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\",\n"
-      "                    \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "                    \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\"\n"
       "                ],\n"
       "                \"subdeviceId\": 15,\n"
       "                \"coreClockRate\": 3,\n"
@@ -1869,8 +1863,8 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ze_device_module_properties_t\": {\n"
       "                \"spirvVersionSupported\": \"1.0\",\n"
       "                \"flags\": [\n"
-      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
-      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_DP4A\",\n"
+      "                    \"ZE_DEVICE_MODULE_FLAG_FP16\"\n"
       "                ],\n"
       "                \"fp16flags\": [\n"
       "                    \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
@@ -1881,8 +1875,8 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
       "                ],\n"
       "                \"fp64flags\": [\n"
-      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
-      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\",\n"
+      "                    \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\"\n"
       "                ],\n"
       "                \"maxArgumentsSize\": 2,\n"
       "                \"printfBufferSize\": 3,\n"
@@ -1921,8 +1915,9 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ze_float_atomic_ext_properties_t\": {\n"
       "                \"fp16Flags\": [\n"
       "                    "
+      "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
+      "                    "
       "\"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_LOAD_STORE\",\n"
-      "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_ADD\",\n"
       "                    \"ZE_DEVICE_FP_ATOMIC_EXT_FLAG_GLOBAL_MIN_MAX\"\n"
       "                ],\n"
       "                \"fp32Flags\": [\n"
@@ -1973,12 +1968,12 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
       "                ],\n"
       "                \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "                ],\n"
       "                \"sharedSystemAllocCapabilities\": [\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "                    \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "                ]\n"
       "            },\n"
       "            \"ze_device_cache_properties_t\": [\n"
@@ -2007,20 +2002,20 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            },\n"
       "            \"ze_device_external_memory_properties_t\": {\n"
       "                \"memoryAllocationImportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"memoryAllocationExportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"imageImportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ],\n"
       "                \"imageExportTypes\": [\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+      "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -2045,8 +2040,8 @@ TEST(JSONFormatterTests, DevicePropertiesToJSON) {
       "    \"deviceId\": 2,\n"
       "    \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "    \"flags\": [\n"
-      "        \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
-      "        \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_ECC\",\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\"\n"
       "    ],\n"
       "    \"coreClockRate\": 3,\n"
       "    \"maxMemAllocSize\": 4,\n"
@@ -2078,9 +2073,9 @@ TEST(JSONFormatterTests, SubDevicePropertiesToJSON) {
       "    \"deviceId\": 2,\n"
       "    \"uuid\": \"12345678-1234-5678-1234-567812345678\",\n"
       "    \"flags\": [\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_ECC\",\n"
       "        \"ZE_DEVICE_PROPERTY_FLAG_INTEGRATED\",\n"
-      "        \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\",\n"
-      "        \"ZE_DEVICE_PROPERTY_FLAG_ECC\"\n"
+      "        \"ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE\"\n"
       "    ],\n"
       "    \"subdeviceId\": 15,\n"
       "    \"coreClockRate\": 3,\n"
@@ -2131,8 +2126,8 @@ TEST(JSONFormatterTests, DeviceModulePropertiesToJSON) {
   const auto expected = "{\n"
                         "    \"spirvVersionSupported\": \"1.0\",\n"
                         "    \"flags\": [\n"
-                        "        \"ZE_DEVICE_MODULE_FLAG_FP16\",\n"
-                        "        \"ZE_DEVICE_MODULE_FLAG_DP4A\"\n"
+                        "        \"ZE_DEVICE_MODULE_FLAG_DP4A\",\n"
+                        "        \"ZE_DEVICE_MODULE_FLAG_FP16\"\n"
                         "    ],\n"
                         "    \"fp16flags\": [\n"
                         "        \"ZE_DEVICE_FP_FLAG_DENORM\",\n"
@@ -2143,8 +2138,8 @@ TEST(JSONFormatterTests, DeviceModulePropertiesToJSON) {
                         "        \"ZE_DEVICE_FP_FLAG_ROUND_TO_ZERO\"\n"
                         "    ],\n"
                         "    \"fp64flags\": [\n"
-                        "        \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\",\n"
-                        "        \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\"\n"
+                        "        \"ZE_DEVICE_FP_FLAG_ROUNDED_DIVIDE_SQRT\",\n"
+                        "        \"ZE_DEVICE_FP_FLAG_ROUND_TO_INF\"\n"
                         "    ],\n"
                         "    \"maxArgumentsSize\": 2,\n"
                         "    \"printfBufferSize\": 3,\n"
@@ -2275,12 +2270,12 @@ TEST(JSONFormatterTests, DeviceMemoryAccessPropertiesToJSON) {
       "        \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT_ATOMIC\"\n"
       "    ],\n"
       "    \"sharedCrossDeviceAllocCapabilities\": [\n"
-      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\"\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_CONCURRENT\",\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "    ],\n"
       "    \"sharedSystemAllocCapabilities\": [\n"
-      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\",\n"
-      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\"\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_ATOMIC\",\n"
+      "        \"ZE_MEMORY_ACCESS_CAP_FLAG_RW\"\n"
       "    ]\n"
       "}";
 
@@ -2354,20 +2349,20 @@ TEST(JSONFormatterTests, DeviceExternalMemoryPropertiesToJSON) {
   const auto actual = cs::ptree_to_string(json);
   const auto expected = "{\n"
                         "    \"memoryAllocationImportTypes\": [\n"
-                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
                         "    ],\n"
                         "    \"memoryAllocationExportTypes\": [\n"
-                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
                         "    ],\n"
                         "    \"imageImportTypes\": [\n"
-                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
                         "    ],\n"
                         "    \"imageExportTypes\": [\n"
-                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\",\n"
-                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\"\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
+                        "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
                         "    ]\n"
                         "}";
 
