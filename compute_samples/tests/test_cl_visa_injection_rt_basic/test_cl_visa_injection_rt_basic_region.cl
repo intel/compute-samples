@@ -33,7 +33,7 @@ test_region(const global uint *pSrc, global uint *pDst) {
       "add (M1, 16) inext_plus_x(0,0)<1> %1(0,0)<1;1,0> %2(0,0)<1;1,0>\n"
       "add (M1, 16) inext_plus_x(0,0)<1> inext_plus_x(0,0)<1;1,0> 0x1:w\n"
       ".decl hxw v_type=G type=d num_elts=1 align=dword\n"
-      "mul (M1_NM, 1) hxw(0,0)<1> %3(0,1)<0;1,0> %4(0,0)<0;1,0>\n"
+      "mul (M1_NM, 1) hxw(0,0)<1> %3(0,0)<0;1,0> %4(0,0)<0;1,0>\n"
       "cmp.lt (M1, 16) my_P2 inext_plus_x(0,0)<1;1,0> hxw(0,0)<0;1,0>\n"
       "(!my_P2) goto (M1, 16) else_label\n"
       // "goto (M1, 16) if_label\n"
