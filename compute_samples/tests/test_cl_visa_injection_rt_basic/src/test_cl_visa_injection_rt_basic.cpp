@@ -23,8 +23,6 @@ namespace cs = compute_samples;
 
 namespace {
 
-#define CL_DEVICE_SUB_GROUP_SIZES_INTEL 0x4108
-
 HWTEST(TestCLVisaInjectionRtBasic, TemplateEmpty) {
   EXPECT_TRUE(check_supported_subgroup_size(16));
 
@@ -1056,8 +1054,14 @@ HWTEST(TestCLVisaInjectionRtBasic, SGEMM) {
   compute::buffer c_buff(context, cs::size_in_bytes(c),
                          compute::memory_object::read_write);
 
+  std::string compile_opts = "-DTYPE=float";
+  auto intel_id = get_intel_id();
+  if (IS_PVC(intel_id)) {
+    compile_opts += " -DDEVICE_PVC";
+  }
+
   compute::program program = compute_samples::build_program(
-      context, "test_cl_visa_injection_rt_basic_gemm.cl", "-DTYPE=float");
+      context, "test_cl_visa_injection_rt_basic_gemm.cl", compile_opts);
   compute::command_queue queue = compute::system::default_queue();
 
   auto run_kernel = [&](const char *kernel_name,

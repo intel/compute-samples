@@ -16,6 +16,9 @@ namespace compute = boost::compute;
 namespace {
 
 #define CL_DEVICE_SUB_GROUP_SIZES_INTEL 0x4108
+#define CL_DEVICE_ID_INTEL 0x4251
+
+#define IS_PVC(id) (((id)&0xffc0) == 0x0bc0)
 
 bool check_supported_subgroup_size(size_t sz) {
   compute::device device = compute::system::default_device();
@@ -29,6 +32,11 @@ bool check_supported_subgroup_size(size_t sz) {
   }
 
   return false;
+}
+
+uint32_t get_intel_id() {
+  compute::device device = compute::system::default_device();
+  return device.get_info<uint32_t>(CL_DEVICE_ID_INTEL);
 }
 
 } // namespace
