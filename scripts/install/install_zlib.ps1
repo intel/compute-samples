@@ -5,10 +5,10 @@
 #
 
 echo "Downloading zlib"
-wget -Uri https://zlib.net/zlib1211.zip -OutFile zlib1211.zip
+wget -Uri https://zlib.net/zlib1213.zip -OutFile zlib1213.zip
 
 echo "Extracting zlib"
-. "C:\Program Files\7-Zip\7z.exe" x zlib1211.zip
+. "C:\Program Files\7-Zip\7z.exe" x zlib1213.zip
 
 echo "Installing zlib"
 $rootPath = (Resolve-Path ".").ToString()
@@ -17,7 +17,7 @@ mkdir $installPath -Force
 $zlibPath = $installPath + "/zlib"
 
 pushd
-cd zlib-1.2.11
+cd zlib-1.2.13
 mkdir build | Out-Null
 cd build
 
@@ -26,5 +26,5 @@ cmake --build . --target INSTALL --config Release
 popd
 
 echo "Cleaning zlib"
-rm -R zlib-1.2.11
-rm zlib1211.zip
+rm -R zlib-1.2.13
+rm zlib1213.zip
