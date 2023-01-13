@@ -11,8 +11,11 @@ add_core_library(va_utils
     "src/va_utils.cpp"
 )
 
+include(import_libva)
+
 target_link_libraries(va_utils
     PUBLIC
+    VA::VA
     dl
     compute_samples::ocl_utils
 )

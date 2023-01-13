@@ -6,10 +6,10 @@
 
 if(NOT TARGET VA::VA)
     find_path(VA_INCLUDE_DIR
-      NAMES va.h
+      NAMES va/va.h
       PATHS
       ${VA_ROOT}
-      PATH_SUFFIXES "include" "include/va"
+      PATH_SUFFIXES "include"
     )
 
     find_library(VA_LIBRARY
