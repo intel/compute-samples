@@ -209,9 +209,7 @@ run_vme_interop(const VmeInteropApplication::Arguments &args,
 
 void VmeInteropApplication::run_os_specific_implementation(
     const Arguments &args, const compute::device &device) const {
-  int drm_fd = -1;
-
-  VADisplay va_display = vamanager.get_va_display(drm_fd);
+  VADisplay va_display = vamanager.get_va_display();
 
   if (vamanager.get_va_device(device.platform(), va_display) != device) {
     throw std::runtime_error("VA API interoperable device not found.");
@@ -265,9 +263,5 @@ void VmeInteropApplication::run_os_specific_implementation(
   LOG_INFO << "Wrote " << frame_count << " frames with overlaid "
            << "motion vectors to " << args.output_yuv_path << " .";
   writer.write_to_file(args.output_yuv_path.c_str());
-
-  if (drm_fd >= 0) {
-    close(drm_fd);
-  }
 }
 } // namespace compute_samples

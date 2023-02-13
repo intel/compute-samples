@@ -82,9 +82,12 @@ VAManager::~VAManager() {
   dlclose(libVaHandle);
   dlclose(libVaX11Handle);
   dlclose(libVaDRMHandle);
+  if (drm_fd >= 0) {
+    close(drm_fd);
+  }
 }
 
-VADisplay VAManager::get_va_display(int &drm_fd) {
+VADisplay VAManager::get_va_display() {
   VADisplay va_display;
   int major_version, minor_version;
   VAStatus status = -1;
@@ -98,18 +101,20 @@ VADisplay VAManager::get_va_display(int &drm_fd) {
   if (status != VA_STATUS_SUCCESS) {
     LOG_INFO << "initializing VADisplay from X11 display "
                 "failed.  Trying render node";
-    drm_fd = open(DRM_RENDER_NODE_PATH, O_RDWR);
     if (drm_fd < 0) {
-      LOG_INFO << "initializing VADisplay from render node "
-                  "failed. Trying card0 handle";
-      drm_fd = open(DRM_DEVICE_PATH, O_RDWR);
+      drm_fd = open(DRM_RENDER_NODE_PATH, O_RDWR);
       if (drm_fd < 0) {
-        LOG_ERROR << "initializing VADisplay from card0 failed.";
-        status = VA_STATUS_ERROR_OPERATION_FAILED;
+        LOG_INFO << "initializing VADisplay from render node "
+                    "failed. Trying card0 handle";
+        drm_fd = open(DRM_DEVICE_PATH, O_RDWR);
+        if (drm_fd < 0) {
+          LOG_ERROR << "initializing VADisplay from card0 failed.";
+          status = VA_STATUS_ERROR_OPERATION_FAILED;
+        }
       }
+      va_display = vaGetDisplayDRM(drm_fd);
+      status = vaInitialize(va_display, &major_version, &minor_version);
     }
-    va_display = vaGetDisplayDRM(drm_fd);
-    status = vaInitialize(va_display, &major_version, &minor_version);
   }
 
   if ((va_display == nullptr) || (status != VA_STATUS_SUCCESS)) {

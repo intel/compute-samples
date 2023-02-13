@@ -43,7 +43,7 @@ public:
   vaCreateSurfacesFPTR vaCreateSurfaces;
   vaQueryImageFormatsPFN vaQueryImageFormats;
   vaMaxNumImageFormatsPFN vaMaxNumImageFormats;
-  VADisplay get_va_display(int &);
+  VADisplay get_va_display();
   boost::compute::device get_va_device(const boost::compute::platform &,
                                        const VADisplay);
 
@@ -65,6 +65,7 @@ private:
   void *libVaHandle;
   void *libVaX11Handle;
   void *libVaDRMHandle;
+  int drm_fd = -1;
 };
 } // namespace compute_samples
 #endif
