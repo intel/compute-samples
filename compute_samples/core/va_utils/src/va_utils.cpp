@@ -88,7 +88,7 @@ VAManager::~VAManager() {
 }
 
 VADisplay VAManager::get_va_display() {
-  VADisplay va_display;
+  VADisplay va_display = nullptr;
   int major_version, minor_version;
   VAStatus status = -1;
 
