@@ -8,6 +8,7 @@
 #include "ze_info/json_formatter.hpp"
 
 #include "ze_api.h"
+#include "zet_api.h"
 #include "utils/utils.hpp"
 #include "ze_utils/ze_utils.hpp"
 
@@ -216,6 +217,9 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   tree.add_child("ze_device_external_memory_properties_t",
                  device_external_memory_properties_to_json(
                      capabilities.external_memory_properties));
+  tree.add_child(
+      "zet_device_debug_properties_t",
+      device_debug_properties_to_json(capabilities.debug_properties));
   pt::ptree sub_devices;
   tree.put("sub_devices_count",
            std::to_string(capabilities.sub_devices.size()));
@@ -546,6 +550,20 @@ boost::property_tree::ptree device_external_memory_properties_to_json(
     image_export_node.push_back(std::make_pair("", node));
   }
   tree.add_child("imageExportTypes", image_export_node);
+  return tree;
+}
+
+boost::property_tree::ptree
+device_debug_properties_to_json(const zet_device_debug_properties_t &p) {
+  pt::ptree tree;
+  pt::ptree debug_properties_node;
+  for (const auto &flag : split_string(
+           flags_to_string<zet_device_debug_property_flag_t>(p.flags), " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    debug_properties_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("flags", debug_properties_node);
   return tree;
 }
 

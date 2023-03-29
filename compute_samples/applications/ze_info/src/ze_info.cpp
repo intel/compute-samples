@@ -12,6 +12,7 @@
 #include "ze_info/json_formatter.hpp"
 
 #include "ze_api.h"
+#include "zet_api.h"
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;

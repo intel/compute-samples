@@ -10,6 +10,7 @@
 
 #include "ze_info/capabilities.hpp"
 #include "ze_api.h"
+#include "zet_api.h"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -73,6 +74,9 @@ device_image_properties_to_json(const ze_device_image_properties_t &p);
 
 boost::property_tree::ptree device_external_memory_properties_to_json(
     const ze_device_external_memory_properties_t &p);
+
+boost::property_tree::ptree
+device_debug_properties_to_json(const zet_device_debug_properties_t &p);
 
 std::string ptree_to_string(const boost::property_tree::ptree tree);
 

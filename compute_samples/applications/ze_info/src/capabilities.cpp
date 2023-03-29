@@ -7,6 +7,7 @@
 
 #include "ze_info/capabilities.hpp"
 #include "ze_api.h"
+#include "zet_api.h"
 
 #include <vector>
 
@@ -296,6 +297,16 @@ get_device_external_memory_properties(ze_device_handle_t device) {
   const auto result = zeDeviceGetExternalMemoryProperties(device, &properties);
   throw_if_failed(result, "zeDeviceGetExternalMemoryProperties");
   LOG_DEBUG << "Device external memory properties retrieved";
+  return properties;
+}
+
+zet_device_debug_properties_t
+get_device_debug_properties(ze_device_handle_t device) {
+  zet_device_debug_properties_t properties = {
+      ZET_STRUCTURE_TYPE_DEVICE_DEBUG_PROPERTIES};
+  const auto result = zetDeviceGetDebugProperties(device, &properties);
+  throw_if_failed(result, "zetDeviceGetDebugProperties");
+  LOG_DEBUG << "Device debug properties retrieved";
   return properties;
 }
 

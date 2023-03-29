@@ -9,6 +9,7 @@
 #include "ze_info/text_formatter.hpp"
 #include "ze_info/json_formatter.hpp"
 #include "ze_api.h"
+#include "zet_api.h"
 
 #include <sstream>
 #include <cstring>
@@ -149,6 +150,12 @@ fake_device_external_memory_properties() {
           ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD};
 }
 
+zet_device_debug_properties_t fake_device_debug_properties() {
+  return zet_device_debug_properties_t{
+      ZET_STRUCTURE_TYPE_DEVICE_DEBUG_PROPERTIES, nullptr,
+      ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH};
+}
+
 ze_scheduling_hint_exp_properties_t
 fake_device_kernel_schedule_hint_properties() {
   return ze_scheduling_hint_exp_properties_t{
@@ -195,6 +202,7 @@ cs::DeviceCapabilities fake_device_capabilities() {
   capabilities.image_properties = fake_device_image_properties();
   capabilities.external_memory_properties =
       fake_device_external_memory_properties();
+  capabilities.debug_properties = fake_device_debug_properties();
   return capabilities;
 }
 
@@ -430,6 +438,8 @@ TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
                                             indentation_level_);
   ss << cs::device_external_memory_properties_to_text(
       capabilities.external_memory_properties, indentation_level_);
+  ss << cs::device_debug_properties_to_text(capabilities.debug_properties,
+                                            indentation_level_);
   ss << cs::key_value_to_text("Number of sub-devices", "2", indentation_level_);
   ss << cs::key_value_to_text("Sub-device", "0", indentation_level_);
   ss << cs::device_capabilities_to_text(capabilities.sub_devices[0],
@@ -771,6 +781,19 @@ TEST_F(TextFormatterTests, DeviceExternalMemoryPropertiesToText) {
   const auto expected = ss.str();
   const auto actual = cs::device_external_memory_properties_to_text(
       properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceDebugPropertiesToText) {
+  const auto properties = fake_device_debug_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("flags", "ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH",
+                              indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_debug_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
@@ -1160,6 +1183,11 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "                ]\n"
       "            },\n"
+      "            \"zet_device_debug_properties_t\": {\n"
+      "                \"flags\": [\n"
+      "                    \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
+      "                ]\n"
+      "            },\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -1357,6 +1385,11 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                \"imageExportTypes\": [\n"
       "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
       "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"zet_device_debug_properties_t\": {\n"
+      "                \"flags\": [\n"
+      "                    \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -1617,6 +1650,11 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
       "        ]\n"
       "    },\n"
+      "    \"zet_device_debug_properties_t\": {\n"
+      "        \"flags\": [\n"
+      "            \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
+      "        ]\n"
+      "    },\n"
       "    \"sub_devices_count\": 2,\n"
       "    \"sub_devices\": [\n"
       "        {\n"
@@ -1815,6 +1853,11 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                \"imageExportTypes\": [\n"
       "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
       "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"zet_device_debug_properties_t\": {\n"
+      "                \"flags\": [\n"
+      "                    \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -2016,6 +2059,11 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                \"imageExportTypes\": [\n"
       "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
       "                    \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"zet_device_debug_properties_t\": {\n"
+      "                \"flags\": [\n"
+      "                    \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -2363,6 +2411,20 @@ TEST(JSONFormatterTests, DeviceExternalMemoryPropertiesToJSON) {
                         "    \"imageExportTypes\": [\n"
                         "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF\",\n"
                         "        \"ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD\"\n"
+                        "    ]\n"
+                        "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceDebugPropertiesToJSON) {
+  const auto properties = fake_device_debug_properties();
+
+  const auto json = cs::device_debug_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"flags\": [\n"
+                        "        \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
                         "    ]\n"
                         "}";
 

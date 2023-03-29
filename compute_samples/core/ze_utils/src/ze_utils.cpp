@@ -9,6 +9,7 @@
 #include "logging/logging.hpp"
 
 #include "ze_api.h"
+#include "zet_api.h"
 
 #include <stdexcept>
 #include <string>
@@ -189,6 +190,18 @@ std::string to_string(const ze_external_memory_type_flag_t flag) {
     return "ZE_EXTERNAL_MEMORY_TYPE_FLAG_FORCE_UINT32";
   default:
     return "Unknown ze_external_memory_type_flag_t value: " +
+           std::to_string(static_cast<int>(flag));
+  }
+}
+
+std::string to_string(const zet_device_debug_property_flag_t flag) {
+  switch (flag) {
+  case ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH:
+    return "ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH";
+  case ZET_DEVICE_DEBUG_PROPERTY_FLAG_FORCE_UINT32:
+    return "ZET_DEVICE_DEBUG_PROPERTY_FLAG_FORCE_UINT32";
+  default:
+    return "Unknown zet_device_debug_property_flag_t value: " +
            std::to_string(static_cast<int>(flag));
   }
 }

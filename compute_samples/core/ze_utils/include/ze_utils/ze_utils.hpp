@@ -12,6 +12,7 @@
 #include <string>
 
 #include "ze_api.h"
+#include "zet_api.h"
 #include "utils/utils.hpp"
 
 namespace compute_samples {
@@ -29,6 +30,7 @@ std::string to_string(ze_scheduling_hint_exp_flag_t flag);
 std::string to_string(ze_device_fp_atomic_ext_flag_t flag);
 std::string to_string(ze_device_raytracing_ext_flag_t flag);
 std::string to_string(ze_command_queue_group_property_flag_t flag);
+std::string to_string(zet_device_debug_property_flag_t flag);
 
 template <typename T> std::string flags_to_string(uint32_t flags) {
   const size_t bits = 8;

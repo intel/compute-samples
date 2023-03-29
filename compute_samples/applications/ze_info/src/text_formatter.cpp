@@ -9,6 +9,7 @@
 #include "utils/utils.hpp"
 #include "ze_utils/ze_utils.hpp"
 #include "ze_api.h"
+#include "zet_api.h"
 
 #include <sstream>
 #include <string>
@@ -135,6 +136,8 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
                                         indentation_level);
   ss << device_external_memory_properties_to_text(
       capabilities.external_memory_properties, indentation_level);
+  ss << device_debug_properties_to_text(capabilities.debug_properties,
+                                        indentation_level);
   ss << key_value_to_text("Number of sub-devices",
                           std::to_string(capabilities.sub_devices.size()),
                           indentation_level);
@@ -465,6 +468,16 @@ std::string device_external_memory_properties_to_text(
   ss << key_value_to_text(
       "Image export types",
       flags_to_string<ze_external_memory_type_flag_t>(p.imageImportTypes),
+      indentation_level);
+  return ss.str();
+}
+
+std::string
+device_debug_properties_to_text(const zet_device_debug_properties_t &p,
+                                const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text(
+      "flags", flags_to_string<zet_device_debug_property_flag_t>(p.flags),
       indentation_level);
   return ss.str();
 }

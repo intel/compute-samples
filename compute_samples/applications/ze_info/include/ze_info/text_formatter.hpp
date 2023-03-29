@@ -10,6 +10,7 @@
 
 #include "ze_info/capabilities.hpp"
 #include "ze_api.h"
+#include "zet_api.h"
 
 #include <string>
 #include <vector>
@@ -82,6 +83,10 @@ device_image_properties_to_text(const ze_device_image_properties_t &p,
 
 std::string device_external_memory_properties_to_text(
     const ze_device_external_memory_properties_t &p, int indentation_level);
+
+std::string
+device_debug_properties_to_text(const zet_device_debug_properties_t &p,
+                                int indentation_level);
 
 std::string key_value_to_text(const std::string key, const std::string value,
                               int indentation_level);

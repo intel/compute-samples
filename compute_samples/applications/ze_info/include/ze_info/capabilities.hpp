@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "ze_api.h"
+#include "zet_api.h"
 
 namespace compute_samples {
 struct DeviceCapabilities {
@@ -23,6 +24,7 @@ struct DeviceCapabilities {
   std::vector<ze_device_cache_properties_t> cache_properties;
   ze_device_image_properties_t image_properties;
   ze_device_external_memory_properties_t external_memory_properties;
+  zet_device_debug_properties_t debug_properties;
   std::vector<DeviceCapabilities> sub_devices;
   ze_scheduling_hint_exp_properties_t scheduling_hint_properties;
   ze_float_atomic_ext_properties_t float_atomics_properties;
@@ -85,6 +87,9 @@ get_device_image_properties(ze_device_handle_t device);
 
 ze_device_external_memory_properties_t
 get_device_external_memory_properties(ze_device_handle_t device);
+
+zet_device_debug_properties_t
+get_device_debug_properties(ze_device_handle_t device);
 
 std::vector<ze_device_handle_t>
 get_device_sub_devices(ze_device_handle_t device);
