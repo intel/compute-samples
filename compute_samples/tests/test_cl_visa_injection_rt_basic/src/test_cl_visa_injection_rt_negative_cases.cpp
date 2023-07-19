@@ -138,7 +138,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, Simple) {
   std::string log = check_asm_text_rt(asm_txt);
   EXPECT_TRUE(contains(log, "syntax error"));
 
-  log = check_asm_text_ocloc(true, file_prefix + "_simple", asm_txt, "skl");
+  log = check_asm_text_ocloc(true, file_prefix + "_simple", asm_txt, "cfl");
   EXPECT_TRUE(contains(log, "syntax error"));
 }
 
@@ -149,7 +149,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, IllegalExecSize) {
   EXPECT_TRUE(contains(log, "invalid execution size"));
 
   log = check_asm_text_ocloc(true, file_prefix + "_illegal_exec_size", asm_txt,
-                             "skl");
+                             "cfl");
   EXPECT_TRUE(contains(log, "invalid execution size"));
 }
 
@@ -160,7 +160,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, MissingRegion) {
   EXPECT_TRUE(contains(log, "syntax error"));
 
   log = check_asm_text_ocloc(true, file_prefix + "_missing_region", asm_txt,
-                             "skl");
+                             "cfl");
   EXPECT_TRUE(contains(log, "syntax error"));
 }
 
@@ -170,7 +170,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, BadOpcode) {
   std::string log = check_asm_text_rt(asm_txt);
   EXPECT_TRUE(contains(log, "syntax error"));
 
-  log = check_asm_text_ocloc(true, file_prefix + "_bad_opcode", asm_txt, "skl");
+  log = check_asm_text_ocloc(true, file_prefix + "_bad_opcode", asm_txt, "cfl");
   EXPECT_TRUE(contains(log, "syntax error"));
 }
 
@@ -181,7 +181,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, UndefinedDecl) {
   EXPECT_TRUE(contains(log, "syntax error"));
 
   log = check_asm_text_ocloc(true, file_prefix + "_undefined_decl", asm_txt,
-                             "skl");
+                             "cfl");
   EXPECT_TRUE(contains(log, "syntax error"));
 }
 
@@ -192,7 +192,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, UndefinedPred) {
   EXPECT_TRUE(contains(log, "undefined predicate variable"));
 
   log = check_asm_text_ocloc(true, file_prefix + "_undefined_pred", asm_txt,
-                             "skl");
+                             "cfl");
   EXPECT_TRUE(contains(log, "undefined predicate variable"));
 }
 
@@ -203,7 +203,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, BadOperandSyntax) {
   EXPECT_TRUE(contains(log, "syntax error"));
 
   log = check_asm_text_ocloc(true, file_prefix + "_bad_operand_syntax", asm_txt,
-                             "skl");
+                             "cfl");
   EXPECT_TRUE(contains(log, "syntax error"));
 }
 
@@ -214,7 +214,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, WrongDeclare) {
   EXPECT_TRUE(contains(log, "syntax error"));
 
   log = check_asm_text_ocloc(true, file_prefix + "_wrong_declare", asm_txt,
-                             "skl");
+                             "cfl");
   EXPECT_TRUE(contains(log, "syntax error"));
 }
 
@@ -225,7 +225,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, MissingLabel) {
   EXPECT_TRUE(contains(log, "Found a total of 1 errors in vISA input"));
 
   log = check_asm_text_ocloc(true, file_prefix + "_missing_label", asm_txt,
-                             "skl");
+                             "cfl");
   EXPECT_TRUE(contains(log, "Found a total of 1 errors in vISA input"));
 }
 
@@ -236,7 +236,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, DuplicateLabel) {
   EXPECT_TRUE(contains(log, "Found a total of 1 errors in vISA input"));
 
   log = check_asm_text_ocloc(true, file_prefix + "_duplicate_label", asm_txt,
-                             "skl");
+                             "cfl");
   EXPECT_TRUE(contains(log, "Found a total of 1 errors in vISA input"));
 }
 
@@ -244,7 +244,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, UnsupportedInstructionDIVM) {
   const std::string asm_txt =
       "divm (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:f";
   auto log = check_asm_text_ocloc(
-      false, file_prefix + "_unsupported_instruction_divm_skl", asm_txt, "skl",
+      false, file_prefix + "_unsupported_instruction_divm_cfl", asm_txt, "cfl",
       "f", "f");
   EXPECT_TRUE(contains(log, "Build succeeded"));
 
@@ -262,7 +262,7 @@ HWTEST(TestCLVisaInjectionRtNegativeCases, UnsupportedInstructionROL) {
   EXPECT_TRUE(contains(log, "Build succeeded"));
 
   log = check_asm_text_ocloc(
-      true, file_prefix + "_unsupported_instruction_rol_skl", asm_txt, "skl");
+      true, file_prefix + "_unsupported_instruction_rol_cfl", asm_txt, "cfl");
   EXPECT_FALSE(contains(log, "Build succeeded"));
 }
 

@@ -239,9 +239,9 @@ asm [qualifiers] ([Assembler Template]
      - MissingLabel (string under test `goto (M1, 16) check_label0`)
    - [x] Duplicate labels
      - DuplicateLabel (string under test `check_label0:\ncheck_label0:`)
-   - [x] Unsupported instruction ICLLP vs SKL
+   - [x] Unsupported instruction ICLLP vs CFL
      - UnsupportedInstructionDIVM (string under test `divm (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:f`)
-   - [x] Unsupported instruction SKL vs TGLLP
+   - [x] Unsupported instruction CFL vs TGLLP
      - UnsupportedInstructionROL (string under test `rol (M1, 8) tmp1(0,0)<1> tmp2(0,0)<1;1,0> 0x2:d`)
 
 ## Selecting tests
