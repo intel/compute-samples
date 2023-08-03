@@ -141,6 +141,7 @@ DeviceCapabilities get_device_capabilities(ze_device_handle_t device) {
   capabilities.float_atomics_properties =
       get_float_atomic_ext_properties(device);
   capabilities.ray_tracing_properties = get_raytracing_ext_properties(device);
+  capabilities.debug_properties = get_device_debug_properties(device);
   return capabilities;
 }
 
