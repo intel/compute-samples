@@ -28,7 +28,9 @@ std::string generate_spirv(const std::string &path,
 
   const int return_code = std::system(command_line.c_str());
   const std::string log = load_text_file(log_file);
-  std::remove(log_file.c_str());
+  if (std::remove(log_file.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << log_file.c_str() << " failed";
+  }
 
   if (return_code != 0) {
     LOG_ERROR << "Offline compiler return code: " << return_code;
@@ -52,8 +54,12 @@ generate_spirv_from_source(const std::string &source,
   const std::string spv_path = generate_spirv(cl_path, build_options);
   const std::vector<uint8_t> spirv = load_binary_file(spv_path);
 
-  std::remove(cl_path.c_str());
-  std::remove(spv_path.c_str());
+  if (std::remove(cl_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << cl_path.c_str() << " failed";
+  }
+  if (std::remove(spv_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << spv_path.c_str() << " failed";
+  }
 
   return spirv;
 }

@@ -7,6 +7,7 @@
 
 #include "utils/utils.hpp"
 #include "gtest/gtest.h"
+#include "logging/logging.hpp"
 #include <cstdio>
 
 TEST(LoadTextFile, ValidFile) {
@@ -27,7 +28,9 @@ TEST(SaveTextFile, ValidFile) {
 
   compute_samples::save_text_file(text, path);
   const std::string output = compute_samples::load_text_file(path);
-  std::remove(path.c_str());
+  if (std::remove(path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << path.c_str() << " failed";
+  }
 
   EXPECT_EQ(text, output);
 }
@@ -52,7 +55,9 @@ TEST(SaveBinaryFile, ValidFile) {
 
   compute_samples::save_binary_file(bytes, path);
   const std::vector<uint8_t> output = compute_samples::load_binary_file(path);
-  std::remove(path.c_str());
+  if (std::remove(path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << path.c_str() << " failed";
+  }
 
   EXPECT_EQ(bytes, output);
 }

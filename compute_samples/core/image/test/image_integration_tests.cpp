@@ -7,6 +7,7 @@
 
 #include "image/image.hpp"
 #include "gtest/gtest.h"
+#include "logging/logging.hpp"
 
 TEST(ImageIntegrationTests, ReadsPNGFile) {
   compute_samples::ImagePNG32Bit image("rgb_brg_3x2.png");
@@ -35,7 +36,9 @@ TEST(ImageIntegrationTests, WritesPNGFile) {
 
   compute_samples::ImagePNG32Bit output("output.png");
   EXPECT_EQ(output.get_pixels(), pixels);
-  std::remove("output.png");
+  if (std::remove("output.png") != 0) {
+    LOG_DEBUG << "Deleting file output.png failed";
+  }
 
   EXPECT_EQ(image.get_pixels(), pixels);
 }
@@ -71,7 +74,9 @@ TEST(ImageIntegrationTests, WritesGrayscaleBMPFile) {
 
   compute_samples::ImageBMP8Bit output("output.bmp");
   EXPECT_EQ(output.get_pixels(), pixels);
-  std::remove("output.bmp");
+  if (std::remove("output.bmp") != 0) {
+    LOG_DEBUG << "Deleting file output.bmp failed";
+  }
 
   EXPECT_EQ(image.get_pixels(), pixels);
 }
@@ -103,7 +108,9 @@ TEST(ImageIntegrationTests, WritesColorBMPFile) {
 
   compute_samples::ImageBMP32Bit output("output.bmp");
   EXPECT_EQ(output.get_pixels(), pixels);
-  std::remove("output.bmp");
+  if (std::remove("output.bmp") != 0) {
+    LOG_DEBUG << "Deleting file output.bmp failed";
+  }
 
   EXPECT_EQ(image.get_pixels(), pixels);
 }

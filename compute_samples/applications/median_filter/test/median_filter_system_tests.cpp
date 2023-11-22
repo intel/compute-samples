@@ -12,10 +12,15 @@
 #include "image/image.hpp"
 #include "median_filter/median_filter.hpp"
 #include "test_harness/test_harness.hpp"
+#include "logging/logging.hpp"
 
 class MedianFilterSystemTests : public testing::Test {
 protected:
-  void TearDown() override { std::remove(output_file_.c_str()); }
+  void TearDown() override {
+    if (std::remove(output_file_.c_str()) != 0) {
+      LOG_DEBUG << "Deleting file " << output_file_.c_str() << " failed";
+    }
+  }
 
   const std::string input_file_ = "test_input.png";
   const std::string output_file_ = "test_output.png";

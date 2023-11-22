@@ -14,14 +14,23 @@
 
 #include "vme_interlaced/vme_interlaced.hpp"
 #include "test_harness/test_harness.hpp"
+#include "logging/logging.hpp"
 
 class VmeInterlacedSystemTests : public testing::Test {
 protected:
   void TearDown() override {
-    std::remove(output_top_file_.c_str());
-    std::remove(output_bot_file_.c_str());
-    std::remove(reference_top_file_.c_str());
-    std::remove(reference_bot_file_.c_str());
+    if (std::remove(output_top_file_.c_str()) != 0) {
+      LOG_DEBUG << "Deleting file " << output_top_file_.c_str() << " failed";
+    }
+    if (std::remove(output_bot_file_.c_str()) != 0) {
+      LOG_DEBUG << "Deleting file " << output_bot_file_.c_str() << " failed";
+    }
+    if (std::remove(reference_top_file_.c_str()) != 0) {
+      LOG_DEBUG << "Deleting file " << reference_top_file_.c_str() << " failed";
+    }
+    if (std::remove(reference_bot_file_.c_str()) != 0) {
+      LOG_DEBUG << "Deleting file " << reference_bot_file_.c_str() << " failed";
+    }
   }
 
   const std::string input_file_ = "football_interlaced_720x480.yuv";

@@ -25,8 +25,12 @@ HWTEST(OfflineCompilerIntegrationTests, GenerateSPIRVFromFile) {
   EXPECT_TRUE(spv_file.good());
   EXPECT_TRUE(spv_file.peek() != std::ifstream::traits_type::eof());
 
-  std::remove(cl_path.c_str());
-  std::remove(spv_path.c_str());
+  if (std::remove(cl_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << cl_path.c_str() << " failed";
+  }
+  if (std::remove(spv_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << spv_path.c_str() << " failed";
+  }
 }
 
 HWTEST(OfflineCompilerIntegrationTests, GenerateSPIRVFromFileWithBuildOptions) {
@@ -39,8 +43,12 @@ HWTEST(OfflineCompilerIntegrationTests, GenerateSPIRVFromFileWithBuildOptions) {
   EXPECT_TRUE(spv_file.good());
   EXPECT_TRUE(spv_file.peek() != std::ifstream::traits_type::eof());
 
-  std::remove(cl_path.c_str());
-  std::remove(spv_path.c_str());
+  if (std::remove(cl_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << cl_path.c_str() << " failed";
+  }
+  if (std::remove(spv_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << spv_path.c_str() << " failed";
+  }
 }
 
 HWTEST(OfflineCompilerIntegrationTests, GenerateSPIRVFromFileInvalidPath) {
@@ -53,7 +61,9 @@ HWTEST(OfflineCompilerIntegrationTests, GenerateSPIRVFromFileInvalidKernel) {
   const std::string cl_path = "kernel.cl";
   cs::save_text_file(source, cl_path);
   EXPECT_THROW(cs::generate_spirv(cl_path), std::runtime_error);
-  std::remove(cl_path.c_str());
+  if (std::remove(cl_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << cl_path.c_str() << " failed";
+  }
 }
 
 HWTEST(OfflineCompilerIntegrationTests, GenerateSPIRVFromSource) {

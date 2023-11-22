@@ -108,8 +108,12 @@ std::string check_asm_text_ocloc(bool check_ret, const std::string &file_name,
 
   LOG_DEBUG << "[check_asm_text_ocloc] cmd output:\n" << log << std::endl;
 
-  fs::remove(log_path.c_str());
-  fs::remove(cl_path.c_str());
+  if (std::remove(log_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << log_path.c_str() << " failed";
+  }
+  if (std::remove(cl_path.c_str()) != 0) {
+    LOG_DEBUG << "Deleting file " << cl_path.c_str() << " failed";
+  }
 
   if (check_ret) {
     EXPECT_FALSE(return_code == 0);
@@ -119,7 +123,9 @@ std::string check_asm_text_ocloc(bool check_ret, const std::string &file_name,
   for (auto &ext : {"", ".spv", ".gen"}) {
     const std::string path = file_name + ext;
     if (fs::exists(path)) {
-      std::remove(path.c_str());
+      if (std::remove(path.c_str()) != 0) {
+        LOG_DEBUG << "Deleting file " << path.c_str() << " failed";
+      }
     }
   }
 

@@ -13,6 +13,7 @@
 
 #include <boost/compute/utility/source.hpp>
 #include "test_harness/test_harness.hpp"
+#include "logging/logging.hpp"
 
 namespace cs = compute_samples;
 namespace compute = boost::compute;
@@ -24,7 +25,11 @@ protected:
     context = compute::context(device);
   }
 
-  void TearDown() override { std::remove(cl_file.c_str()); }
+  void TearDown() override {
+    if (std::remove(cl_file.c_str()) != 0) {
+      LOG_DEBUG << "Deleting file " << cl_file.c_str() << " failed";
+    }
+  }
 
   const std::string cl_file = "kernel.cl";
   const std::string spv_file = "kernel.spv";
