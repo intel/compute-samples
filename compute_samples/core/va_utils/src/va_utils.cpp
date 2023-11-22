@@ -109,7 +109,6 @@ VADisplay VAManager::get_va_display() {
         drm_fd = open(DRM_DEVICE_PATH, O_RDWR);
         if (drm_fd < 0) {
           LOG_ERROR << "initializing VADisplay from card0 failed.";
-          status = VA_STATUS_ERROR_OPERATION_FAILED;
         }
       }
       va_display = vaGetDisplayDRM(drm_fd);
