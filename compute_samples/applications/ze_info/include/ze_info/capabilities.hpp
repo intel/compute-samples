@@ -29,6 +29,7 @@ struct DeviceCapabilities {
   ze_scheduling_hint_exp_properties_t scheduling_hint_properties;
   ze_float_atomic_ext_properties_t float_atomics_properties;
   ze_device_raytracing_ext_properties_t ray_tracing_properties;
+  ze_mutable_command_list_exp_properties_t mutable_command_list_properties;
 };
 
 struct DriverCapabilities {
@@ -102,6 +103,9 @@ get_float_atomic_ext_properties(ze_device_handle_t device);
 
 ze_device_raytracing_ext_properties_t
 get_raytracing_ext_properties(ze_device_handle_t device);
+
+ze_mutable_command_list_exp_properties_t
+get_mutable_command_list_exp_properties(ze_device_handle_t device);
 
 std::vector<DeviceCapabilities> get_device_sub_devices_capabilities(
     const std::vector<ze_device_handle_t> &sub_devices);

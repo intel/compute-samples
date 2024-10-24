@@ -206,6 +206,44 @@ std::string to_string(const zet_device_debug_property_flag_t flag) {
   }
 }
 
+std::string to_string(const ze_mutable_command_list_exp_flags_t flag) {
+  switch (flag) {
+  case ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED:
+    return "ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED";
+  case ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_FORCE_UINT32:
+    return "ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_FORCE_UINT32";
+  default:
+    return "Unknown ze_mutable_command_list_exp_flags_t value: " +
+           std::to_string(static_cast<int>(flag));
+  }
+}
+
+std::string to_string(const ze_mutable_command_exp_flag_t flag) {
+  switch (flag) {
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS";
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT";
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE";
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET";
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT";
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS";
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION";
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS";
+  case ZE_MUTABLE_COMMAND_EXP_FLAG_FORCE_UINT32:
+    return "ZE_MUTABLE_COMMAND_EXP_FLAG_FORCE_UINT32";
+  default:
+    return "Unknown ze_mutable_command_exp_flags_t value: " +
+           std::to_string(static_cast<int>(flag));
+  }
+}
+
 std::string to_string(const ze_device_cache_property_flag_t flag) {
   switch (flag) {
   case ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL:

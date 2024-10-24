@@ -142,6 +142,8 @@ DeviceCapabilities get_device_capabilities(ze_device_handle_t device) {
       get_float_atomic_ext_properties(device);
   capabilities.ray_tracing_properties = get_raytracing_ext_properties(device);
   capabilities.debug_properties = get_device_debug_properties(device);
+  capabilities.mutable_command_list_properties =
+      get_mutable_command_list_exp_properties(device);
   return capabilities;
 }
 
@@ -309,6 +311,18 @@ get_device_debug_properties(ze_device_handle_t device) {
   throw_if_failed(result, "zetDeviceGetDebugProperties");
   LOG_DEBUG << "Device debug properties retrieved";
   return properties;
+}
+
+ze_mutable_command_list_exp_properties_t
+get_mutable_command_list_exp_properties(ze_device_handle_t device) {
+  ze_mutable_command_list_exp_properties_t mutable_command_list_exp_properties =
+      {ZE_STRUCTURE_TYPE_MUTABLE_COMMAND_LIST_EXP_PROPERTIES, nullptr, 0, 0};
+  ze_device_properties_t properties = {ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES};
+  properties.pNext = &mutable_command_list_exp_properties;
+  const auto result = zeDeviceGetProperties(device, &properties);
+  throw_if_failed(result, "zeDeviceGetProperties");
+  LOG_DEBUG << "Device mutable command list exp properties retrieved";
+  return mutable_command_list_exp_properties;
 }
 
 std::vector<ze_device_handle_t>

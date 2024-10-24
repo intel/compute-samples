@@ -129,7 +129,7 @@ void erase_substrings(std::string &string,
 
 std::vector<std::string> split_string(const std::string &string,
                                       const std::string &delimeter) {
-  if (delimeter.empty()) {
+  if (string.empty() || delimeter.empty()) {
     return {string};
   }
   std::vector<std::string> tokens;

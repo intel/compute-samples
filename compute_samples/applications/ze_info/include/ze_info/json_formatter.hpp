@@ -78,6 +78,9 @@ boost::property_tree::ptree device_external_memory_properties_to_json(
 boost::property_tree::ptree
 device_debug_properties_to_json(const zet_device_debug_properties_t &p);
 
+boost::property_tree::ptree device_mutable_command_list_properties_to_json(
+    const ze_mutable_command_list_exp_properties_t &p);
+
 std::string ptree_to_string(const boost::property_tree::ptree tree);
 
 void write_capabilities_to_json(

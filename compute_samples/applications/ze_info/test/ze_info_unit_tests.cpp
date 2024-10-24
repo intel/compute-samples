@@ -156,6 +156,21 @@ zet_device_debug_properties_t fake_device_debug_properties() {
       ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH};
 }
 
+ze_mutable_command_list_exp_properties_t
+fake_mutable_command_list_exp_properties() {
+  return ze_mutable_command_list_exp_properties_t{
+      ZE_STRUCTURE_TYPE_MUTABLE_COMMAND_LIST_EXP_PROPERTIES, nullptr,
+      ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED,
+      ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS |
+          ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT |
+          ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE |
+          ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET |
+          ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT |
+          ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS |
+          ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION |
+          ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS};
+}
+
 ze_scheduling_hint_exp_properties_t
 fake_device_kernel_schedule_hint_properties() {
   return ze_scheduling_hint_exp_properties_t{
@@ -203,6 +218,8 @@ cs::DeviceCapabilities fake_device_capabilities() {
   capabilities.external_memory_properties =
       fake_device_external_memory_properties();
   capabilities.debug_properties = fake_device_debug_properties();
+  capabilities.mutable_command_list_properties =
+      fake_mutable_command_list_exp_properties();
   return capabilities;
 }
 
@@ -440,6 +457,8 @@ TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
       capabilities.external_memory_properties, indentation_level_);
   ss << cs::device_debug_properties_to_text(capabilities.debug_properties,
                                             indentation_level_);
+  ss << cs::device_mutable_command_list_properties_to_text(
+      capabilities.mutable_command_list_properties, indentation_level_);
   ss << cs::key_value_to_text("Number of sub-devices", "2", indentation_level_);
   ss << cs::key_value_to_text("Sub-device", "0", indentation_level_);
   ss << cs::device_capabilities_to_text(capabilities.sub_devices[0],
@@ -794,6 +813,31 @@ TEST_F(TextFormatterTests, DeviceDebugPropertiesToText) {
   const auto expected = ss.str();
   const auto actual =
       cs::device_debug_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceMutableCommandListPropertiesToText) {
+  const auto properties = fake_mutable_command_list_exp_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Mutable command list flags",
+                              "ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED",
+                              indentation_level_);
+  ss << cs::key_value_to_text(
+      "Mutable command flags",
+      "ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET | "
+      "ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS | "
+      "ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT | "
+      "ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE | "
+      "ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS | "
+      "ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION | "
+      "ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT | "
+      "ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS",
+      indentation_level_);
+  const auto expected = ss.str();
+  const auto actual = cs::device_mutable_command_list_properties_to_text(
+      properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
@@ -1188,6 +1232,22 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
       "                ]\n"
       "            },\n"
+      "            \"ze_mutable_command_list_exp_properties_t\": {\n"
+      "                \"mutableCommandListFlags\": [\n"
+      "                    \"ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED\"\n"
+      "                ],\n"
+      "                \"mutableCommandFlags\": [\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS\",\n"
+      "                    "
+      "\"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
+      "                ]\n"
+      "            },\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -1390,6 +1450,22 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "            \"zet_device_debug_properties_t\": {\n"
       "                \"flags\": [\n"
       "                    \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_mutable_command_list_exp_properties_t\": {\n"
+      "                \"mutableCommandListFlags\": [\n"
+      "                    \"ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED\"\n"
+      "                ],\n"
+      "                \"mutableCommandFlags\": [\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS\",\n"
+      "                    "
+      "\"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -1655,6 +1731,21 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
       "        ]\n"
       "    },\n"
+      "    \"ze_mutable_command_list_exp_properties_t\": {\n"
+      "        \"mutableCommandListFlags\": [\n"
+      "            \"ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED\"\n"
+      "        ],\n"
+      "        \"mutableCommandFlags\": [\n"
+      "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET\",\n"
+      "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS\",\n"
+      "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT\",\n"
+      "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE\",\n"
+      "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS\",\n"
+      "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION\",\n"
+      "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT\",\n"
+      "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
+      "        ]\n"
+      "    },\n"
       "    \"sub_devices_count\": 2,\n"
       "    \"sub_devices\": [\n"
       "        {\n"
@@ -1858,6 +1949,22 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"zet_device_debug_properties_t\": {\n"
       "                \"flags\": [\n"
       "                    \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_mutable_command_list_exp_properties_t\": {\n"
+      "                \"mutableCommandListFlags\": [\n"
+      "                    \"ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED\"\n"
+      "                ],\n"
+      "                \"mutableCommandFlags\": [\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS\",\n"
+      "                    "
+      "\"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -2064,6 +2171,22 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"zet_device_debug_properties_t\": {\n"
       "                \"flags\": [\n"
       "                    \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
+      "                ]\n"
+      "            },\n"
+      "            \"ze_mutable_command_list_exp_properties_t\": {\n"
+      "                \"mutableCommandListFlags\": [\n"
+      "                    \"ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED\"\n"
+      "                ],\n"
+      "                \"mutableCommandFlags\": [\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS\",\n"
+      "                    "
+      "\"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT\",\n"
+      "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "                ]\n"
       "            },\n"
       "            \"sub_devices_count\": 0,\n"
@@ -2427,6 +2550,32 @@ TEST(JSONFormatterTests, DeviceDebugPropertiesToJSON) {
                         "        \"ZET_DEVICE_DEBUG_PROPERTY_FLAG_ATTACH\"\n"
                         "    ]\n"
                         "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceMutableCommandListPropertiesToJSON) {
+  const auto properties = fake_mutable_command_list_exp_properties();
+
+  const auto json =
+      cs::device_mutable_command_list_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "{\n"
+      "    \"mutableCommandListFlags\": [\n"
+      "        \"ZE_MUTABLE_COMMAND_LIST_EXP_FLAG_RESERVED\"\n"
+      "    ],\n"
+      "    \"mutableCommandFlags\": [\n"
+      "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_GLOBAL_OFFSET\",\n"
+      "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS\",\n"
+      "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_COUNT\",\n"
+      "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_GROUP_SIZE\",\n"
+      "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_ARGUMENTS\",\n"
+      "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_KERNEL_INSTRUCTION\",\n"
+      "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_SIGNAL_EVENT\",\n"
+      "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
+      "    ]\n"
+      "}";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }

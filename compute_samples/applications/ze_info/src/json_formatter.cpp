@@ -220,6 +220,9 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   tree.add_child(
       "zet_device_debug_properties_t",
       device_debug_properties_to_json(capabilities.debug_properties));
+  tree.add_child("ze_mutable_command_list_exp_properties_t",
+                 device_mutable_command_list_properties_to_json(
+                     capabilities.mutable_command_list_properties));
   pt::ptree sub_devices;
   tree.put("sub_devices_count",
            std::to_string(capabilities.sub_devices.size()));
@@ -564,6 +567,33 @@ device_debug_properties_to_json(const zet_device_debug_properties_t &p) {
     debug_properties_node.push_back(std::make_pair("", node));
   }
   tree.add_child("flags", debug_properties_node);
+  return tree;
+}
+
+boost::property_tree::ptree device_mutable_command_list_properties_to_json(
+    const ze_mutable_command_list_exp_properties_t &p) {
+  pt::ptree tree;
+  pt::ptree mutable_command_list_node;
+  pt::ptree mutable_command_node;
+  for (const auto &flag :
+       split_string(flags_to_string<ze_mutable_command_list_exp_flags_t>(
+                        p.mutableCommandListFlags),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    mutable_command_list_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("mutableCommandListFlags", mutable_command_list_node);
+
+  for (const auto &flag :
+       split_string(flags_to_string<ze_mutable_command_exp_flag_t>(
+                        p.mutableCommandFlags),
+                    " | ")) {
+    pt::ptree node;
+    node.put("", flag);
+    mutable_command_node.push_back(std::make_pair("", node));
+  }
+  tree.add_child("mutableCommandFlags", mutable_command_node);
   return tree;
 }
 

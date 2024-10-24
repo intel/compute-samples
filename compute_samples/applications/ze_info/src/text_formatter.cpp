@@ -138,6 +138,8 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
       capabilities.external_memory_properties, indentation_level);
   ss << device_debug_properties_to_text(capabilities.debug_properties,
                                         indentation_level);
+  ss << device_mutable_command_list_properties_to_text(
+      capabilities.mutable_command_list_properties, indentation_level);
   ss << key_value_to_text("Number of sub-devices",
                           std::to_string(capabilities.sub_devices.size()),
                           indentation_level);
@@ -478,6 +480,21 @@ device_debug_properties_to_text(const zet_device_debug_properties_t &p,
   std::stringstream ss;
   ss << key_value_to_text(
       "flags", flags_to_string<zet_device_debug_property_flag_t>(p.flags),
+      indentation_level);
+  return ss.str();
+}
+
+std::string device_mutable_command_list_properties_to_text(
+    const ze_mutable_command_list_exp_properties_t &p,
+    const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Mutable command list flags",
+                          flags_to_string<ze_mutable_command_list_exp_flags_t>(
+                              p.mutableCommandListFlags),
+                          indentation_level);
+  ss << key_value_to_text(
+      "Mutable command flags",
+      flags_to_string<ze_mutable_command_exp_flag_t>(p.mutableCommandFlags),
       indentation_level);
   return ss.str();
 }

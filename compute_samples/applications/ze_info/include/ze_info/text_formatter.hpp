@@ -102,6 +102,10 @@ std::string device_raytracing_properties_to_text(
     const ze_device_raytracing_ext_properties_t &p,
     const int indentation_level);
 
+std::string device_mutable_command_list_properties_to_text(
+    const ze_mutable_command_list_exp_properties_t &p,
+    const int indentation_level);
+
 } // namespace compute_samples
 
 #endif
