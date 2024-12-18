@@ -106,6 +106,14 @@ std::string device_mutable_command_list_properties_to_text(
     const ze_mutable_command_list_exp_properties_t &p,
     const int indentation_level);
 
+std::string programmable_metrics_properties_to_text(
+    const std::vector<zet_metric_programmable_exp_properties_t> &properties,
+    int indentation_level);
+
+std::string tracer_metrics_properties_to_text(
+    const std::vector<zet_metric_group_properties_t> &properties,
+    int indentation_level);
+
 } // namespace compute_samples
 
 #endif

@@ -244,6 +244,22 @@ std::string to_string(const ze_mutable_command_exp_flag_t flag) {
   }
 }
 
+std::string to_string(const zet_metric_group_sampling_type_flag_t flag) {
+  switch (flag) {
+  case ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EVENT_BASED:
+    return "ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EVENT_BASED";
+  case ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_TIME_BASED:
+    return "ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_TIME_BASED";
+  case ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED:
+    return "ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED";
+  case ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_FORCE_UINT32:
+    return "ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_FORCE_UINT32";
+  default:
+    return "Unknown zet_metric_group_sampling_type_flag_t value: " +
+           std::to_string(static_cast<int>(flag));
+  }
+}
+
 std::string to_string(const ze_device_cache_property_flag_t flag) {
   switch (flag) {
   case ZE_DEVICE_CACHE_PROPERTY_FLAG_USER_CONTROL:

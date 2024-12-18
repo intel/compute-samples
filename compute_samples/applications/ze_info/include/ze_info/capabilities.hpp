@@ -30,6 +30,10 @@ struct DeviceCapabilities {
   ze_float_atomic_ext_properties_t float_atomics_properties;
   ze_device_raytracing_ext_properties_t ray_tracing_properties;
   ze_mutable_command_list_exp_properties_t mutable_command_list_properties;
+  std::vector<zet_metric_programmable_exp_properties_t>
+      programmable_metrics_properties;
+  std::vector<zet_metric_group_properties_t> tracer_metrics_properties;
+  int programmable_metrics_count;
 };
 
 struct DriverCapabilities {
@@ -106,6 +110,14 @@ get_raytracing_ext_properties(ze_device_handle_t device);
 
 ze_mutable_command_list_exp_properties_t
 get_mutable_command_list_exp_properties(ze_device_handle_t device);
+
+std::vector<zet_metric_programmable_exp_properties_t>
+get_programmable_metrics_properties(ze_device_handle_t device);
+
+std::vector<zet_metric_group_properties_t>
+get_tracer_metrics_properties(ze_device_handle_t device);
+
+int get_programmable_metrics_count(ze_device_handle_t device);
 
 std::vector<DeviceCapabilities> get_device_sub_devices_capabilities(
     const std::vector<ze_device_handle_t> &sub_devices);

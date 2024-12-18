@@ -171,6 +171,40 @@ fake_mutable_command_list_exp_properties() {
           ZE_MUTABLE_COMMAND_EXP_FLAG_GRAPH_ARGUMENTS};
 }
 
+zet_metric_programmable_exp_properties_t
+fake_programmable_metrics_properties() {
+  zet_metric_programmable_exp_properties_t properties = {};
+  properties.stype = ZET_STRUCTURE_TYPE_METRIC_PROGRAMMABLE_EXP_PROPERTIES;
+  properties.pNext = nullptr;
+  std::strncpy(properties.name, "EU_ACTIVE",
+               ZET_MAX_METRIC_PROGRAMMABLE_NAME_EXP);
+  std::strncpy(properties.description, "Execution Unit Active",
+               ZET_MAX_METRIC_PROGRAMMABLE_DESCRIPTION_EXP);
+  std::strncpy(properties.component, "Component1",
+               ZET_MAX_METRIC_PROGRAMMABLE_COMPONENT_EXP);
+  properties.tierNumber = 2;
+  properties.domain = 1;
+  properties.parameterCount = 3;
+  properties.samplingType =
+      ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED;
+  properties.sourceId = 1;
+  return properties;
+}
+
+zet_metric_group_properties_t fake_tracer_metrics_properties() {
+  zet_metric_group_properties_t properties = {};
+  properties.stype = ZET_STRUCTURE_TYPE_METRIC_GROUP_PROPERTIES;
+  properties.pNext = nullptr;
+  std::strncpy(properties.name, "TracerMetrics", ZET_MAX_METRIC_GROUP_NAME);
+  std::strncpy(properties.description, "Tracer Metrics Group",
+               ZET_MAX_METRIC_GROUP_DESCRIPTION);
+  properties.samplingType =
+      ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED;
+  properties.domain = 1;
+  properties.metricCount = 5;
+  return properties;
+}
+
 ze_scheduling_hint_exp_properties_t
 fake_device_kernel_schedule_hint_properties() {
   return ze_scheduling_hint_exp_properties_t{
@@ -220,6 +254,10 @@ cs::DeviceCapabilities fake_device_capabilities() {
   capabilities.debug_properties = fake_device_debug_properties();
   capabilities.mutable_command_list_properties =
       fake_mutable_command_list_exp_properties();
+  capabilities.programmable_metrics_properties = {
+      fake_programmable_metrics_properties()};
+  capabilities.tracer_metrics_properties = {fake_tracer_metrics_properties()};
+  capabilities.programmable_metrics_count = 1;
   return capabilities;
 }
 
@@ -459,6 +497,12 @@ TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
                                             indentation_level_);
   ss << cs::device_mutable_command_list_properties_to_text(
       capabilities.mutable_command_list_properties, indentation_level_);
+  ss << cs::programmable_metrics_properties_to_text(
+      capabilities.programmable_metrics_properties, indentation_level_);
+  ss << cs::tracer_metrics_properties_to_text(
+      capabilities.tracer_metrics_properties, indentation_level_);
+  ss << cs::key_value_to_text("Programmable metrics count", "1",
+                              indentation_level_);
   ss << cs::key_value_to_text("Number of sub-devices", "2", indentation_level_);
   ss << cs::key_value_to_text("Sub-device", "0", indentation_level_);
   ss << cs::device_capabilities_to_text(capabilities.sub_devices[0],
@@ -838,6 +882,49 @@ TEST_F(TextFormatterTests, DeviceMutableCommandListPropertiesToText) {
   const auto expected = ss.str();
   const auto actual = cs::device_mutable_command_list_properties_to_text(
       properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, ProgrammableMetricsPropertiesToText) {
+  const auto properties = std::vector<zet_metric_programmable_exp_properties_t>{
+      fake_programmable_metrics_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Name", "EU_ACTIVE", indentation_level_);
+  ss << cs::key_value_to_text("Description", "Execution Unit Active",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Component", "Component1", indentation_level_);
+  ss << cs::key_value_to_text("Tier Number", "2", indentation_level_);
+  ss << cs::key_value_to_text("Domain", "1", indentation_level_);
+  ss << cs::key_value_to_text("Parameter Count", "3", indentation_level_);
+  ss << cs::key_value_to_text(
+      "Sampling Type", "ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED",
+      indentation_level_);
+  ss << cs::key_value_to_text("Source ID", "1", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual = cs::programmable_metrics_properties_to_text(
+      properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, TracerMetricsPropertiesToText) {
+  const auto properties = std::vector<zet_metric_group_properties_t>{
+      fake_tracer_metrics_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Name", "TracerMetrics", indentation_level_);
+  ss << cs::key_value_to_text("Description", "Tracer Metrics Group",
+                              indentation_level_);
+  ss << cs::key_value_to_text(
+      "Sampling Type", "ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED",
+      indentation_level_);
+  ss << cs::key_value_to_text("Domain", "1", indentation_level_);
+  ss << cs::key_value_to_text("Metric Count", "5", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::tracer_metrics_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
@@ -1248,6 +1335,30 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "                ]\n"
       "            },\n"
+      "            \"zet_metric_programmable_exp_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"EU_ACTIVE\",\n"
+      "                    \"description\": \"Execution Unit Active\",\n"
+      "                    \"component\": \"Component1\",\n"
+      "                    \"tierNumber\": 2,\n"
+      "                    \"domain\": 1,\n"
+      "                    \"parameterCount\": 3,\n"
+      "                    \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "                    \"sourceId\": 1\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zet_metric_group_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"TracerMetrics\",\n"
+      "                    \"description\": \"Tracer Metrics Group\",\n"
+      "                    \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "                    \"domain\": 1,\n"
+      "                    \"metricCount\": 5\n"
+      "                }\n"
+      "            ],\n"
+      "            \"programmable_metrics_count\": 1,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -1468,6 +1579,30 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "                ]\n"
       "            },\n"
+      "            \"zet_metric_programmable_exp_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"EU_ACTIVE\",\n"
+      "                    \"description\": \"Execution Unit Active\",\n"
+      "                    \"component\": \"Component1\",\n"
+      "                    \"tierNumber\": 2,\n"
+      "                    \"domain\": 1,\n"
+      "                    \"parameterCount\": 3,\n"
+      "                    \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "                    \"sourceId\": 1\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zet_metric_group_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"TracerMetrics\",\n"
+      "                    \"description\": \"Tracer Metrics Group\",\n"
+      "                    \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "                    \"domain\": 1,\n"
+      "                    \"metricCount\": 5\n"
+      "                }\n"
+      "            ],\n"
+      "            \"programmable_metrics_count\": 1,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        }\n"
@@ -1746,6 +1881,30 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "        ]\n"
       "    },\n"
+      "    \"zet_metric_programmable_exp_properties_t\": [\n"
+      "        {\n"
+      "            \"name\": \"EU_ACTIVE\",\n"
+      "            \"description\": \"Execution Unit Active\",\n"
+      "            \"component\": \"Component1\",\n"
+      "            \"tierNumber\": 2,\n"
+      "            \"domain\": 1,\n"
+      "            \"parameterCount\": 3,\n"
+      "            \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "            \"sourceId\": 1\n"
+      "        }\n"
+      "    ],\n"
+      "    \"zet_metric_group_properties_t\": [\n"
+      "        {\n"
+      "            \"name\": \"TracerMetrics\",\n"
+      "            \"description\": \"Tracer Metrics Group\",\n"
+      "            \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "            \"domain\": 1,\n"
+      "            \"metricCount\": 5\n"
+      "        }\n"
+      "    ],\n"
+      "    \"programmable_metrics_count\": 1,\n"
       "    \"sub_devices_count\": 2,\n"
       "    \"sub_devices\": [\n"
       "        {\n"
@@ -1967,6 +2126,30 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "                ]\n"
       "            },\n"
+      "            \"zet_metric_programmable_exp_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"EU_ACTIVE\",\n"
+      "                    \"description\": \"Execution Unit Active\",\n"
+      "                    \"component\": \"Component1\",\n"
+      "                    \"tierNumber\": 2,\n"
+      "                    \"domain\": 1,\n"
+      "                    \"parameterCount\": 3,\n"
+      "                    \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "                    \"sourceId\": 1\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zet_metric_group_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"TracerMetrics\",\n"
+      "                    \"description\": \"Tracer Metrics Group\",\n"
+      "                    \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "                    \"domain\": 1,\n"
+      "                    \"metricCount\": 5\n"
+      "                }\n"
+      "            ],\n"
+      "            \"programmable_metrics_count\": 1,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -2189,6 +2372,30 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "                ]\n"
       "            },\n"
+      "            \"zet_metric_programmable_exp_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"EU_ACTIVE\",\n"
+      "                    \"description\": \"Execution Unit Active\",\n"
+      "                    \"component\": \"Component1\",\n"
+      "                    \"tierNumber\": 2,\n"
+      "                    \"domain\": 1,\n"
+      "                    \"parameterCount\": 3,\n"
+      "                    \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "                    \"sourceId\": 1\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zet_metric_group_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"TracerMetrics\",\n"
+      "                    \"description\": \"Tracer Metrics Group\",\n"
+      "                    \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "                    \"domain\": 1,\n"
+      "                    \"metricCount\": 5\n"
+      "                }\n"
+      "            ],\n"
+      "            \"programmable_metrics_count\": 1,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        }\n"
@@ -2576,6 +2783,51 @@ TEST(JSONFormatterTests, DeviceMutableCommandListPropertiesToJSON) {
       "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "    ]\n"
       "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, ProgrammableMetricsPropertiesToJSON) {
+  const auto properties = std::vector<zet_metric_programmable_exp_properties_t>{
+      fake_programmable_metrics_properties()};
+
+  const auto json = cs::programmable_metrics_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "[\n"
+      "        {\n"
+      "            \"name\": \"EU_ACTIVE\",\n"
+      "            \"description\": \"Execution Unit Active\",\n"
+      "            \"component\": \"Component1\",\n"
+      "            \"tierNumber\": 2,\n"
+      "            \"domain\": 1,\n"
+      "            \"parameterCount\": 3,\n"
+      "            \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "            \"sourceId\": 1\n"
+      "        }\n"
+      "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, TracerMetricsPropertiesToJSON) {
+  const auto properties = std::vector<zet_metric_group_properties_t>{
+      fake_tracer_metrics_properties()};
+
+  const auto json = cs::tracer_metrics_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "[\n"
+      "        {\n"
+      "            \"name\": \"TracerMetrics\",\n"
+      "            \"description\": \"Tracer Metrics Group\",\n"
+      "            \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "            \"domain\": 1,\n"
+      "            \"metricCount\": 5\n"
+      "        }\n"
+      "]";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }

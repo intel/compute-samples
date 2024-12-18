@@ -33,6 +33,7 @@ std::string to_string(ze_command_queue_group_property_flag_t flag);
 std::string to_string(ze_mutable_command_list_exp_flags_t flag);
 std::string to_string(ze_mutable_command_exp_flag_t flag);
 std::string to_string(zet_device_debug_property_flag_t flag);
+std::string to_string(zet_metric_group_sampling_type_flag_t flag);
 
 template <typename T> std::string flags_to_string(uint32_t flags) {
   const size_t bits = 8;

@@ -223,6 +223,15 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   tree.add_child("ze_mutable_command_list_exp_properties_t",
                  device_mutable_command_list_properties_to_json(
                      capabilities.mutable_command_list_properties));
+  tree.add_child("zet_metric_programmable_exp_properties_t",
+                 programmable_metrics_properties_to_json(
+                     capabilities.programmable_metrics_properties));
+  tree.add_child("zet_metric_group_properties_t",
+                 tracer_metrics_properties_to_json(
+                     capabilities.tracer_metrics_properties));
+  tree.put("programmable_metrics_count",
+           capabilities.programmable_metrics_count);
+
   pt::ptree sub_devices;
   tree.put("sub_devices_count",
            std::to_string(capabilities.sub_devices.size()));
@@ -595,6 +604,43 @@ boost::property_tree::ptree device_mutable_command_list_properties_to_json(
   }
   tree.add_child("mutableCommandFlags", mutable_command_node);
   return tree;
+}
+
+boost::property_tree::ptree programmable_metrics_properties_to_json(
+    const std::vector<zet_metric_programmable_exp_properties_t> &properties) {
+  pt::ptree array;
+  for (const auto &p : properties) {
+    pt::ptree tree;
+    tree.put("name", p.name);
+    tree.put("description", p.description);
+    tree.put("component", p.component);
+    tree.put("tierNumber", p.tierNumber);
+    tree.put("domain", p.domain);
+    tree.put("parameterCount", p.parameterCount);
+    tree.put(
+        "samplingType",
+        flags_to_string<zet_metric_group_sampling_type_flag_t>(p.samplingType));
+    tree.put("sourceId", p.sourceId);
+    array.push_back(std::make_pair("", tree));
+  }
+  return array;
+}
+
+boost::property_tree::ptree tracer_metrics_properties_to_json(
+    const std::vector<zet_metric_group_properties_t> &properties) {
+  pt::ptree array;
+  for (const auto &p : properties) {
+    pt::ptree tree;
+    tree.put("name", p.name);
+    tree.put("description", p.description);
+    tree.put(
+        "samplingType",
+        flags_to_string<zet_metric_group_sampling_type_flag_t>(p.samplingType));
+    tree.put("domain", p.domain);
+    tree.put("metricCount", p.metricCount);
+    array.push_back(std::make_pair("", tree));
+  }
+  return array;
 }
 
 std::string ptree_to_string(const pt::ptree tree) {
