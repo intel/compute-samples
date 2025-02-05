@@ -2954,51 +2954,6 @@ TEST(JSONFormatterTests, TracerMetricsPropertiesToJSON) {
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
-TEST(JSONFormatterTests, ProgrammableMetricsPropertiesToJSON) {
-  const auto properties = std::vector<zet_metric_programmable_exp_properties_t>{
-      fake_programmable_metrics_properties()};
-
-  const auto json = cs::programmable_metrics_properties_to_json(properties);
-  const auto actual = cs::ptree_to_string(json);
-  const auto expected =
-      "[\n"
-      "        {\n"
-      "            \"name\": \"EU_ACTIVE\",\n"
-      "            \"description\": \"Execution Unit Active\",\n"
-      "            \"component\": \"Component1\",\n"
-      "            \"tierNumber\": 2,\n"
-      "            \"domain\": 1,\n"
-      "            \"parameterCount\": 3,\n"
-      "            \"samplingType\": "
-      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
-      "            \"sourceId\": 1\n"
-      "        }\n"
-      "]";
-
-  EXPECT_THAT(actual, ::testing::StrEq(expected));
-}
-
-TEST(JSONFormatterTests, TracerMetricsPropertiesToJSON) {
-  const auto properties = std::vector<zet_metric_group_properties_t>{
-      fake_tracer_metrics_properties()};
-
-  const auto json = cs::tracer_metrics_properties_to_json(properties);
-  const auto actual = cs::ptree_to_string(json);
-  const auto expected =
-      "[\n"
-      "        {\n"
-      "            \"name\": \"TracerMetrics\",\n"
-      "            \"description\": \"Tracer Metrics Group\",\n"
-      "            \"samplingType\": "
-      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
-      "            \"domain\": 1,\n"
-      "            \"metricCount\": 5\n"
-      "        }\n"
-      "]";
-
-  EXPECT_THAT(actual, ::testing::StrEq(expected));
-}
-
 TEST(JSONFormatterTests, PtreeToStringEmptyArray) {
   pt::ptree children;
   pt::ptree child;
