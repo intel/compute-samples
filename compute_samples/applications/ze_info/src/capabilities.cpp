@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -8,6 +8,7 @@
 #include "ze_info/capabilities.hpp"
 #include "ze_api.h"
 #include "zet_api.h"
+#include "zes_api.h"
 
 #include <vector>
 
@@ -150,6 +151,9 @@ DeviceCapabilities get_device_capabilities(ze_device_handle_t device) {
       get_tracer_metrics_properties(device);
   capabilities.programmable_metrics_count =
       get_programmable_metrics_count(device);
+  capabilities.engine_properties = get_device_engine_properties(device);
+  capabilities.ras_handles_count = get_device_ras_handles_count(device);
+  capabilities.vf_handles_count = get_device_vf_handles_count(device);
   return capabilities;
 }
 
@@ -333,66 +337,102 @@ get_mutable_command_list_exp_properties(ze_device_handle_t device) {
 
 std::vector<zet_metric_programmable_exp_properties_t>
 get_programmable_metrics_properties(ze_device_handle_t device) {
-  uint32_t programmable_count = 0;
-  auto result =
-      zetMetricProgrammableGetExp(device, &programmable_count, nullptr);
-  if (programmable_count == 0) {
-    throw std::runtime_error("No programmable metrics found");
-  }
-
-  std::vector<zet_metric_programmable_exp_handle_t> metric_programmable_handles(
-      programmable_count);
-  result = zetMetricProgrammableGetExp(device, &programmable_count,
-                                       metric_programmable_handles.data());
+  uint32_t count = 0;
+  auto result = zetMetricProgrammableGetExp(device, &count, nullptr);
   throw_if_failed(result, "zetMetricProgrammableGetExp");
+  LOG_DEBUG << "Programmable metrics count retrieved";
 
-  std::vector<zet_metric_programmable_exp_properties_t> programmable_properties(
-      programmable_count);
-  for (uint32_t i = 0; i < programmable_count; ++i) {
-    zet_metric_programmable_exp_properties_t properties = {};
-    properties.stype = ZET_STRUCTURE_TYPE_METRIC_PROGRAMMABLE_EXP_PROPERTIES;
-    result = zetMetricProgrammableGetPropertiesExp(
-        metric_programmable_handles[i], &properties);
+  std::vector<zet_metric_programmable_exp_handle_t> metric_handles(count);
+  result = zetMetricProgrammableGetExp(device, &count, metric_handles.data());
+  throw_if_failed(result, "zetMetricProgrammableGetExp");
+  LOG_DEBUG << "Programmable metrics handles retrieved";
+
+  std::vector<zet_metric_programmable_exp_properties_t> properties(
+      count, {ZET_STRUCTURE_TYPE_METRIC_PROGRAMMABLE_EXP_PROPERTIES});
+  for (uint32_t i = 0; i < count; ++i) {
+    result = zetMetricProgrammableGetPropertiesExp(metric_handles[i],
+                                                   &properties[i]);
     throw_if_failed(result, "zetMetricProgrammableGetPropertiesExp");
-    programmable_properties[i] = properties;
   }
 
   LOG_DEBUG << "Programmable metrics properties retrieved";
-  return programmable_properties;
+  return properties;
 }
 
 std::vector<zet_metric_group_properties_t>
 get_tracer_metrics_properties(ze_device_handle_t device) {
-  uint32_t metric_group_count = 0;
-  zetMetricGroupGet(device, &metric_group_count, nullptr);
-  if (metric_group_count == 0) {
-    throw std::runtime_error("No metric groups found");
-  }
+  uint32_t count = 0;
+  auto result = zetMetricGroupGet(device, &count, nullptr);
+  throw_if_failed(result, "zetMetricGroupGet");
+  LOG_DEBUG << "Tracer metrics count retrieved";
 
-  std::vector<zet_metric_group_handle_t> metric_group_handles(
-      metric_group_count);
-  zetMetricGroupGet(device, &metric_group_count, metric_group_handles.data());
+  std::vector<zet_metric_group_handle_t> metric_handles(count);
+  result = zetMetricGroupGet(device, &count, metric_handles.data());
+  throw_if_failed(result, "zetMetricGroupGet");
+  LOG_DEBUG << "Tracer metrics handles retrieved";
 
-  std::vector<zet_metric_group_properties_t> metric_group_properties(
-      metric_group_count);
-  for (uint32_t i = 0; i < metric_group_count; ++i) {
-    zet_metric_group_properties_t properties = {};
-    properties.stype = ZET_STRUCTURE_TYPE_METRIC_GROUP_PROPERTIES;
-    zetMetricGroupGetProperties(metric_group_handles[i], &properties);
-    metric_group_properties[i] = properties;
+  std::vector<zet_metric_group_properties_t> properties(
+      count, {ZET_STRUCTURE_TYPE_METRIC_GROUP_PROPERTIES});
+  for (uint32_t i = 0; i < count; ++i) {
+    zetMetricGroupGetProperties(metric_handles[i], &properties[i]);
+    throw_if_failed(result, "zetMetricGroupGetProperties");
   }
 
   LOG_DEBUG << "Tracer metrics properties retrieved";
-  return metric_group_properties;
+  return properties;
 }
 
-int get_programmable_metrics_count(ze_device_handle_t device) {
+uint32_t get_programmable_metrics_count(ze_device_handle_t device) {
   uint32_t count = 0;
   auto result = zetMetricProgrammableGetExp(device, &count, nullptr);
-  if (result != ZE_RESULT_SUCCESS) {
-    throw std::runtime_error("Failed to get programmable metrics count");
+  throw_if_failed(result, "zetMetricProgrammableGetExp");
+  return count;
+}
+
+std::vector<zes_engine_properties_t>
+get_device_engine_properties(ze_device_handle_t device) {
+  zes_device_handle_t sysman_device =
+      get_sysman_device_from_core_device(device);
+  uint32_t count = 0;
+  auto result = zesDeviceEnumEngineGroups(sysman_device, &count, nullptr);
+  throw_if_failed(result, "zesDeviceEnumEngineGroups");
+  LOG_DEBUG << "Device engine groups count retrieved";
+
+  std::vector<zes_engine_handle_t> engine_handles(count, {nullptr});
+  result =
+      zesDeviceEnumEngineGroups(sysman_device, &count, engine_handles.data());
+  throw_if_failed(result, "zesDeviceEnumEngineGroups");
+  LOG_DEBUG << "Device engine handles retrieved";
+
+  std::vector<zes_engine_properties_t> properties(
+      count, {ZES_STRUCTURE_TYPE_ENGINE_PROPERTIES});
+  for (size_t i = 0; i < properties.size(); ++i) {
+    result = zesEngineGetProperties(engine_handles[i], &properties[i]);
+    throw_if_failed(result, "zesEngineGetProperties");
   }
-  return static_cast<int>(count);
+  LOG_DEBUG << "Device engines properties retrieved";
+
+  return properties;
+}
+
+uint32_t get_device_ras_handles_count(ze_device_handle_t device) {
+  zes_device_handle_t sysman_device =
+      get_sysman_device_from_core_device(device);
+  uint32_t count = 0;
+  const auto result = zesDeviceEnumRasErrorSets(sysman_device, &count, nullptr);
+  throw_if_failed(result, "zesDeviceEnumRasErrorSets");
+  LOG_DEBUG << "Ras handles count retrieved";
+  return count;
+}
+
+uint32_t get_device_vf_handles_count(ze_device_handle_t device) {
+  zes_device_handle_t sysman_device =
+      get_sysman_device_from_core_device(device);
+  uint32_t count = 0;
+  const auto result = zesDeviceEnumEnabledVFExp(sysman_device, &count, nullptr);
+  throw_if_failed(result, "zesDeviceEnumEnabledVFExp");
+  LOG_DEBUG << "VF handles count retrieved";
+  return count;
 }
 
 std::vector<ze_device_handle_t>

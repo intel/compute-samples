@@ -56,9 +56,13 @@ ZeInfoApplication::run_implementation(std::vector<std::string> &command_line) {
     return Status::SKIP;
   }
 
-  const auto result = zeInit(0);
+  auto result = zeInit(0);
   throw_if_failed(result, "zeInit");
-  LOG_DEBUG << "Drivers initialized";
+  LOG_DEBUG << "Core drivers initialized";
+
+  result = zesInit(0);
+  throw_if_failed(result, "zesInit");
+  LOG_DEBUG << "Sysman drivers initialized";
 
   const std::vector<ze_driver_handle_t> drivers = get_drivers();
   const std::vector<DriverCapabilities> capabilities =

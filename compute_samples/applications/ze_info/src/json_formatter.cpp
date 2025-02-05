@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -232,6 +232,11 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   tree.put("programmable_metrics_count",
            capabilities.programmable_metrics_count);
 
+  tree.add_child(
+      "zes_engine_properties_t",
+      all_device_engine_properties_to_json(capabilities.engine_properties));
+  tree.put("ras_handles_count", std::to_string(capabilities.ras_handles_count));
+  tree.put("vf_handles_count", std::to_string(capabilities.vf_handles_count));
   pt::ptree sub_devices;
   tree.put("sub_devices_count",
            std::to_string(capabilities.sub_devices.size()));
@@ -641,6 +646,30 @@ boost::property_tree::ptree tracer_metrics_properties_to_json(
     array.push_back(std::make_pair("", tree));
   }
   return array;
+}
+
+boost::property_tree::ptree all_device_engine_properties_to_json(
+    const std::vector<zes_engine_properties_t> &p) {
+  pt::ptree tree;
+  if (p.empty()) {
+    pt::ptree node;
+    tree.push_back(std::make_pair("", node));
+  } else {
+    for (const auto &properties : p) {
+      tree.push_back(
+          std::make_pair("", device_engine_properties_to_json(properties)));
+    }
+  }
+  return tree;
+}
+
+boost::property_tree::ptree
+device_engine_properties_to_json(const zes_engine_properties_t &p) {
+  pt::ptree tree;
+  tree.put("type", to_string(p.type));
+  tree.put("onSubdevice", to_string(p.onSubdevice));
+  tree.put("subdeviceId", p.subdeviceId);
+  return tree;
 }
 
 std::string ptree_to_string(const pt::ptree tree) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -11,6 +11,7 @@
 #include <vector>
 #include "ze_api.h"
 #include "zet_api.h"
+#include "zes_api.h"
 
 namespace compute_samples {
 struct DeviceCapabilities {
@@ -33,7 +34,10 @@ struct DeviceCapabilities {
   std::vector<zet_metric_programmable_exp_properties_t>
       programmable_metrics_properties;
   std::vector<zet_metric_group_properties_t> tracer_metrics_properties;
-  int programmable_metrics_count;
+  std::vector<zes_engine_properties_t> engine_properties;
+  uint32_t programmable_metrics_count;
+  uint32_t ras_handles_count;
+  uint32_t vf_handles_count;
 };
 
 struct DriverCapabilities {
@@ -117,11 +121,17 @@ get_programmable_metrics_properties(ze_device_handle_t device);
 std::vector<zet_metric_group_properties_t>
 get_tracer_metrics_properties(ze_device_handle_t device);
 
-int get_programmable_metrics_count(ze_device_handle_t device);
+uint32_t get_programmable_metrics_count(ze_device_handle_t device);
+
+std::vector<zes_engine_properties_t>
+get_device_engine_properties(ze_device_handle_t device);
+
+uint32_t get_device_ras_handles_count(ze_device_handle_t device);
+
+uint32_t get_device_vf_handles_count(ze_device_handle_t device);
 
 std::vector<DeviceCapabilities> get_device_sub_devices_capabilities(
     const std::vector<ze_device_handle_t> &sub_devices);
-
 } // namespace compute_samples
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,6 +102,13 @@ std::string to_string(const ze_result_t result) {
     return "Unknown ze_result_t value: " +
            std::to_string(static_cast<int>(result));
   }
+}
+
+std::string to_string(ze_bool_t boolean) {
+  if (boolean != 0u) {
+    return "true";
+  }
+  return "false";
 }
 
 std::string to_string(const ze_device_memory_property_flag_t flag) {
@@ -402,10 +409,89 @@ std::string to_string(const ze_device_raytracing_ext_flag_t flag) {
   }
 }
 
+std::string to_string(const zes_engine_group_t type) {
+  switch (type) {
+  case ZES_ENGINE_GROUP_ALL:
+    return "ZES_ENGINE_GROUP_ALL";
+  case ZES_ENGINE_GROUP_COMPUTE_ALL:
+    return "ZES_ENGINE_GROUP_COMPUTE_ALL";
+  case ZES_ENGINE_GROUP_MEDIA_ALL:
+    return "ZES_ENGINE_GROUP_MEDIA_ALL";
+  case ZES_ENGINE_GROUP_COPY_ALL:
+    return "ZES_ENGINE_GROUP_COPY_ALL";
+  case ZES_ENGINE_GROUP_COMPUTE_SINGLE:
+    return "ZES_ENGINE_GROUP_COMPUTE_SINGLE";
+  case ZES_ENGINE_GROUP_RENDER_SINGLE:
+    return "ZES_ENGINE_GROUP_RENDER_SINGLE";
+  case ZES_ENGINE_GROUP_MEDIA_DECODE_SINGLE:
+    return "ZES_ENGINE_GROUP_MEDIA_DECODE_SINGLE";
+  case ZES_ENGINE_GROUP_MEDIA_ENCODE_SINGLE:
+    return "ZES_ENGINE_GROUP_MEDIA_ENCODE_SINGLE";
+  case ZES_ENGINE_GROUP_COPY_SINGLE:
+    return "ZES_ENGINE_GROUP_COPY_SINGLE";
+  case ZES_ENGINE_GROUP_MEDIA_ENHANCEMENT_SINGLE:
+    return "ZES_ENGINE_GROUP_MEDIA_ENHANCEMENT_SINGLE";
+  case ZES_ENGINE_GROUP_3D_SINGLE:
+    return "ZES_ENGINE_GROUP_3D_SINGLE";
+  case ZES_ENGINE_GROUP_3D_RENDER_COMPUTE_ALL:
+    return "ZES_ENGINE_GROUP_3D_RENDER_COMPUTE_ALL";
+  case ZES_ENGINE_GROUP_RENDER_ALL:
+    return "ZES_ENGINE_GROUP_RENDER_ALL";
+  case ZES_ENGINE_GROUP_3D_ALL:
+    return "ZES_ENGINE_GROUP_3D_ALL";
+  case ZES_ENGINE_GROUP_MEDIA_CODEC_SINGLE:
+    return "ZES_ENGINE_GROUP_MEDIA_CODEC_SINGLE";
+  case ZES_ENGINE_GROUP_FORCE_UINT32:
+    return "ZES_ENGINE_GROUP_FORCE_UINT32";
+  default:
+    return "Unknown zes_engine_group_t value: " +
+           std::to_string(static_cast<int>(type));
+  }
+}
+
 void throw_if_failed(ze_result_t result, const std::string &function_name) {
   if (result != ZE_RESULT_SUCCESS) {
     throw std::runtime_error(function_name + " failed: " + to_string(result));
   }
 }
 
+zes_device_handle_t
+get_sysman_device_from_core_device(ze_device_handle_t device) {
+  ze_device_properties_t properties = {ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES};
+  auto result = zeDeviceGetProperties(device, &properties);
+  throw_if_failed(result, "zeDeviceGetProperties");
+
+  zes_uuid_t uuid = {};
+  std::copy(properties.uuid.id, properties.uuid.id + ZE_MAX_DEVICE_UUID_SIZE,
+            uuid.id);
+
+  uint32_t driver_count = 0;
+  result = zesDriverGet(&driver_count, nullptr);
+  throw_if_failed(result, "zesDriverGet");
+  if (driver_count == 0) {
+    throw std::runtime_error("zesDriverGet returned 0 drivers");
+  }
+
+  std::vector<ze_driver_handle_t> drivers(driver_count);
+  result = zesDriverGet(&driver_count, drivers.data());
+  throw_if_failed(result, "zesDriverGet");
+
+  zes_device_handle_t sysman_device = nullptr;
+  ze_bool_t on_subdevice = 0u; // onSubdevice and subdeviceId are not used
+  uint32_t subdevice_id = 0;   // but function segfaults without them
+  for (auto driver : drivers) {
+    result = zesDriverGetDeviceByUuidExp(driver, uuid, &sysman_device,
+                                         &on_subdevice, &subdevice_id);
+    if (result == ZE_RESULT_SUCCESS && (sysman_device != nullptr)) {
+      break;
+    }
+  }
+
+  if (sysman_device == nullptr) {
+    throw std::runtime_error("zesDriverGetDeviceByUuidExp did not find "
+                             "matching core device uuid");
+  }
+
+  return sysman_device;
+}
 } // namespace compute_samples

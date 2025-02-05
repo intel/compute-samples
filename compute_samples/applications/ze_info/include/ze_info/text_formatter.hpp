@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -114,6 +114,17 @@ std::string tracer_metrics_properties_to_text(
     const std::vector<zet_metric_group_properties_t> &properties,
     int indentation_level);
 
+std::string all_device_engine_properties_to_text(
+    const std::vector<zes_engine_properties_t> &p, const int indentation_level);
+
+std::string device_engine_properties_to_text(const zes_engine_properties_t &p,
+                                             const int indentation_level);
+
+std::string device_ras_handles_count_to_text(const uint32_t &count,
+                                             const int indentation_level);
+
+std::string device_vf_handles_count_to_text(const uint32_t &count,
+                                            const int indentation_level);
 } // namespace compute_samples
 
 #endif

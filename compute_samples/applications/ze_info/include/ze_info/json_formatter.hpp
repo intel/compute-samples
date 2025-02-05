@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,6 +86,12 @@ boost::property_tree::ptree programmable_metrics_properties_to_json(
 
 boost::property_tree::ptree tracer_metrics_properties_to_json(
     const std::vector<zet_metric_group_properties_t> &properties);
+
+boost::property_tree::ptree all_device_engine_properties_to_json(
+    const std::vector<zes_engine_properties_t> &p);
+
+boost::property_tree::ptree
+device_engine_properties_to_json(const zes_engine_properties_t &p);
 
 std::string ptree_to_string(const boost::property_tree::ptree tree);
 

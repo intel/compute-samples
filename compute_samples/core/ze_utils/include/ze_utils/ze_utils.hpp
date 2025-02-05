@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -13,10 +13,12 @@
 
 #include "ze_api.h"
 #include "zet_api.h"
+#include "zes_api.h"
 #include "utils/utils.hpp"
 
 namespace compute_samples {
 std::string to_string(ze_result_t result);
+std::string to_string(ze_bool_t boolean);
 std::string to_string(ze_device_memory_property_flag_t flag);
 std::string to_string(ze_ipc_property_flag_t flag);
 std::string to_string(ze_device_type_t type);
@@ -34,6 +36,7 @@ std::string to_string(ze_mutable_command_list_exp_flags_t flag);
 std::string to_string(ze_mutable_command_exp_flag_t flag);
 std::string to_string(zet_device_debug_property_flag_t flag);
 std::string to_string(zet_metric_group_sampling_type_flag_t flag);
+std::string to_string(zes_engine_group_t type);
 
 template <typename T> std::string flags_to_string(uint32_t flags) {
   const size_t bits = 8;
@@ -50,6 +53,9 @@ template <typename T> std::string flags_to_string(uint32_t flags) {
 }
 
 void throw_if_failed(ze_result_t result, const std::string &function_name);
+
+zes_device_handle_t
+get_sysman_device_from_core_device(ze_device_handle_t device);
 } // namespace compute_samples
 
 #endif

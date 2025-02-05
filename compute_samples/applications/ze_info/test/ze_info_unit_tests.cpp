@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -205,6 +205,15 @@ zet_metric_group_properties_t fake_tracer_metrics_properties() {
   return properties;
 }
 
+zes_engine_properties_t fake_device_engine_properties() {
+  return zes_engine_properties_t{ZES_STRUCTURE_TYPE_ENGINE_PROPERTIES, nullptr,
+                                 ZES_ENGINE_GROUP_ALL, 0, 0};
+}
+
+uint32_t fake_ras_handles_count() { return 2; }
+
+uint32_t fake_vf_handles_count() { return 2; }
+
 ze_scheduling_hint_exp_properties_t
 fake_device_kernel_schedule_hint_properties() {
   return ze_scheduling_hint_exp_properties_t{
@@ -258,6 +267,10 @@ cs::DeviceCapabilities fake_device_capabilities() {
       fake_programmable_metrics_properties()};
   capabilities.tracer_metrics_properties = {fake_tracer_metrics_properties()};
   capabilities.programmable_metrics_count = 1;
+  capabilities.engine_properties = {fake_device_engine_properties(),
+                                    fake_device_engine_properties()};
+  capabilities.ras_handles_count = fake_ras_handles_count();
+  capabilities.vf_handles_count = fake_vf_handles_count();
   return capabilities;
 }
 
@@ -503,6 +516,10 @@ TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
       capabilities.tracer_metrics_properties, indentation_level_);
   ss << cs::key_value_to_text("Programmable metrics count", "1",
                               indentation_level_);
+  ss << cs::all_device_engine_properties_to_text(capabilities.engine_properties,
+                                                 indentation_level_);
+  ss << cs::key_value_to_text("Ras handles count", "2", indentation_level_);
+  ss << cs::key_value_to_text("VF handles count", "2", indentation_level_);
   ss << cs::key_value_to_text("Number of sub-devices", "2", indentation_level_);
   ss << cs::key_value_to_text("Sub-device", "0", indentation_level_);
   ss << cs::device_capabilities_to_text(capabilities.sub_devices[0],
@@ -925,6 +942,41 @@ TEST_F(TextFormatterTests, TracerMetricsPropertiesToText) {
   const auto expected = ss.str();
   const auto actual =
       cs::tracer_metrics_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDeviceEnginePropertiesToText) {
+  const auto properties = std::vector<zes_engine_properties_t>{
+      fake_device_engine_properties(), fake_device_engine_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of engine properties", "2",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Engine properties", "0", indentation_level_);
+  ss << cs::device_engine_properties_to_text(properties[0],
+                                             indentation_level_ + 1);
+  ss << cs::key_value_to_text("Engine properties", "1", indentation_level_);
+  ss << cs::device_engine_properties_to_text(properties[1],
+                                             indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::all_device_engine_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceEnginePropertiesToText) {
+  const auto properties = fake_device_engine_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Type", "ZES_ENGINE_GROUP_ALL",
+                              indentation_level_);
+  ss << cs::key_value_to_text("On subdevice", "false", indentation_level_);
+  ss << cs::key_value_to_text("Subdevice id", "0", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_engine_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
@@ -1359,6 +1411,20 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                }\n"
       "            ],\n"
       "            \"programmable_metrics_count\": 1,\n"
+      "            \"zes_engine_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ras_handles_count\": 2,\n"
+      "            \"vf_handles_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -1603,6 +1669,20 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                }\n"
       "            ],\n"
       "            \"programmable_metrics_count\": 1,\n"
+      "            \"zes_engine_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ras_handles_count\": 2,\n"
+      "            \"vf_handles_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        }\n"
@@ -1905,6 +1985,20 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "        }\n"
       "    ],\n"
       "    \"programmable_metrics_count\": 1,\n"
+      "    \"zes_engine_properties_t\": [\n"
+      "        {\n"
+      "            \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        },\n"
+      "        {\n"
+      "            \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        }\n"
+      "    ],\n"
+      "    \"ras_handles_count\": 2,\n"
+      "    \"vf_handles_count\": 2,\n"
       "    \"sub_devices_count\": 2,\n"
       "    \"sub_devices\": [\n"
       "        {\n"
@@ -2150,6 +2244,20 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                }\n"
       "            ],\n"
       "            \"programmable_metrics_count\": 1,\n"
+      "            \"zes_engine_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ras_handles_count\": 2,\n"
+      "            \"vf_handles_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -2396,6 +2504,20 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                }\n"
       "            ],\n"
       "            \"programmable_metrics_count\": 1,\n"
+      "            \"zes_engine_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"ras_handles_count\": 2,\n"
+      "            \"vf_handles_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        }\n"
@@ -2783,6 +2905,51 @@ TEST(JSONFormatterTests, DeviceMutableCommandListPropertiesToJSON) {
       "        \"ZE_MUTABLE_COMMAND_EXP_FLAG_WAIT_EVENTS\"\n"
       "    ]\n"
       "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, ProgrammableMetricsPropertiesToJSON) {
+  const auto properties = std::vector<zet_metric_programmable_exp_properties_t>{
+      fake_programmable_metrics_properties()};
+
+  const auto json = cs::programmable_metrics_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "[\n"
+      "        {\n"
+      "            \"name\": \"EU_ACTIVE\",\n"
+      "            \"description\": \"Execution Unit Active\",\n"
+      "            \"component\": \"Component1\",\n"
+      "            \"tierNumber\": 2,\n"
+      "            \"domain\": 1,\n"
+      "            \"parameterCount\": 3,\n"
+      "            \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "            \"sourceId\": 1\n"
+      "        }\n"
+      "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, TracerMetricsPropertiesToJSON) {
+  const auto properties = std::vector<zet_metric_group_properties_t>{
+      fake_tracer_metrics_properties()};
+
+  const auto json = cs::tracer_metrics_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "[\n"
+      "        {\n"
+      "            \"name\": \"TracerMetrics\",\n"
+      "            \"description\": \"Tracer Metrics Group\",\n"
+      "            \"samplingType\": "
+      "\"ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED\",\n"
+      "            \"domain\": 1,\n"
+      "            \"metricCount\": 5\n"
+      "        }\n"
+      "]";
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }

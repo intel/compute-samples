@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -148,6 +148,12 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
       "Programmable metrics count",
       std::to_string(capabilities.programmable_metrics_count),
       indentation_level);
+  ss << all_device_engine_properties_to_text(capabilities.engine_properties,
+                                             indentation_level);
+  ss << device_ras_handles_count_to_text(capabilities.ras_handles_count,
+                                         indentation_level);
+  ss << device_vf_handles_count_to_text(capabilities.vf_handles_count,
+                                        indentation_level);
   ss << key_value_to_text("Number of sub-devices",
                           std::to_string(capabilities.sub_devices.size()),
                           indentation_level);
@@ -504,6 +510,47 @@ std::string device_mutable_command_list_properties_to_text(
       "Mutable command flags",
       flags_to_string<ze_mutable_command_exp_flag_t>(p.mutableCommandFlags),
       indentation_level);
+  return ss.str();
+}
+
+std::string all_device_engine_properties_to_text(
+    const std::vector<zes_engine_properties_t> &p,
+    const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Number of engine properties",
+                          std::to_string(p.size()), indentation_level);
+  for (size_t i = 0; i < p.size(); ++i) {
+    ss << key_value_to_text("Engine properties", std::to_string(i),
+                            indentation_level);
+    ss << device_engine_properties_to_text(p[i], indentation_level + 1);
+  }
+  return ss.str();
+}
+
+std::string device_engine_properties_to_text(const zes_engine_properties_t &p,
+                                             const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Type", to_string(p.type), indentation_level);
+  ss << key_value_to_text("On subdevice", to_string(p.onSubdevice),
+                          indentation_level);
+  ss << key_value_to_text("Subdevice id", std::to_string(p.subdeviceId),
+                          indentation_level);
+  return ss.str();
+}
+
+std::string device_ras_handles_count_to_text(const uint32_t &count,
+                                             const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Ras handles count", std::to_string(count),
+                          indentation_level);
+  return ss.str();
+}
+
+std::string device_vf_handles_count_to_text(const uint32_t &count,
+                                            const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("VF handles count", std::to_string(count),
+                          indentation_level);
   return ss.str();
 }
 
