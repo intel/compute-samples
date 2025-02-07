@@ -114,17 +114,33 @@ std::string tracer_metrics_properties_to_text(
     const std::vector<zet_metric_group_properties_t> &properties,
     int indentation_level);
 
-std::string all_device_engine_properties_to_text(
-    const std::vector<zes_engine_properties_t> &p, const int indentation_level);
+template <typename PROPERTIES>
+std::string
+all_device_sysman_properties_to_text(const std::vector<PROPERTIES> &p,
+                                     const std::string &type,
+                                     const int indentation_level);
 
-std::string device_engine_properties_to_text(const zes_engine_properties_t &p,
+std::string device_sysman_properties_to_text(const zes_engine_properties_t &p,
                                              const int indentation_level);
 
-std::string device_ras_handles_count_to_text(const uint32_t &count,
+std::string device_sysman_properties_to_text(const zes_power_properties_t &p,
                                              const int indentation_level);
 
-std::string device_vf_handles_count_to_text(const uint32_t &count,
-                                            const int indentation_level);
+std::string device_sysman_properties_to_text(const zes_diag_properties_t &p,
+                                             const int indentation_level);
+
+std::string device_sysman_properties_to_text(const zes_mem_properties_t &p,
+                                             const int indentation_level);
+
+std::string device_sysman_properties_to_text(const zes_freq_properties_t &p,
+                                             const int indentation_level);
+
+std::string device_sysman_properties_to_text(const zes_temp_properties_t &p,
+                                             const int indentation_level);
+
+std::string device_sysman_handles_count_to_text(const uint32_t &count,
+                                                const std::string &type,
+                                                const int indentation_level);
 } // namespace compute_samples
 
 #endif

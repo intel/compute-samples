@@ -7,6 +7,7 @@
 
 #include "ze_info/text_formatter.hpp"
 #include "utils/utils.hpp"
+#include <boost/algorithm/string.hpp>
 #include "ze_utils/ze_utils.hpp"
 #include "ze_api.h"
 #include "zet_api.h"
@@ -145,15 +146,33 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
   ss << tracer_metrics_properties_to_text(
       capabilities.tracer_metrics_properties, indentation_level);
   ss << key_value_to_text(
-      "Programmable metrics count",
+      "Number of programmable metrics",
       std::to_string(capabilities.programmable_metrics_count),
       indentation_level);
-  ss << all_device_engine_properties_to_text(capabilities.engine_properties,
-                                             indentation_level);
-  ss << device_ras_handles_count_to_text(capabilities.ras_handles_count,
-                                         indentation_level);
-  ss << device_vf_handles_count_to_text(capabilities.vf_handles_count,
-                                        indentation_level);
+  ss << all_device_sysman_properties_to_text(
+      capabilities.sysman_engine_properties, "Engine", indentation_level);
+  ss << all_device_sysman_properties_to_text(
+      capabilities.sysman_diagnostic_properties, "Diagnostic",
+      indentation_level);
+  ss << all_device_sysman_properties_to_text(
+      capabilities.sysman_memory_properties, "Memory", indentation_level);
+  ss << all_device_sysman_properties_to_text(
+      capabilities.sysman_power_properties, "Power", indentation_level);
+  ss << all_device_sysman_properties_to_text(
+      capabilities.sysman_frequency_properties, "Frequency", indentation_level);
+  ss << all_device_sysman_properties_to_text(
+      capabilities.sysman_temperature_properties, "Temperature",
+      indentation_level);
+  ss << device_sysman_handles_count_to_text(
+      capabilities.sysman_ras_handles_count, "RAS", indentation_level);
+  ss << device_sysman_handles_count_to_text(
+      capabilities.sysman_vf_handles_count, "VF", indentation_level);
+  ss << device_sysman_handles_count_to_text(
+      capabilities.sysman_performance_handles_count, "Performance",
+      indentation_level);
+  ss << device_sysman_handles_count_to_text(
+      capabilities.sysman_firmware_handles_count, "Firmware",
+      indentation_level);
   ss << key_value_to_text("Number of sub-devices",
                           std::to_string(capabilities.sub_devices.size()),
                           indentation_level);
@@ -513,21 +532,26 @@ std::string device_mutable_command_list_properties_to_text(
   return ss.str();
 }
 
-std::string all_device_engine_properties_to_text(
-    const std::vector<zes_engine_properties_t> &p,
-    const int indentation_level) {
+template <typename PROPERTIES>
+std::string
+all_device_sysman_properties_to_text(const std::vector<PROPERTIES> &p,
+                                     const std::string &type,
+                                     const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("Number of engine properties",
+  const std::string lowercase = boost::algorithm::to_lower_copy(type);
+  const std::string capitalised =
+      static_cast<char>(std::toupper(lowercase[0])) + lowercase.substr(1);
+  ss << key_value_to_text("Number of " + lowercase + " properties",
                           std::to_string(p.size()), indentation_level);
   for (size_t i = 0; i < p.size(); ++i) {
-    ss << key_value_to_text("Engine properties", std::to_string(i),
+    ss << key_value_to_text(capitalised + " properties", std::to_string(i),
                             indentation_level);
-    ss << device_engine_properties_to_text(p[i], indentation_level + 1);
+    ss << device_sysman_properties_to_text(p[i], indentation_level + 1);
   }
   return ss.str();
 }
 
-std::string device_engine_properties_to_text(const zes_engine_properties_t &p,
+std::string device_sysman_properties_to_text(const zes_engine_properties_t &p,
                                              const int indentation_level) {
   std::stringstream ss;
   ss << key_value_to_text("Type", to_string(p.type), indentation_level);
@@ -538,19 +562,99 @@ std::string device_engine_properties_to_text(const zes_engine_properties_t &p,
   return ss.str();
 }
 
-std::string device_ras_handles_count_to_text(const uint32_t &count,
+std::string device_sysman_properties_to_text(const zes_power_properties_t &p,
                                              const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("Ras handles count", std::to_string(count),
+  ss << key_value_to_text("Can control", to_string(p.canControl),
+                          indentation_level);
+  ss << key_value_to_text("Is energy threshold supported",
+                          to_string(p.isEnergyThresholdSupported),
+                          indentation_level);
+  ss << key_value_to_text("On subdevice", to_string(p.onSubdevice),
+                          indentation_level);
+  ss << key_value_to_text("Subdevice id", std::to_string(p.subdeviceId),
                           indentation_level);
   return ss.str();
 }
 
-std::string device_vf_handles_count_to_text(const uint32_t &count,
-                                            const int indentation_level) {
+std::string device_sysman_properties_to_text(const zes_diag_properties_t &p,
+                                             const int indentation_level) {
   std::stringstream ss;
-  ss << key_value_to_text("VF handles count", std::to_string(count),
+  ss << key_value_to_text("Name", std::string(p.name), indentation_level);
+  ss << key_value_to_text("Have tests", to_string(p.haveTests),
                           indentation_level);
+  ss << key_value_to_text("On subdevice", to_string(p.onSubdevice),
+                          indentation_level);
+  ss << key_value_to_text("Subdevice id", std::to_string(p.subdeviceId),
+                          indentation_level);
+  return ss.str();
+}
+
+std::string device_sysman_properties_to_text(const zes_mem_properties_t &p,
+                                             const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Type", to_string(p.type), indentation_level);
+  ss << key_value_to_text("Location", to_string(p.location), indentation_level);
+  ss << key_value_to_text("Physical size", std::to_string(p.physicalSize),
+                          indentation_level);
+  ss << key_value_to_text("Bus width", std::to_string(p.busWidth),
+                          indentation_level);
+  ss << key_value_to_text("Number of channels", std::to_string(p.numChannels),
+                          indentation_level);
+  ss << key_value_to_text("On subdevice", to_string(p.onSubdevice),
+                          indentation_level);
+  ss << key_value_to_text("Subdevice id", std::to_string(p.subdeviceId),
+                          indentation_level);
+  return ss.str();
+}
+
+std::string device_sysman_properties_to_text(const zes_freq_properties_t &p,
+                                             const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Type", to_string(p.type), indentation_level);
+  ss << key_value_to_text("Can control", to_string(p.canControl),
+                          indentation_level);
+  ss << key_value_to_text("Is throttle event supported",
+                          to_string(p.isThrottleEventSupported),
+                          indentation_level);
+  ss << key_value_to_text("Min", std::to_string(p.min), indentation_level);
+  ss << key_value_to_text("Max", std::to_string(p.max), indentation_level);
+  ss << key_value_to_text("On subdevice", to_string(p.onSubdevice),
+                          indentation_level);
+  ss << key_value_to_text("Subdevice id", std::to_string(p.subdeviceId),
+                          indentation_level);
+  return ss.str();
+}
+
+std::string device_sysman_properties_to_text(const zes_temp_properties_t &p,
+                                             const int indentation_level) {
+  std::stringstream ss;
+  ss << key_value_to_text("Type", to_string(p.type), indentation_level);
+  ss << key_value_to_text("Max temperature", std::to_string(p.maxTemperature),
+                          indentation_level);
+  ss << key_value_to_text("Is critical temperature supported",
+                          to_string(p.isCriticalTempSupported),
+                          indentation_level);
+  ss << key_value_to_text("Is threshold 1 supported",
+                          to_string(p.isThreshold1Supported),
+                          indentation_level);
+  ss << key_value_to_text("Is threshold 2 supported",
+                          to_string(p.isThreshold2Supported),
+                          indentation_level);
+  ss << key_value_to_text("On subdevice", to_string(p.onSubdevice),
+                          indentation_level);
+  ss << key_value_to_text("Subdevice id", std::to_string(p.subdeviceId),
+                          indentation_level);
+  return ss.str();
+}
+
+std::string device_sysman_handles_count_to_text(const uint32_t &count,
+                                                const std::string &type,
+                                                const int indentation_level) {
+  const std::string lowercase = boost::algorithm::to_lower_copy(type);
+  std::stringstream ss;
+  ss << key_value_to_text("Number of " + lowercase + " handles",
+                          std::to_string(count), indentation_level);
   return ss.str();
 }
 

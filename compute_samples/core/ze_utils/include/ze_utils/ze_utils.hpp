@@ -37,6 +37,10 @@ std::string to_string(ze_mutable_command_exp_flag_t flag);
 std::string to_string(zet_device_debug_property_flag_t flag);
 std::string to_string(zet_metric_group_sampling_type_flag_t flag);
 std::string to_string(zes_engine_group_t type);
+std::string to_string(zes_mem_type_t type);
+std::string to_string(zes_mem_loc_t type);
+std::string to_string(zes_freq_domain_t type);
+std::string to_string(zes_temp_sensors_t type);
 
 template <typename T> std::string flags_to_string(uint32_t flags) {
   const size_t bits = 8;

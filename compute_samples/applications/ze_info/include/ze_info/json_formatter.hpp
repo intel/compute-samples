@@ -87,11 +87,27 @@ boost::property_tree::ptree programmable_metrics_properties_to_json(
 boost::property_tree::ptree tracer_metrics_properties_to_json(
     const std::vector<zet_metric_group_properties_t> &properties);
 
-boost::property_tree::ptree all_device_engine_properties_to_json(
-    const std::vector<zes_engine_properties_t> &p);
+template <typename PROPERTIES>
+boost::property_tree::ptree
+all_device_sysman_properties_to_json(const std::vector<PROPERTIES> &p);
 
 boost::property_tree::ptree
-device_engine_properties_to_json(const zes_engine_properties_t &p);
+device_sysman_properties_to_json(const zes_engine_properties_t &p);
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_power_properties_t &p);
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_diag_properties_t &p);
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_mem_properties_t &p);
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_freq_properties_t &p);
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_temp_properties_t &p);
 
 std::string ptree_to_string(const boost::property_tree::ptree tree);
 

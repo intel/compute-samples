@@ -6,15 +6,19 @@ Level Zero platform consists of:
 * `drivers` representing collections of physical devices.
 * `devices` representing physical devices.
 
-Device discovery is done by calling `zeDriverGet` and `zeDeviceGet` as shown in the example below:
+Device discovery is done by calling `zeInitDrivers` and `zeDeviceGet` as shown in the example below:
 
 ```c++
 std::vector<ze_driver_handle_t> get_drivers() {
+  ze_init_driver_type_desc_t desc = {ZE_STRUCTURE_TYPE_INIT_DRIVER_TYPE_DESC};
+  desc.pNext = nullptr;
+  desc.flags = UINT32_MAX; // all driver types requested
+
   uint32_t count = 0;
-  zeDriverGet(&count, nullptr);
+  zeInitDrivers(&count, nullptr, &desc);
 
   std::vector<ze_driver_handle_t> drivers(count);
-  zeDriverGet(&count, drivers.data());
+  zeInitDrivers(&count, drivers.data(), &desc);
 
   return drivers;
 }

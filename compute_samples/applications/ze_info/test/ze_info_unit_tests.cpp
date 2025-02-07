@@ -205,14 +205,59 @@ zet_metric_group_properties_t fake_tracer_metrics_properties() {
   return properties;
 }
 
-zes_engine_properties_t fake_device_engine_properties() {
+zes_engine_properties_t fake_device_sysman_engine_properties() {
   return zes_engine_properties_t{ZES_STRUCTURE_TYPE_ENGINE_PROPERTIES, nullptr,
                                  ZES_ENGINE_GROUP_ALL, 0, 0};
 }
 
-uint32_t fake_ras_handles_count() { return 2; }
+zes_diag_properties_t fake_device_sysman_diagnostic_properties() {
+  return zes_diag_properties_t{
+      ZES_STRUCTURE_TYPE_ENGINE_PROPERTIES, nullptr, 0, 0,
+      "diagnostic_test_suite_name",         1};
+}
 
-uint32_t fake_vf_handles_count() { return 2; }
+zes_mem_properties_t fake_device_sysman_memory_properties() {
+  return zes_mem_properties_t{ZES_STRUCTURE_TYPE_MEM_PROPERTIES,
+                              nullptr,
+                              ZES_MEM_TYPE_GDDR5,
+                              0,
+                              0,
+                              ZES_MEM_LOC_DEVICE,
+                              1024,
+                              8,
+                              2};
+}
+
+zes_power_properties_t fake_device_sysman_power_properties() {
+  return zes_power_properties_t{
+      ZES_STRUCTURE_TYPE_POWER_PROPERTIES, nullptr, 0, 0, 1, 1};
+}
+
+zes_freq_properties_t fake_device_sysman_frequency_properties() {
+  return zes_freq_properties_t{ZES_STRUCTURE_TYPE_FREQ_PROPERTIES,
+                               nullptr,
+                               ZES_FREQ_DOMAIN_GPU,
+                               0,
+                               0,
+                               1,
+                               1,
+                               10.0,
+                               1050.0};
+}
+
+zes_temp_properties_t fake_device_sysman_temperature_properties() {
+  return zes_temp_properties_t{ZES_STRUCTURE_TYPE_TEMP_PROPERTIES,
+                               nullptr,
+                               ZES_TEMP_SENSORS_GLOBAL,
+                               0,
+                               0,
+                               105.0,
+                               1,
+                               1,
+                               1};
+}
+
+uint32_t fake_device_sysman_handles_count() { return 2; }
 
 ze_scheduling_hint_exp_properties_t
 fake_device_kernel_schedule_hint_properties() {
@@ -267,10 +312,30 @@ cs::DeviceCapabilities fake_device_capabilities() {
       fake_programmable_metrics_properties()};
   capabilities.tracer_metrics_properties = {fake_tracer_metrics_properties()};
   capabilities.programmable_metrics_count = 1;
-  capabilities.engine_properties = {fake_device_engine_properties(),
-                                    fake_device_engine_properties()};
-  capabilities.ras_handles_count = fake_ras_handles_count();
-  capabilities.vf_handles_count = fake_vf_handles_count();
+  capabilities.sysman_engine_properties = {
+      fake_device_sysman_engine_properties(),
+      fake_device_sysman_engine_properties()};
+  capabilities.sysman_diagnostic_properties = {
+      fake_device_sysman_diagnostic_properties(),
+      fake_device_sysman_diagnostic_properties()};
+  capabilities.sysman_memory_properties = {
+      fake_device_sysman_memory_properties(),
+      fake_device_sysman_memory_properties()};
+  capabilities.sysman_power_properties = {
+      fake_device_sysman_power_properties(),
+      fake_device_sysman_power_properties()};
+  capabilities.sysman_frequency_properties = {
+      fake_device_sysman_frequency_properties(),
+      fake_device_sysman_frequency_properties()};
+  capabilities.sysman_temperature_properties = {
+      fake_device_sysman_temperature_properties(),
+      fake_device_sysman_temperature_properties()};
+  capabilities.sysman_performance_handles_count =
+      fake_device_sysman_handles_count();
+  capabilities.sysman_firmware_handles_count =
+      fake_device_sysman_handles_count();
+  capabilities.sysman_ras_handles_count = fake_device_sysman_handles_count();
+  capabilities.sysman_vf_handles_count = fake_device_sysman_handles_count();
   return capabilities;
 }
 
@@ -514,12 +579,33 @@ TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
       capabilities.programmable_metrics_properties, indentation_level_);
   ss << cs::tracer_metrics_properties_to_text(
       capabilities.tracer_metrics_properties, indentation_level_);
-  ss << cs::key_value_to_text("Programmable metrics count", "1",
+  ss << cs::key_value_to_text("Number of programmable metrics", "1",
                               indentation_level_);
-  ss << cs::all_device_engine_properties_to_text(capabilities.engine_properties,
-                                                 indentation_level_);
-  ss << cs::key_value_to_text("Ras handles count", "2", indentation_level_);
-  ss << cs::key_value_to_text("VF handles count", "2", indentation_level_);
+  ss << cs::all_device_sysman_properties_to_text(
+      capabilities.sysman_engine_properties, "Engine", indentation_level_);
+  ss << cs::all_device_sysman_properties_to_text(
+      capabilities.sysman_diagnostic_properties, "Diagnostic",
+      indentation_level_);
+  ss << cs::all_device_sysman_properties_to_text(
+      capabilities.sysman_memory_properties, "Memory", indentation_level_);
+  ss << cs::all_device_sysman_properties_to_text(
+      capabilities.sysman_power_properties, "Power", indentation_level_);
+  ss << cs::all_device_sysman_properties_to_text(
+      capabilities.sysman_frequency_properties, "Frequency",
+      indentation_level_);
+  ss << cs::all_device_sysman_properties_to_text(
+      capabilities.sysman_temperature_properties, "Temperature",
+      indentation_level_);
+  ss << cs::device_sysman_handles_count_to_text(
+      capabilities.sysman_ras_handles_count, "Ras", indentation_level_);
+  ss << cs::device_sysman_handles_count_to_text(
+      capabilities.sysman_vf_handles_count, "Vf", indentation_level_);
+  ss << cs::device_sysman_handles_count_to_text(
+      capabilities.sysman_performance_handles_count, "Performance",
+      indentation_level_);
+  ss << cs::device_sysman_handles_count_to_text(
+      capabilities.sysman_firmware_handles_count, "Firmware",
+      indentation_level_);
   ss << cs::key_value_to_text("Number of sub-devices", "2", indentation_level_);
   ss << cs::key_value_to_text("Sub-device", "0", indentation_level_);
   ss << cs::device_capabilities_to_text(capabilities.sub_devices[0],
@@ -946,28 +1032,29 @@ TEST_F(TextFormatterTests, TracerMetricsPropertiesToText) {
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
-TEST_F(TextFormatterTests, AllDeviceEnginePropertiesToText) {
+TEST_F(TextFormatterTests, AllDeviceSysmanEnginePropertiesToText) {
   const auto properties = std::vector<zes_engine_properties_t>{
-      fake_device_engine_properties(), fake_device_engine_properties()};
+      fake_device_sysman_engine_properties(),
+      fake_device_sysman_engine_properties()};
 
   std::stringstream ss;
   ss << cs::key_value_to_text("Number of engine properties", "2",
                               indentation_level_);
   ss << cs::key_value_to_text("Engine properties", "0", indentation_level_);
-  ss << cs::device_engine_properties_to_text(properties[0],
+  ss << cs::device_sysman_properties_to_text(properties[0],
                                              indentation_level_ + 1);
   ss << cs::key_value_to_text("Engine properties", "1", indentation_level_);
-  ss << cs::device_engine_properties_to_text(properties[1],
+  ss << cs::device_sysman_properties_to_text(properties[1],
                                              indentation_level_ + 1);
   const auto expected = ss.str();
-  const auto actual =
-      cs::all_device_engine_properties_to_text(properties, indentation_level_);
+  const auto actual = cs::all_device_sysman_properties_to_text(
+      properties, "Engine", indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 
-TEST_F(TextFormatterTests, DeviceEnginePropertiesToText) {
-  const auto properties = fake_device_engine_properties();
+TEST_F(TextFormatterTests, DeviceSysmanEnginePropertiesToText) {
+  const auto properties = fake_device_sysman_engine_properties();
 
   std::stringstream ss;
   ss << cs::key_value_to_text("Type", "ZES_ENGINE_GROUP_ALL",
@@ -976,7 +1063,208 @@ TEST_F(TextFormatterTests, DeviceEnginePropertiesToText) {
   ss << cs::key_value_to_text("Subdevice id", "0", indentation_level_);
   const auto expected = ss.str();
   const auto actual =
-      cs::device_engine_properties_to_text(properties, indentation_level_);
+      cs::device_sysman_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDeviceSysmanDiagnosticPropertiesToText) {
+  const auto properties = std::vector<zes_diag_properties_t>{
+      fake_device_sysman_diagnostic_properties(),
+      fake_device_sysman_diagnostic_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of diagnostic properties", "2",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Diagnostic properties", "0", indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[0],
+                                             indentation_level_ + 1);
+  ss << cs::key_value_to_text("Diagnostic properties", "1", indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[1],
+                                             indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual = cs::all_device_sysman_properties_to_text(
+      properties, "Diagnostic", indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceSysmanDiagnosticPropertiesToText) {
+  const auto properties = fake_device_sysman_diagnostic_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Name", "diagnostic_test_suite_name",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Have tests", "true", indentation_level_);
+  ss << cs::key_value_to_text("On subdevice", "false", indentation_level_);
+  ss << cs::key_value_to_text("Subdevice id", "0", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_sysman_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDeviceSysmanMemoryPropertiesToText) {
+  const auto properties =
+      std::vector<zes_mem_properties_t>{fake_device_sysman_memory_properties(),
+                                        fake_device_sysman_memory_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of memory properties", "2",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Memory properties", "0", indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[0],
+                                             indentation_level_ + 1);
+  ss << cs::key_value_to_text("Memory properties", "1", indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[1],
+                                             indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual = cs::all_device_sysman_properties_to_text(
+      properties, "Memory", indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceSysmanMemoryPropertiesToText) {
+  const auto properties = fake_device_sysman_memory_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Type", "ZES_MEM_TYPE_GDDR5", indentation_level_);
+  ss << cs::key_value_to_text("Location", "ZES_MEM_LOC_DEVICE",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Physical size", "1024", indentation_level_);
+  ss << cs::key_value_to_text("Bus width", "8", indentation_level_);
+  ss << cs::key_value_to_text("Number of channels", "2", indentation_level_);
+  ss << cs::key_value_to_text("On subdevice", "false", indentation_level_);
+  ss << cs::key_value_to_text("Subdevice id", "0", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_sysman_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDeviceSysmanPowerPropertiesToText) {
+  const auto properties = std::vector<zes_power_properties_t>{
+      fake_device_sysman_power_properties(),
+      fake_device_sysman_power_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of power properties", "2",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Power properties", "0", indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[0],
+                                             indentation_level_ + 1);
+  ss << cs::key_value_to_text("Power properties", "1", indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[1],
+                                             indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual = cs::all_device_sysman_properties_to_text(
+      properties, "Power", indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceSysmanPowerPropertiesToText) {
+  const auto properties = fake_device_sysman_power_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Can control", "true", indentation_level_);
+  ss << cs::key_value_to_text("Is energy threshold supported", "true",
+                              indentation_level_);
+  ss << cs::key_value_to_text("On subdevice", "false", indentation_level_);
+  ss << cs::key_value_to_text("Subdevice id", "0", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_sysman_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDeviceSysmanFrequencyPropertiesToText) {
+  const auto properties = std::vector<zes_freq_properties_t>{
+      fake_device_sysman_frequency_properties(),
+      fake_device_sysman_frequency_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of frequency properties", "2",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Frequency properties", "0", indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[0],
+                                             indentation_level_ + 1);
+  ss << cs::key_value_to_text("Frequency properties", "1", indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[1],
+                                             indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual = cs::all_device_sysman_properties_to_text(
+      properties, "Frequency", indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceSysmanFrequencyPropertiesToText) {
+  const auto properties = fake_device_sysman_frequency_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Type", "ZES_FREQ_DOMAIN_GPU",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Can control", "true", indentation_level_);
+  ss << cs::key_value_to_text("Is throttle event supported", "true",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Min", "10.000000", indentation_level_);
+  ss << cs::key_value_to_text("Max", "1050.000000", indentation_level_);
+  ss << cs::key_value_to_text("On subdevice", "false", indentation_level_);
+  ss << cs::key_value_to_text("Subdevice id", "0", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_sysman_properties_to_text(properties, indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, AllDeviceSysmanTemperaturePropertiesToText) {
+  const auto properties = std::vector<zes_temp_properties_t>{
+      fake_device_sysman_temperature_properties(),
+      fake_device_sysman_temperature_properties()};
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Number of temperature properties", "2",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Temperature properties", "0",
+                              indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[0],
+                                             indentation_level_ + 1);
+  ss << cs::key_value_to_text("Temperature properties", "1",
+                              indentation_level_);
+  ss << cs::device_sysman_properties_to_text(properties[1],
+                                             indentation_level_ + 1);
+  const auto expected = ss.str();
+  const auto actual = cs::all_device_sysman_properties_to_text(
+      properties, "Temperature", indentation_level_);
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST_F(TextFormatterTests, DeviceSysmanTemperaturePropertiesToText) {
+  const auto properties = fake_device_sysman_temperature_properties();
+
+  std::stringstream ss;
+  ss << cs::key_value_to_text("Type", "ZES_TEMP_SENSORS_GLOBAL",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Max temperature", "105.000000",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Is critical temperature supported", "true",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Is threshold 1 supported", "true",
+                              indentation_level_);
+  ss << cs::key_value_to_text("Is threshold 2 supported", "true",
+                              indentation_level_);
+  ss << cs::key_value_to_text("On subdevice", "false", indentation_level_);
+  ss << cs::key_value_to_text("Subdevice id", "0", indentation_level_);
+  const auto expected = ss.str();
+  const auto actual =
+      cs::device_sysman_properties_to_text(properties, indentation_level_);
 
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
@@ -1423,8 +1711,98 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"subdeviceId\": 0\n"
       "                }\n"
       "            ],\n"
+      "            \"zes_diag_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"diagnostic_test_suite_name\",\n"
+      "                    \"haveTests\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"name\": \"diagnostic_test_suite_name\",\n"
+      "                    \"haveTests\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_mem_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "                    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "                    \"physicalSize\": 1024,\n"
+      "                    \"busWidth\": 8,\n"
+      "                    \"numChannels\": 2,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "                    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "                    \"physicalSize\": 1024,\n"
+      "                    \"busWidth\": 8,\n"
+      "                    \"numChannels\": 2,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_power_properties_t\": [\n"
+      "                {\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isEnergyThresholdSupported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isEnergyThresholdSupported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_freq_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isThrottleEventSupported\": true,\n"
+      "                    \"min\": 10,\n"
+      "                    \"max\": 1050,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isThrottleEventSupported\": true,\n"
+      "                    \"min\": 10,\n"
+      "                    \"max\": 1050,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_temp_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "                    \"maxTemperature\": 105,\n"
+      "                    \"isCriticalTempSupported\": true,\n"
+      "                    \"isThreshold1Supported\": true,\n"
+      "                    \"isThreshold2Supported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "                    \"maxTemperature\": 105,\n"
+      "                    \"isCriticalTempSupported\": true,\n"
+      "                    \"isThreshold1Supported\": true,\n"
+      "                    \"isThreshold2Supported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
       "            \"ras_handles_count\": 2,\n"
       "            \"vf_handles_count\": 2,\n"
+      "            \"performance_handles_count\": 2,\n"
+      "            \"firmware_handles_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -1681,8 +2059,98 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"subdeviceId\": 0\n"
       "                }\n"
       "            ],\n"
+      "            \"zes_diag_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"diagnostic_test_suite_name\",\n"
+      "                    \"haveTests\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"name\": \"diagnostic_test_suite_name\",\n"
+      "                    \"haveTests\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_mem_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "                    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "                    \"physicalSize\": 1024,\n"
+      "                    \"busWidth\": 8,\n"
+      "                    \"numChannels\": 2,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "                    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "                    \"physicalSize\": 1024,\n"
+      "                    \"busWidth\": 8,\n"
+      "                    \"numChannels\": 2,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_power_properties_t\": [\n"
+      "                {\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isEnergyThresholdSupported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isEnergyThresholdSupported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_freq_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isThrottleEventSupported\": true,\n"
+      "                    \"min\": 10,\n"
+      "                    \"max\": 1050,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isThrottleEventSupported\": true,\n"
+      "                    \"min\": 10,\n"
+      "                    \"max\": 1050,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_temp_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "                    \"maxTemperature\": 105,\n"
+      "                    \"isCriticalTempSupported\": true,\n"
+      "                    \"isThreshold1Supported\": true,\n"
+      "                    \"isThreshold2Supported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "                    \"maxTemperature\": 105,\n"
+      "                    \"isCriticalTempSupported\": true,\n"
+      "                    \"isThreshold1Supported\": true,\n"
+      "                    \"isThreshold2Supported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
       "            \"ras_handles_count\": 2,\n"
       "            \"vf_handles_count\": 2,\n"
+      "            \"performance_handles_count\": 2,\n"
+      "            \"firmware_handles_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        }\n"
@@ -1997,8 +2465,98 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"subdeviceId\": 0\n"
       "        }\n"
       "    ],\n"
+      "    \"zes_diag_properties_t\": [\n"
+      "        {\n"
+      "            \"name\": \"diagnostic_test_suite_name\",\n"
+      "            \"haveTests\": true,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        },\n"
+      "        {\n"
+      "            \"name\": \"diagnostic_test_suite_name\",\n"
+      "            \"haveTests\": true,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        }\n"
+      "    ],\n"
+      "    \"zes_mem_properties_t\": [\n"
+      "        {\n"
+      "            \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "            \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "            \"physicalSize\": 1024,\n"
+      "            \"busWidth\": 8,\n"
+      "            \"numChannels\": 2,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        },\n"
+      "        {\n"
+      "            \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "            \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "            \"physicalSize\": 1024,\n"
+      "            \"busWidth\": 8,\n"
+      "            \"numChannels\": 2,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        }\n"
+      "    ],\n"
+      "    \"zes_power_properties_t\": [\n"
+      "        {\n"
+      "            \"canControl\": true,\n"
+      "            \"isEnergyThresholdSupported\": true,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        },\n"
+      "        {\n"
+      "            \"canControl\": true,\n"
+      "            \"isEnergyThresholdSupported\": true,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        }\n"
+      "    ],\n"
+      "    \"zes_freq_properties_t\": [\n"
+      "        {\n"
+      "            \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "            \"canControl\": true,\n"
+      "            \"isThrottleEventSupported\": true,\n"
+      "            \"min\": 10,\n"
+      "            \"max\": 1050,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        },\n"
+      "        {\n"
+      "            \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "            \"canControl\": true,\n"
+      "            \"isThrottleEventSupported\": true,\n"
+      "            \"min\": 10,\n"
+      "            \"max\": 1050,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        }\n"
+      "    ],\n"
+      "    \"zes_temp_properties_t\": [\n"
+      "        {\n"
+      "            \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "            \"maxTemperature\": 105,\n"
+      "            \"isCriticalTempSupported\": true,\n"
+      "            \"isThreshold1Supported\": true,\n"
+      "            \"isThreshold2Supported\": true,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        },\n"
+      "        {\n"
+      "            \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "            \"maxTemperature\": 105,\n"
+      "            \"isCriticalTempSupported\": true,\n"
+      "            \"isThreshold1Supported\": true,\n"
+      "            \"isThreshold2Supported\": true,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        }\n"
+      "    ],\n"
       "    \"ras_handles_count\": 2,\n"
       "    \"vf_handles_count\": 2,\n"
+      "    \"performance_handles_count\": 2,\n"
+      "    \"firmware_handles_count\": 2,\n"
       "    \"sub_devices_count\": 2,\n"
       "    \"sub_devices\": [\n"
       "        {\n"
@@ -2256,8 +2814,98 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"subdeviceId\": 0\n"
       "                }\n"
       "            ],\n"
+      "            \"zes_diag_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"diagnostic_test_suite_name\",\n"
+      "                    \"haveTests\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"name\": \"diagnostic_test_suite_name\",\n"
+      "                    \"haveTests\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_mem_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "                    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "                    \"physicalSize\": 1024,\n"
+      "                    \"busWidth\": 8,\n"
+      "                    \"numChannels\": 2,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "                    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "                    \"physicalSize\": 1024,\n"
+      "                    \"busWidth\": 8,\n"
+      "                    \"numChannels\": 2,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_power_properties_t\": [\n"
+      "                {\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isEnergyThresholdSupported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isEnergyThresholdSupported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_freq_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isThrottleEventSupported\": true,\n"
+      "                    \"min\": 10,\n"
+      "                    \"max\": 1050,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isThrottleEventSupported\": true,\n"
+      "                    \"min\": 10,\n"
+      "                    \"max\": 1050,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_temp_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "                    \"maxTemperature\": 105,\n"
+      "                    \"isCriticalTempSupported\": true,\n"
+      "                    \"isThreshold1Supported\": true,\n"
+      "                    \"isThreshold2Supported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "                    \"maxTemperature\": 105,\n"
+      "                    \"isCriticalTempSupported\": true,\n"
+      "                    \"isThreshold1Supported\": true,\n"
+      "                    \"isThreshold2Supported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
       "            \"ras_handles_count\": 2,\n"
       "            \"vf_handles_count\": 2,\n"
+      "            \"performance_handles_count\": 2,\n"
+      "            \"firmware_handles_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -2516,8 +3164,98 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"subdeviceId\": 0\n"
       "                }\n"
       "            ],\n"
+      "            \"zes_diag_properties_t\": [\n"
+      "                {\n"
+      "                    \"name\": \"diagnostic_test_suite_name\",\n"
+      "                    \"haveTests\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"name\": \"diagnostic_test_suite_name\",\n"
+      "                    \"haveTests\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_mem_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "                    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "                    \"physicalSize\": 1024,\n"
+      "                    \"busWidth\": 8,\n"
+      "                    \"numChannels\": 2,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+      "                    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+      "                    \"physicalSize\": 1024,\n"
+      "                    \"busWidth\": 8,\n"
+      "                    \"numChannels\": 2,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_power_properties_t\": [\n"
+      "                {\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isEnergyThresholdSupported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isEnergyThresholdSupported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_freq_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isThrottleEventSupported\": true,\n"
+      "                    \"min\": 10,\n"
+      "                    \"max\": 1050,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+      "                    \"canControl\": true,\n"
+      "                    \"isThrottleEventSupported\": true,\n"
+      "                    \"min\": 10,\n"
+      "                    \"max\": 1050,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
+      "            \"zes_temp_properties_t\": [\n"
+      "                {\n"
+      "                    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "                    \"maxTemperature\": 105,\n"
+      "                    \"isCriticalTempSupported\": true,\n"
+      "                    \"isThreshold1Supported\": true,\n"
+      "                    \"isThreshold2Supported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                },\n"
+      "                {\n"
+      "                    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+      "                    \"maxTemperature\": 105,\n"
+      "                    \"isCriticalTempSupported\": true,\n"
+      "                    \"isThreshold1Supported\": true,\n"
+      "                    \"isThreshold2Supported\": true,\n"
+      "                    \"onSubdevice\": false,\n"
+      "                    \"subdeviceId\": 0\n"
+      "                }\n"
+      "            ],\n"
       "            \"ras_handles_count\": 2,\n"
       "            \"vf_handles_count\": 2,\n"
+      "            \"performance_handles_count\": 2,\n"
+      "            \"firmware_handles_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        }\n"
@@ -2951,6 +3689,270 @@ TEST(JSONFormatterTests, TracerMetricsPropertiesToJSON) {
       "        }\n"
       "]";
 
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, AllDeviceSysmanEnginePropertiesToJSON) {
+  const auto properties = std::vector<zes_engine_properties_t>{
+      fake_device_sysman_engine_properties(),
+      fake_device_sysman_engine_properties()};
+
+  const auto json = cs::all_device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "[\n"
+                        "        {\n"
+                        "            \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        },\n"
+                        "        {\n"
+                        "            \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        }\n"
+                        "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceSysmanEnginePropertiesToJSON) {
+  const auto properties = fake_device_sysman_engine_properties();
+
+  const auto json = cs::device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"type\": \"ZES_ENGINE_GROUP_ALL\",\n"
+                        "    \"onSubdevice\": false,\n"
+                        "    \"subdeviceId\": 0\n"
+                        "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, AllDeviceSysmanDiagnosticPropertiesToJSON) {
+  const auto properties = std::vector<zes_diag_properties_t>{
+      fake_device_sysman_diagnostic_properties(),
+      fake_device_sysman_diagnostic_properties()};
+
+  const auto json = cs::all_device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected =
+      "[\n"
+      "        {\n"
+      "            \"name\": \"diagnostic_test_suite_name\",\n"
+      "            \"haveTests\": true,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        },\n"
+      "        {\n"
+      "            \"name\": \"diagnostic_test_suite_name\",\n"
+      "            \"haveTests\": true,\n"
+      "            \"onSubdevice\": false,\n"
+      "            \"subdeviceId\": 0\n"
+      "        }\n"
+      "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceSysmanDiagnosticPropertiesToJSON) {
+  const auto properties = fake_device_sysman_diagnostic_properties();
+
+  const auto json = cs::device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"name\": \"diagnostic_test_suite_name\",\n"
+                        "    \"haveTests\": true,\n"
+                        "    \"onSubdevice\": false,\n"
+                        "    \"subdeviceId\": 0\n"
+                        "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, AllDeviceSysmanMemoryPropertiesToJSON) {
+  const auto properties =
+      std::vector<zes_mem_properties_t>{fake_device_sysman_memory_properties(),
+                                        fake_device_sysman_memory_properties()};
+
+  const auto json = cs::all_device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "[\n"
+                        "        {\n"
+                        "            \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+                        "            \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+                        "            \"physicalSize\": 1024,\n"
+                        "            \"busWidth\": 8,\n"
+                        "            \"numChannels\": 2,\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        },\n"
+                        "        {\n"
+                        "            \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+                        "            \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+                        "            \"physicalSize\": 1024,\n"
+                        "            \"busWidth\": 8,\n"
+                        "            \"numChannels\": 2,\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        }\n"
+                        "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceSysmanMemoryPropertiesToJSON) {
+  const auto properties = fake_device_sysman_memory_properties();
+
+  const auto json = cs::device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"type\": \"ZES_MEM_TYPE_GDDR5\",\n"
+                        "    \"location\": \"ZES_MEM_LOC_DEVICE\",\n"
+                        "    \"physicalSize\": 1024,\n"
+                        "    \"busWidth\": 8,\n"
+                        "    \"numChannels\": 2,\n"
+                        "    \"onSubdevice\": false,\n"
+                        "    \"subdeviceId\": 0\n"
+                        "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, AllDeviceSysmanPowerPropertiesToJSON) {
+  const auto properties = std::vector<zes_power_properties_t>{
+      fake_device_sysman_power_properties(),
+      fake_device_sysman_power_properties()};
+
+  const auto json = cs::all_device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "[\n"
+                        "        {\n"
+                        "            \"canControl\": true,\n"
+                        "            \"isEnergyThresholdSupported\": true,\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        },\n"
+                        "        {\n"
+                        "            \"canControl\": true,\n"
+                        "            \"isEnergyThresholdSupported\": true,\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        }\n"
+                        "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceSysmanPowerPropertiesToJSON) {
+  const auto properties = fake_device_sysman_power_properties();
+
+  const auto json = cs::device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"canControl\": true,\n"
+                        "    \"isEnergyThresholdSupported\": true,\n"
+                        "    \"onSubdevice\": false,\n"
+                        "    \"subdeviceId\": 0\n"
+                        "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, AllDeviceSysmanFrequencyPropertiesToJSON) {
+  const auto properties = std::vector<zes_freq_properties_t>{
+      fake_device_sysman_frequency_properties(),
+      fake_device_sysman_frequency_properties()};
+
+  const auto json = cs::all_device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "[\n"
+                        "        {\n"
+                        "            \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+                        "            \"canControl\": true,\n"
+                        "            \"isThrottleEventSupported\": true,\n"
+                        "            \"min\": 10,\n"
+                        "            \"max\": 1050,\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        },\n"
+                        "        {\n"
+                        "            \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+                        "            \"canControl\": true,\n"
+                        "            \"isThrottleEventSupported\": true,\n"
+                        "            \"min\": 10,\n"
+                        "            \"max\": 1050,\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        }\n"
+                        "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceSysmanFrequencyPropertiesToJSON) {
+  const auto properties = fake_device_sysman_frequency_properties();
+
+  const auto json = cs::device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"type\": \"ZES_FREQ_DOMAIN_GPU\",\n"
+                        "    \"canControl\": true,\n"
+                        "    \"isThrottleEventSupported\": true,\n"
+                        "    \"min\": 10,\n"
+                        "    \"max\": 1050,\n"
+                        "    \"onSubdevice\": false,\n"
+                        "    \"subdeviceId\": 0\n"
+                        "}";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, AllDeviceSysmanTemperaturePropertiesToJSON) {
+  const auto properties = std::vector<zes_temp_properties_t>{
+      fake_device_sysman_temperature_properties(),
+      fake_device_sysman_temperature_properties()};
+
+  const auto json = cs::all_device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "[\n"
+                        "        {\n"
+                        "            \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+                        "            \"maxTemperature\": 105,\n"
+                        "            \"isCriticalTempSupported\": true,\n"
+                        "            \"isThreshold1Supported\": true,\n"
+                        "            \"isThreshold2Supported\": true,\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        },\n"
+                        "        {\n"
+                        "            \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+                        "            \"maxTemperature\": 105,\n"
+                        "            \"isCriticalTempSupported\": true,\n"
+                        "            \"isThreshold1Supported\": true,\n"
+                        "            \"isThreshold2Supported\": true,\n"
+                        "            \"onSubdevice\": false,\n"
+                        "            \"subdeviceId\": 0\n"
+                        "        }\n"
+                        "]";
+
+  EXPECT_THAT(actual, ::testing::StrEq(expected));
+}
+
+TEST(JSONFormatterTests, DeviceSysmanTemperaturePropertiesToJSON) {
+  const auto properties = fake_device_sysman_temperature_properties();
+
+  const auto json = cs::device_sysman_properties_to_json(properties);
+  const auto actual = cs::ptree_to_string(json);
+  const auto expected = "{\n"
+                        "    \"type\": \"ZES_TEMP_SENSORS_GLOBAL\",\n"
+                        "    \"maxTemperature\": 105,\n"
+                        "    \"isCriticalTempSupported\": true,\n"
+                        "    \"isThreshold1Supported\": true,\n"
+                        "    \"isThreshold2Supported\": true,\n"
+                        "    \"onSubdevice\": false,\n"
+                        "    \"subdeviceId\": 0\n"
+                        "}";
   EXPECT_THAT(actual, ::testing::StrEq(expected));
 }
 

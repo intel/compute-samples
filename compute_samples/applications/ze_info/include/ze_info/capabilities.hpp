@@ -9,6 +9,7 @@
 #define COMPUTE_SAMPLES_ZE_INFO_CAPABILITIES_HPP
 
 #include <vector>
+#include <string>
 #include "ze_api.h"
 #include "zet_api.h"
 #include "zes_api.h"
@@ -34,10 +35,17 @@ struct DeviceCapabilities {
   std::vector<zet_metric_programmable_exp_properties_t>
       programmable_metrics_properties;
   std::vector<zet_metric_group_properties_t> tracer_metrics_properties;
-  std::vector<zes_engine_properties_t> engine_properties;
+  std::vector<zes_engine_properties_t> sysman_engine_properties;
+  std::vector<zes_diag_properties_t> sysman_diagnostic_properties;
+  std::vector<zes_mem_properties_t> sysman_memory_properties;
+  std::vector<zes_power_properties_t> sysman_power_properties;
+  std::vector<zes_freq_properties_t> sysman_frequency_properties;
+  std::vector<zes_temp_properties_t> sysman_temperature_properties;
   uint32_t programmable_metrics_count;
-  uint32_t ras_handles_count;
-  uint32_t vf_handles_count;
+  uint32_t sysman_ras_handles_count;
+  uint32_t sysman_vf_handles_count;
+  uint32_t sysman_performance_handles_count;
+  uint32_t sysman_firmware_handles_count;
 };
 
 struct DriverCapabilities {
@@ -123,12 +131,44 @@ get_tracer_metrics_properties(ze_device_handle_t device);
 
 uint32_t get_programmable_metrics_count(ze_device_handle_t device);
 
+template <typename HANDLES, typename FN_HANDLES>
+std::vector<HANDLES> get_sysman_handles(ze_device_handle_t device,
+                                        FN_HANDLES fn_handles,
+                                        const std::string &type);
+
+template <typename PROPERTIES, typename HANDLES, typename FN_PROPERTIES>
+std::vector<PROPERTIES>
+get_sysman_properties(const std::vector<HANDLES> &handles,
+                      FN_PROPERTIES fn_properties, const std::string &type);
+
 std::vector<zes_engine_properties_t>
-get_device_engine_properties(ze_device_handle_t device);
+get_device_sysman_engine_properties(ze_device_handle_t device);
 
-uint32_t get_device_ras_handles_count(ze_device_handle_t device);
+std::vector<zes_diag_properties_t>
+get_device_sysman_diagnostic_properties(ze_device_handle_t device);
 
-uint32_t get_device_vf_handles_count(ze_device_handle_t device);
+std::vector<zes_mem_properties_t>
+get_device_sysman_memory_properties(ze_device_handle_t device);
+
+std::vector<zes_power_properties_t>
+get_device_sysman_power_properties(ze_device_handle_t device);
+
+std::vector<zes_freq_properties_t>
+get_device_sysman_frequency_properties(ze_device_handle_t device);
+
+std::vector<zes_perf_properties_t>
+get_device_sysman_performance_properties(ze_device_handle_t device);
+
+std::vector<zes_temp_properties_t>
+get_device_sysman_temperature_properties(ze_device_handle_t device);
+
+uint32_t get_device_sysman_ras_handles_count(ze_device_handle_t device);
+
+uint32_t get_device_sysman_vf_handles_count(ze_device_handle_t device);
+
+uint32_t get_device_sysman_performance_handles_count(ze_device_handle_t device);
+
+uint32_t get_device_sysman_firmware_handles_count(ze_device_handle_t device);
 
 std::vector<DeviceCapabilities> get_device_sub_devices_capabilities(
     const std::vector<ze_device_handle_t> &sub_devices);

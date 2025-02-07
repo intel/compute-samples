@@ -20,15 +20,30 @@ namespace compute_samples {
 std::vector<ze_driver_handle_t> get_drivers() {
   auto result = ZE_RESULT_SUCCESS;
 
+  ze_init_driver_type_desc_t desc = {ZE_STRUCTURE_TYPE_INIT_DRIVER_TYPE_DESC};
+  desc.pNext = nullptr;
+  desc.flags = UINT32_MAX; // all driver types requested
+
+// prevent usage of ZES_ENABLE_SYSMMAN=1 (use zesInit instead)
+#if defined(_WIN32) || defined(_WIN64)
+  _putenv_s("ZES_ENABLE_SYSMAN", "0");
+#else  // defined(_WIN32) || defined(_WIN64)
+  setenv("ZES_ENABLE_SYSMAN", "0", 1);
+#endif // defined(_WIN32) || defined(_WIN64)
+
   uint32_t count = 0;
-  result = zeDriverGet(&count, nullptr);
-  throw_if_failed(result, "zeDriverGet");
+  result = zeInitDrivers(&count, nullptr, &desc);
+  throw_if_failed(result, "zeInitDrivers");
   LOG_DEBUG << "Driver count retrieved";
 
   std::vector<ze_driver_handle_t> drivers(count);
-  result = zeDriverGet(&count, drivers.data());
-  throw_if_failed(result, "zeDriverGet");
+  result = zeInitDrivers(&count, drivers.data(), &desc);
+  throw_if_failed(result, "zeInitDrivers");
   LOG_DEBUG << "Driver handles retrieved";
+
+  result = zesInit(0);
+  throw_if_failed(result, "zesInit");
+  LOG_DEBUG << "Sysman drivers initialized";
 
   return drivers;
 }
@@ -151,9 +166,26 @@ DeviceCapabilities get_device_capabilities(ze_device_handle_t device) {
       get_tracer_metrics_properties(device);
   capabilities.programmable_metrics_count =
       get_programmable_metrics_count(device);
-  capabilities.engine_properties = get_device_engine_properties(device);
-  capabilities.ras_handles_count = get_device_ras_handles_count(device);
-  capabilities.vf_handles_count = get_device_vf_handles_count(device);
+  capabilities.sysman_engine_properties =
+      get_device_sysman_engine_properties(device);
+  capabilities.sysman_diagnostic_properties =
+      get_device_sysman_diagnostic_properties(device);
+  capabilities.sysman_memory_properties =
+      get_device_sysman_memory_properties(device);
+  capabilities.sysman_power_properties =
+      get_device_sysman_power_properties(device);
+  capabilities.sysman_frequency_properties =
+      get_device_sysman_frequency_properties(device);
+  capabilities.sysman_temperature_properties =
+      get_device_sysman_temperature_properties(device);
+  capabilities.sysman_ras_handles_count =
+      get_device_sysman_ras_handles_count(device);
+  capabilities.sysman_vf_handles_count =
+      get_device_sysman_vf_handles_count(device);
+  capabilities.sysman_performance_handles_count =
+      get_device_sysman_performance_handles_count(device);
+  capabilities.sysman_firmware_handles_count =
+      get_device_sysman_firmware_handles_count(device);
   return capabilities;
 }
 
@@ -389,50 +421,149 @@ uint32_t get_programmable_metrics_count(ze_device_handle_t device) {
   return count;
 }
 
-std::vector<zes_engine_properties_t>
-get_device_engine_properties(ze_device_handle_t device) {
+template <typename HANDLES, typename FN_HANDLES>
+std::vector<HANDLES> get_sysman_handles(ze_device_handle_t device,
+                                        FN_HANDLES fn_handles,
+                                        const std::string &type) {
   zes_device_handle_t sysman_device =
       get_sysman_device_from_core_device(device);
   uint32_t count = 0;
-  auto result = zesDeviceEnumEngineGroups(sysman_device, &count, nullptr);
-  throw_if_failed(result, "zesDeviceEnumEngineGroups");
-  LOG_DEBUG << "Device engine groups count retrieved";
-
-  std::vector<zes_engine_handle_t> engine_handles(count, {nullptr});
-  result =
-      zesDeviceEnumEngineGroups(sysman_device, &count, engine_handles.data());
-  throw_if_failed(result, "zesDeviceEnumEngineGroups");
-  LOG_DEBUG << "Device engine handles retrieved";
-
-  std::vector<zes_engine_properties_t> properties(
-      count, {ZES_STRUCTURE_TYPE_ENGINE_PROPERTIES});
-  for (size_t i = 0; i < properties.size(); ++i) {
-    result = zesEngineGetProperties(engine_handles[i], &properties[i]);
-    throw_if_failed(result, "zesEngineGetProperties");
+  auto result = fn_handles(sysman_device, &count, nullptr);
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << type + " failed: " + to_string(result) +
+                       " (get_sysman_handles template)";
+    return std::vector<HANDLES>(0);
   }
-  LOG_DEBUG << "Device engines properties retrieved";
+  LOG_DEBUG << "Device " + type +
+                   " handle count retrieved (get_sysman_handles template)";
 
+  std::vector<HANDLES> handles(count);
+  result = fn_handles(sysman_device, &count, handles.data());
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << type + " failed: " + to_string(result) +
+                       " (get_sysman_handles template)";
+    return std::vector<HANDLES>(0);
+  }
+  LOG_DEBUG << "Device " + type +
+                   " handles retrieved (get_sysman_handles template)";
+  return handles;
+}
+
+template <typename PROPERTIES, typename HANDLES, typename FN_PROPERTIES>
+std::vector<PROPERTIES>
+get_sysman_properties(const std::vector<HANDLES> &handles,
+                      FN_PROPERTIES fn_properties, const std::string &type) {
+  std::vector<PROPERTIES> properties(handles.size());
+  if (handles.empty()) {
+    return properties;
+  }
+  for (size_t i = 0; i < properties.size(); ++i) {
+    auto result = fn_properties(handles[i], &properties[i]);
+    if (result != ZE_RESULT_SUCCESS) {
+      LOG_WARNING << type + " failed: " + to_string(result) +
+                         " (get_sysman_handles template)";
+      return std::vector<PROPERTIES>(0);
+    }
+  }
+  LOG_DEBUG << "Device " + type +
+                   " properties retrieved (get_sysman_properties template)";
   return properties;
 }
 
-uint32_t get_device_ras_handles_count(ze_device_handle_t device) {
-  zes_device_handle_t sysman_device =
-      get_sysman_device_from_core_device(device);
-  uint32_t count = 0;
-  const auto result = zesDeviceEnumRasErrorSets(sysman_device, &count, nullptr);
-  throw_if_failed(result, "zesDeviceEnumRasErrorSets");
-  LOG_DEBUG << "Ras handles count retrieved";
-  return count;
+std::vector<zes_engine_properties_t>
+get_device_sysman_engine_properties(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_engine_handle_t>(
+      device, zesDeviceEnumEngineGroups, "zesDeviceEnumEngineGroups");
+
+  return get_sysman_properties<zes_engine_properties_t, zes_engine_handle_t>(
+      handles, zesEngineGetProperties, "zesEngineGetProperties");
 }
 
-uint32_t get_device_vf_handles_count(ze_device_handle_t device) {
-  zes_device_handle_t sysman_device =
-      get_sysman_device_from_core_device(device);
-  uint32_t count = 0;
-  const auto result = zesDeviceEnumEnabledVFExp(sysman_device, &count, nullptr);
-  throw_if_failed(result, "zesDeviceEnumEnabledVFExp");
-  LOG_DEBUG << "VF handles count retrieved";
-  return count;
+std::vector<zes_diag_properties_t>
+get_device_sysman_diagnostic_properties(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_diag_handle_t>(
+      device, zesDeviceEnumDiagnosticTestSuites,
+      "zesDeviceEnumDiagnosticTestSuites");
+
+  return get_sysman_properties<zes_diag_properties_t, zes_diag_handle_t>(
+      handles, zesDiagnosticsGetProperties, "zesDiagnosticsGetProperties");
+}
+
+std::vector<zes_mem_properties_t>
+get_device_sysman_memory_properties(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_mem_handle_t>(
+      device, zesDeviceEnumMemoryModules, "zesDeviceEnumMemoryModules");
+
+  return get_sysman_properties<zes_mem_properties_t, zes_mem_handle_t>(
+      handles, zesMemoryGetProperties, "zesMemoryGetProperties");
+}
+
+std::vector<zes_power_properties_t>
+get_device_sysman_power_properties(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_pwr_handle_t>(
+      device, zesDeviceEnumPowerDomains, "zesDeviceEnumPowerDomains");
+
+  return get_sysman_properties<zes_power_properties_t, zes_pwr_handle_t>(
+      handles, zesPowerGetProperties, "zesPowerGetProperties");
+}
+
+std::vector<zes_firmware_properties_t>
+get_device_sysman_firmware_properties(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_firmware_handle_t>(
+      device, zesDeviceEnumFirmwares, "zesDeviceEnumFirmwares");
+
+  return get_sysman_properties<zes_firmware_properties_t,
+                               zes_firmware_handle_t>(
+      handles, zesFirmwareGetProperties, "zesFirmwareGetProperties");
+}
+
+std::vector<zes_freq_properties_t>
+get_device_sysman_frequency_properties(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_freq_handle_t>(
+      device, zesDeviceEnumFrequencyDomains, "zesDeviceEnumFrequencyDomains");
+
+  return get_sysman_properties<zes_freq_properties_t, zes_freq_handle_t>(
+      handles, zesFrequencyGetProperties, "zesFrequencyGetProperties");
+}
+
+std::vector<zes_temp_properties_t>
+get_device_sysman_temperature_properties(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_temp_handle_t>(
+      device, zesDeviceEnumTemperatureSensors,
+      "zesDeviceEnumTemperatureSensors");
+
+  return get_sysman_properties<zes_temp_properties_t, zes_temp_handle_t>(
+      handles, zesTemperatureGetProperties, "zesTemperatureGetProperties");
+}
+
+uint32_t get_device_sysman_ras_handles_count(ze_device_handle_t device) {
+  const auto handles = get_sysman_handles<zes_ras_handle_t>(
+      device, zesDeviceEnumRasErrorSets, "zesDeviceEnumRasErrorSets");
+
+  return handles.size();
+}
+
+uint32_t get_device_sysman_vf_handles_count(ze_device_handle_t device) {
+  const auto handles = get_sysman_handles<zes_vf_handle_t>(
+      device, zesDeviceEnumEnabledVFExp, "zesDeviceEnumEnabledVFExp");
+
+  return handles.size();
+}
+
+uint32_t
+get_device_sysman_performance_handles_count(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_perf_handle_t>(
+      device, zesDeviceEnumPerformanceFactorDomains,
+      "zesDeviceEnumPerformanceFactorDomains");
+
+  return handles.size();
+}
+
+uint32_t get_device_sysman_firmware_handles_count(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_firmware_handle_t>(
+      device, zesDeviceEnumFirmwares, "zesDeviceEnumFirmwares");
+
+  return handles.size();
 }
 
 std::vector<ze_device_handle_t>

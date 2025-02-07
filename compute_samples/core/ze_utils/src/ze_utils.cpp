@@ -449,6 +449,106 @@ std::string to_string(const zes_engine_group_t type) {
   }
 }
 
+std::string to_string(zes_mem_type_t type) {
+  switch (type) {
+  case ZES_MEM_TYPE_HBM:
+    return "ZES_MEM_TYPE_HBM";
+  case ZES_MEM_TYPE_DDR:
+    return "ZES_MEM_TYPE_DDR";
+  case ZES_MEM_TYPE_DDR3:
+    return "ZES_MEM_TYPE_DDR3";
+  case ZES_MEM_TYPE_DDR4:
+    return "ZES_MEM_TYPE_DDR4";
+  case ZES_MEM_TYPE_DDR5:
+    return "ZES_MEM_TYPE_DDR5";
+  case ZES_MEM_TYPE_LPDDR:
+    return "ZES_MEM_TYPE_LPDDR";
+  case ZES_MEM_TYPE_LPDDR3:
+    return "ZES_MEM_TYPE_LPDDR3";
+  case ZES_MEM_TYPE_LPDDR4:
+    return "ZES_MEM_TYPE_LPDDR4";
+  case ZES_MEM_TYPE_LPDDR5:
+    return "ZES_MEM_TYPE_LPDDR5";
+  case ZES_MEM_TYPE_SRAM:
+    return "ZES_MEM_TYPE_SRAM";
+  case ZES_MEM_TYPE_L1:
+    return "ZES_MEM_TYPE_L1";
+  case ZES_MEM_TYPE_L3:
+    return "ZES_MEM_TYPE_L3";
+  case ZES_MEM_TYPE_GRF:
+    return "ZES_MEM_TYPE_GRF";
+  case ZES_MEM_TYPE_SLM:
+    return "ZES_MEM_TYPE_SLM";
+  case ZES_MEM_TYPE_GDDR4:
+    return "ZES_MEM_TYPE_GDDR4";
+  case ZES_MEM_TYPE_GDDR5:
+    return "ZES_MEM_TYPE_GDDR5";
+  case ZES_MEM_TYPE_GDDR5X:
+    return "ZES_MEM_TYPE_GDDR5X";
+  case ZES_MEM_TYPE_GDDR6:
+    return "ZES_MEM_TYPE_GDDR6";
+  case ZES_MEM_TYPE_GDDR6X:
+    return "ZES_MEM_TYPE_GDDR6X";
+  case ZES_MEM_TYPE_GDDR7:
+    return "ZES_MEM_TYPE_GDDR7";
+  default:
+    return "Unknown zes_mem_type_t value: " +
+           std::to_string(static_cast<int>(type));
+  }
+}
+
+std::string to_string(zes_mem_loc_t type) {
+  switch (type) {
+  case ZES_MEM_LOC_SYSTEM:
+    return "ZES_MEM_LOC_SYSTEM";
+  case ZES_MEM_LOC_DEVICE:
+    return "ZES_MEM_LOC_DEVICE";
+  default:
+    return "Unknown zes_mem_loc_t value: " +
+           std::to_string(static_cast<int>(type));
+  }
+}
+
+std::string to_string(zes_freq_domain_t type) {
+  switch (type) {
+  case ZES_FREQ_DOMAIN_GPU:
+    return "ZES_FREQ_DOMAIN_GPU";
+  case ZES_FREQ_DOMAIN_MEMORY:
+    return "ZES_FREQ_DOMAIN_MEMORY";
+  case ZES_FREQ_DOMAIN_MEDIA:
+    return "ZES_FREQ_DOMAIN_MEDIA";
+  default:
+    return "Unknown zes_freq_domain_t value: " +
+           std::to_string(static_cast<int>(type));
+  }
+}
+
+std::string to_string(zes_temp_sensors_t type) {
+  switch (type) {
+  case ZES_TEMP_SENSORS_GLOBAL:
+    return "ZES_TEMP_SENSORS_GLOBAL";
+  case ZES_TEMP_SENSORS_GPU:
+    return "ZES_TEMP_SENSORS_GPU";
+  case ZES_TEMP_SENSORS_MEMORY:
+    return "ZES_TEMP_SENSORS_MEMORY";
+  case ZES_TEMP_SENSORS_GLOBAL_MIN:
+    return "ZES_TEMP_SENSORS_GLOBAL_MIN";
+  case ZES_TEMP_SENSORS_GPU_MIN:
+    return "ZES_TEMP_SENSORS_GPU_MIN";
+  case ZES_TEMP_SENSORS_MEMORY_MIN:
+    return "ZES_TEMP_SENSORS_MEMORY_MIN";
+  case ZES_TEMP_SENSORS_GPU_BOARD:
+    return "ZES_TEMP_SENSORS_GPU_BOARD";
+  case ZES_TEMP_SENSORS_GPU_BOARD_MIN:
+    return "ZES_TEMP_SENSORS_GPU_BOARD_MIN";
+  case ZES_TEMP_SENSORS_VOLTAGE_REGULATOR:
+    return "ZES_TEMP_SENSORS_VOLTAGE_REGULATOR";
+  default:
+    return "Unknown zes_temp_sensors_t value: " +
+           std::to_string(static_cast<int>(type));
+  }
+}
+
 void throw_if_failed(ze_result_t result, const std::string &function_name) {
   if (result != ZE_RESULT_SUCCESS) {
     throw std::runtime_error(function_name + " failed: " + to_string(result));

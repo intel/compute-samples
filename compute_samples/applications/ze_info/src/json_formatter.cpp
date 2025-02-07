@@ -231,12 +231,32 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
                      capabilities.tracer_metrics_properties));
   tree.put("programmable_metrics_count",
            capabilities.programmable_metrics_count);
-
-  tree.add_child(
-      "zes_engine_properties_t",
-      all_device_engine_properties_to_json(capabilities.engine_properties));
-  tree.put("ras_handles_count", std::to_string(capabilities.ras_handles_count));
-  tree.put("vf_handles_count", std::to_string(capabilities.vf_handles_count));
+  tree.add_child("zes_engine_properties_t",
+                 all_device_sysman_properties_to_json(
+                     capabilities.sysman_engine_properties));
+  tree.add_child("zes_diag_properties_t",
+                 all_device_sysman_properties_to_json(
+                     capabilities.sysman_diagnostic_properties));
+  tree.add_child("zes_mem_properties_t",
+                 all_device_sysman_properties_to_json(
+                     capabilities.sysman_memory_properties));
+  tree.add_child("zes_power_properties_t",
+                 all_device_sysman_properties_to_json(
+                     capabilities.sysman_power_properties));
+  tree.add_child("zes_freq_properties_t",
+                 all_device_sysman_properties_to_json(
+                     capabilities.sysman_frequency_properties));
+  tree.add_child("zes_temp_properties_t",
+                 all_device_sysman_properties_to_json(
+                     capabilities.sysman_temperature_properties));
+  tree.put("ras_handles_count",
+           std::to_string(capabilities.sysman_ras_handles_count));
+  tree.put("vf_handles_count",
+           std::to_string(capabilities.sysman_vf_handles_count));
+  tree.put("performance_handles_count",
+           std::to_string(capabilities.sysman_performance_handles_count));
+  tree.put("firmware_handles_count",
+           std::to_string(capabilities.sysman_firmware_handles_count));
   pt::ptree sub_devices;
   tree.put("sub_devices_count",
            std::to_string(capabilities.sub_devices.size()));
@@ -648,8 +668,9 @@ boost::property_tree::ptree tracer_metrics_properties_to_json(
   return array;
 }
 
-boost::property_tree::ptree all_device_engine_properties_to_json(
-    const std::vector<zes_engine_properties_t> &p) {
+template <typename PROPERTIES>
+boost::property_tree::ptree
+all_device_sysman_properties_to_json(const std::vector<PROPERTIES> &p) {
   pt::ptree tree;
   if (p.empty()) {
     pt::ptree node;
@@ -657,16 +678,76 @@ boost::property_tree::ptree all_device_engine_properties_to_json(
   } else {
     for (const auto &properties : p) {
       tree.push_back(
-          std::make_pair("", device_engine_properties_to_json(properties)));
+          std::make_pair("", device_sysman_properties_to_json(properties)));
     }
   }
   return tree;
 }
 
 boost::property_tree::ptree
-device_engine_properties_to_json(const zes_engine_properties_t &p) {
+device_sysman_properties_to_json(const zes_engine_properties_t &p) {
   pt::ptree tree;
   tree.put("type", to_string(p.type));
+  tree.put("onSubdevice", to_string(p.onSubdevice));
+  tree.put("subdeviceId", p.subdeviceId);
+  return tree;
+}
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_power_properties_t &p) {
+  pt::ptree tree;
+  tree.put("canControl", to_string(p.canControl));
+  tree.put("isEnergyThresholdSupported",
+           to_string(p.isEnergyThresholdSupported));
+  tree.put("onSubdevice", to_string(p.onSubdevice));
+  tree.put("subdeviceId", p.subdeviceId);
+  return tree;
+}
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_diag_properties_t &p) {
+  pt::ptree tree;
+  tree.put("name", p.name);
+  tree.put("haveTests", to_string(p.haveTests));
+  tree.put("onSubdevice", to_string(p.onSubdevice));
+  tree.put("subdeviceId", p.subdeviceId);
+  return tree;
+}
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_mem_properties_t &p) {
+  pt::ptree tree;
+  tree.put("type", to_string(p.type));
+  tree.put("location", to_string(p.location));
+  tree.put("physicalSize", p.physicalSize);
+  tree.put("busWidth", p.busWidth);
+  tree.put("numChannels", p.numChannels);
+  tree.put("onSubdevice", to_string(p.onSubdevice));
+  tree.put("subdeviceId", p.subdeviceId);
+  return tree;
+}
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_freq_properties_t &p) {
+  pt::ptree tree;
+  tree.put("type", to_string(p.type));
+  tree.put("canControl", to_string(p.canControl));
+  tree.put("isThrottleEventSupported", to_string(p.isThrottleEventSupported));
+  tree.put("min", p.min);
+  tree.put("max", p.max);
+  tree.put("onSubdevice", to_string(p.onSubdevice));
+  tree.put("subdeviceId", p.subdeviceId);
+  return tree;
+}
+
+boost::property_tree::ptree
+device_sysman_properties_to_json(const zes_temp_properties_t &p) {
+  pt::ptree tree;
+  tree.put("type", to_string(p.type));
+  tree.put("maxTemperature", p.maxTemperature);
+  tree.put("isCriticalTempSupported", to_string(p.isCriticalTempSupported));
+  tree.put("isThreshold1Supported", to_string(p.isThreshold1Supported));
+  tree.put("isThreshold2Supported", to_string(p.isThreshold2Supported));
   tree.put("onSubdevice", to_string(p.onSubdevice));
   tree.put("subdeviceId", p.subdeviceId);
   return tree;
