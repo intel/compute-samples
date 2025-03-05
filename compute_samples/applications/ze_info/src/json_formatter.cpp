@@ -231,31 +231,43 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
                      capabilities.tracer_metrics_properties));
   tree.put("programmable_metrics_count",
            capabilities.programmable_metrics_count);
+  tree.put("zes_engine_handle_t_count",
+           std::to_string(capabilities.sysman_engine_properties.size()));
   tree.add_child("zes_engine_properties_t",
                  all_device_sysman_properties_to_json(
                      capabilities.sysman_engine_properties));
+  tree.put("zes_diag_handle_t_count",
+           std::to_string(capabilities.sysman_diagnostic_properties.size()));
   tree.add_child("zes_diag_properties_t",
                  all_device_sysman_properties_to_json(
                      capabilities.sysman_diagnostic_properties));
+  tree.put("zes_mem_handle_t_count",
+           std::to_string(capabilities.sysman_memory_properties.size()));
   tree.add_child("zes_mem_properties_t",
                  all_device_sysman_properties_to_json(
                      capabilities.sysman_memory_properties));
+  tree.put("zes_pwr_handle_t_count",
+           std::to_string(capabilities.sysman_power_properties.size()));
   tree.add_child("zes_power_properties_t",
                  all_device_sysman_properties_to_json(
                      capabilities.sysman_power_properties));
+  tree.put("zes_freq_handle_t_count",
+           std::to_string(capabilities.sysman_frequency_properties.size()));
   tree.add_child("zes_freq_properties_t",
                  all_device_sysman_properties_to_json(
                      capabilities.sysman_frequency_properties));
+  tree.put("zes_temp_handle_t_count",
+           std::to_string(capabilities.sysman_temperature_properties.size()));
   tree.add_child("zes_temp_properties_t",
                  all_device_sysman_properties_to_json(
                      capabilities.sysman_temperature_properties));
-  tree.put("ras_handles_count",
+  tree.put("zes_ras_handle_t_count",
            std::to_string(capabilities.sysman_ras_handles_count));
-  tree.put("vf_handles_count",
+  tree.put("zes_vf_handle_t_count",
            std::to_string(capabilities.sysman_vf_handles_count));
-  tree.put("performance_handles_count",
+  tree.put("zes_perf_handle_t_count",
            std::to_string(capabilities.sysman_performance_handles_count));
-  tree.put("firmware_handles_count",
+  tree.put("zes_firmware_handle_t_count",
            std::to_string(capabilities.sysman_firmware_handles_count));
   pt::ptree sub_devices;
   tree.put("sub_devices_count",
