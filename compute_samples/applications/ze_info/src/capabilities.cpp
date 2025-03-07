@@ -42,8 +42,11 @@ std::vector<ze_driver_handle_t> get_drivers() {
   LOG_DEBUG << "Driver handles retrieved";
 
   result = zesInit(0);
-  throw_if_failed(result, "zesInit");
-  LOG_DEBUG << "Sysman drivers initialized";
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << "zesInit failed: " + to_string(result);
+  } else {
+    LOG_DEBUG << "Sysman drivers initialized";
+  }
 
   return drivers;
 }

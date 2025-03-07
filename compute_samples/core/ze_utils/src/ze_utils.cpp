@@ -557,24 +557,31 @@ void throw_if_failed(ze_result_t result, const std::string &function_name) {
 
 zes_device_handle_t
 get_sysman_device_from_core_device(ze_device_handle_t device) {
+  uint32_t driver_count = 0;
+  auto result = zesDriverGet(&driver_count, nullptr);
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << "zesDriverGet failed: " + to_string(result);
+    return nullptr;
+  }
+  if (driver_count == 0) {
+    LOG_WARNING << "zesDriverGet returned 0 drivers";
+    return nullptr;
+  }
+
+  std::vector<ze_driver_handle_t> drivers(driver_count);
+  result = zesDriverGet(&driver_count, drivers.data());
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << "zesDriverGet failed: " + to_string(result);
+    return nullptr;
+  }
+
   ze_device_properties_t properties = {ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES};
-  auto result = zeDeviceGetProperties(device, &properties);
+  result = zeDeviceGetProperties(device, &properties);
   throw_if_failed(result, "zeDeviceGetProperties");
 
   zes_uuid_t uuid = {};
   std::copy(properties.uuid.id, properties.uuid.id + ZE_MAX_DEVICE_UUID_SIZE,
             uuid.id);
-
-  uint32_t driver_count = 0;
-  result = zesDriverGet(&driver_count, nullptr);
-  throw_if_failed(result, "zesDriverGet");
-  if (driver_count == 0) {
-    throw std::runtime_error("zesDriverGet returned 0 drivers");
-  }
-
-  std::vector<ze_driver_handle_t> drivers(driver_count);
-  result = zesDriverGet(&driver_count, drivers.data());
-  throw_if_failed(result, "zesDriverGet");
 
   zes_device_handle_t sysman_device = nullptr;
   ze_bool_t on_subdevice = 0u; // onSubdevice and subdeviceId are not used
