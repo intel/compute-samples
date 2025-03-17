@@ -81,11 +81,9 @@ device_debug_properties_to_json(const zet_device_debug_properties_t &p);
 boost::property_tree::ptree device_mutable_command_list_properties_to_json(
     const ze_mutable_command_list_exp_properties_t &p);
 
-boost::property_tree::ptree programmable_metrics_properties_to_json(
-    const std::vector<zet_metric_programmable_exp_properties_t> &properties);
-
-boost::property_tree::ptree tracer_metrics_properties_to_json(
-    const std::vector<zet_metric_group_properties_t> &properties);
+boost::property_tree::ptree tracer_metrics_flags_count_to_json(
+    const std::map<zet_metric_group_sampling_type_flag_t, uint32_t>
+        &flags_count);
 
 template <typename PROPERTIES>
 boost::property_tree::ptree

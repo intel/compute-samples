@@ -25,10 +25,13 @@ std::vector<ze_driver_handle_t> get_drivers() {
   desc.flags = UINT32_MAX; // all driver types requested
 
 // prevent usage of ZES_ENABLE_SYSMMAN=1 (use zesInit instead)
+// and enable metrics
 #if defined(_WIN32) || defined(_WIN64)
   _putenv_s("ZES_ENABLE_SYSMAN", "0");
+  _putenv_s("ZET_ENABLE_METRICS", "1");
 #else  // defined(_WIN32) || defined(_WIN64)
   setenv("ZES_ENABLE_SYSMAN", "0", 1);
+  setenv("ZET_ENABLE_METRICS", "1", 1);
 #endif // defined(_WIN32) || defined(_WIN64)
 
   uint32_t count = 0;
@@ -163,10 +166,8 @@ DeviceCapabilities get_device_capabilities(ze_device_handle_t device) {
   capabilities.debug_properties = get_device_debug_properties(device);
   capabilities.mutable_command_list_properties =
       get_mutable_command_list_exp_properties(device);
-  capabilities.programmable_metrics_properties =
-      get_programmable_metrics_properties(device);
-  capabilities.tracer_metrics_properties =
-      get_tracer_metrics_properties(device);
+  capabilities.tracer_metrics_flags_count =
+      get_tracer_metrics_flags_count(device);
   capabilities.programmable_metrics_count =
       get_programmable_metrics_count(device);
   capabilities.sysman_engine_properties =
@@ -370,32 +371,8 @@ get_mutable_command_list_exp_properties(ze_device_handle_t device) {
   return mutable_command_list_exp_properties;
 }
 
-std::vector<zet_metric_programmable_exp_properties_t>
-get_programmable_metrics_properties(ze_device_handle_t device) {
-  uint32_t count = 0;
-  auto result = zetMetricProgrammableGetExp(device, &count, nullptr);
-  throw_if_failed(result, "zetMetricProgrammableGetExp");
-  LOG_DEBUG << "Programmable metrics count retrieved";
-
-  std::vector<zet_metric_programmable_exp_handle_t> metric_handles(count);
-  result = zetMetricProgrammableGetExp(device, &count, metric_handles.data());
-  throw_if_failed(result, "zetMetricProgrammableGetExp");
-  LOG_DEBUG << "Programmable metrics handles retrieved";
-
-  std::vector<zet_metric_programmable_exp_properties_t> properties(
-      count, {ZET_STRUCTURE_TYPE_METRIC_PROGRAMMABLE_EXP_PROPERTIES});
-  for (uint32_t i = 0; i < count; ++i) {
-    result = zetMetricProgrammableGetPropertiesExp(metric_handles[i],
-                                                   &properties[i]);
-    throw_if_failed(result, "zetMetricProgrammableGetPropertiesExp");
-  }
-
-  LOG_DEBUG << "Programmable metrics properties retrieved";
-  return properties;
-}
-
-std::vector<zet_metric_group_properties_t>
-get_tracer_metrics_properties(ze_device_handle_t device) {
+std::map<zet_metric_group_sampling_type_flag_t, uint32_t>
+get_tracer_metrics_flags_count(ze_device_handle_t device) {
   uint32_t count = 0;
   auto result = zetMetricGroupGet(device, &count, nullptr);
   throw_if_failed(result, "zetMetricGroupGet");
@@ -406,15 +383,30 @@ get_tracer_metrics_properties(ze_device_handle_t device) {
   throw_if_failed(result, "zetMetricGroupGet");
   LOG_DEBUG << "Tracer metrics handles retrieved";
 
-  std::vector<zet_metric_group_properties_t> properties(
-      count, {ZET_STRUCTURE_TYPE_METRIC_GROUP_PROPERTIES});
+  auto flag_types = {ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EVENT_BASED,
+                     ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_TIME_BASED,
+                     ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED};
+
+  std::map<zet_metric_group_sampling_type_flag_t, uint32_t> flags_count;
+  for (auto flag : flag_types) {
+    flags_count[flag] = 0;
+  }
+
   for (uint32_t i = 0; i < count; ++i) {
-    zetMetricGroupGetProperties(metric_handles[i], &properties[i]);
+    zet_metric_group_properties_t properties{
+        ZET_STRUCTURE_TYPE_METRIC_GROUP_PROPERTIES};
+    zetMetricGroupGetProperties(metric_handles[i], &properties);
     throw_if_failed(result, "zetMetricGroupGetProperties");
+
+    for (auto flag : flag_types) {
+      if ((properties.samplingType & flag) != 0) {
+        flags_count[flag] += 1;
+      }
+    }
   }
 
   LOG_DEBUG << "Tracer metrics properties retrieved";
-  return properties;
+  return flags_count;
 }
 
 uint32_t get_programmable_metrics_count(ze_device_handle_t device) {

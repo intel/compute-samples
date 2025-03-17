@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 #include "ze_api.h"
 #include "zet_api.h"
 #include "zes_api.h"
@@ -32,9 +33,8 @@ struct DeviceCapabilities {
   ze_float_atomic_ext_properties_t float_atomics_properties;
   ze_device_raytracing_ext_properties_t ray_tracing_properties;
   ze_mutable_command_list_exp_properties_t mutable_command_list_properties;
-  std::vector<zet_metric_programmable_exp_properties_t>
-      programmable_metrics_properties;
-  std::vector<zet_metric_group_properties_t> tracer_metrics_properties;
+  std::map<zet_metric_group_sampling_type_flag_t, uint32_t>
+      tracer_metrics_flags_count;
   std::vector<zes_engine_properties_t> sysman_engine_properties;
   std::vector<zes_diag_properties_t> sysman_diagnostic_properties;
   std::vector<zes_mem_properties_t> sysman_memory_properties;
@@ -123,11 +123,8 @@ get_raytracing_ext_properties(ze_device_handle_t device);
 ze_mutable_command_list_exp_properties_t
 get_mutable_command_list_exp_properties(ze_device_handle_t device);
 
-std::vector<zet_metric_programmable_exp_properties_t>
-get_programmable_metrics_properties(ze_device_handle_t device);
-
-std::vector<zet_metric_group_properties_t>
-get_tracer_metrics_properties(ze_device_handle_t device);
+std::map<zet_metric_group_sampling_type_flag_t, uint32_t>
+get_tracer_metrics_flags_count(ze_device_handle_t device);
 
 uint32_t get_programmable_metrics_count(ze_device_handle_t device);
 

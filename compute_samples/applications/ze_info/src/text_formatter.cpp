@@ -141,10 +141,8 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
                                         indentation_level);
   ss << device_mutable_command_list_properties_to_text(
       capabilities.mutable_command_list_properties, indentation_level);
-  ss << programmable_metrics_properties_to_text(
-      capabilities.programmable_metrics_properties, indentation_level);
-  ss << tracer_metrics_properties_to_text(
-      capabilities.tracer_metrics_properties, indentation_level);
+  ss << tracer_metrics_flags_count_to_text(
+      capabilities.tracer_metrics_flags_count, indentation_level);
   ss << key_value_to_text(
       "Number of programmable metrics",
       std::to_string(capabilities.programmable_metrics_count),
@@ -661,46 +659,26 @@ std::string device_sysman_handles_count_to_text(const uint32_t &count,
   return ss.str();
 }
 
-std::string programmable_metrics_properties_to_text(
-    const std::vector<zet_metric_programmable_exp_properties_t> &properties,
+std::string tracer_metrics_flags_count_to_text(
+    const std::map<zet_metric_group_sampling_type_flag_t, uint32_t>
+        &flags_count,
     const int indentation_level) {
   std::stringstream ss;
-  for (const auto &p : properties) {
-    ss << key_value_to_text("Name", p.name, indentation_level);
-    ss << key_value_to_text("Description", p.description, indentation_level);
-    ss << key_value_to_text("Component", p.component, indentation_level);
-    ss << key_value_to_text("Tier Number", std::to_string(p.tierNumber),
-                            indentation_level);
-    ss << key_value_to_text("Domain", std::to_string(p.domain),
-                            indentation_level);
-    ss << key_value_to_text("Parameter Count", std::to_string(p.parameterCount),
-                            indentation_level);
-    ss << key_value_to_text(
-        "Sampling Type",
-        flags_to_string<zet_metric_group_sampling_type_flag_t>(p.samplingType),
-        indentation_level);
-    ss << key_value_to_text("Source ID", std::to_string(p.sourceId),
-                            indentation_level);
-  }
-  return ss.str();
-}
-
-std::string tracer_metrics_properties_to_text(
-    const std::vector<zet_metric_group_properties_t> &properties,
-    const int indentation_level) {
-  std::stringstream ss;
-  for (const auto &p : properties) {
-    ss << key_value_to_text("Name", p.name, indentation_level);
-    ss << key_value_to_text("Description", p.description, indentation_level);
-    ss << key_value_to_text(
-        "Sampling Type",
-        flags_to_string<zet_metric_group_sampling_type_flag_t>(p.samplingType),
-        indentation_level);
-    ss << key_value_to_text("Domain", std::to_string(p.domain),
-                            indentation_level);
-    ss << key_value_to_text("Metric Count", std::to_string(p.metricCount),
-                            indentation_level);
-  }
+  ss << key_value_to_text(
+      "Number of zet_metric_group_sampling_type_flag_event_based groups",
+      std::to_string(
+          flags_count.at(ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EVENT_BASED)),
+      indentation_level);
+  ss << key_value_to_text(
+      "Number of zet_metric_group_sampling_type_flag_time_based groups",
+      std::to_string(
+          flags_count.at(ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_TIME_BASED)),
+      indentation_level);
+  ss << key_value_to_text(
+      "Number of zet_metric_group_sampling_type_flag_exp_tracer_based groups",
+      std::to_string(
+          flags_count.at(ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED)),
+      indentation_level);
   return ss.str();
 }
 

@@ -19,6 +19,7 @@
 #include <map>
 
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/regex.hpp>
 namespace pt = boost::property_tree;
 
 namespace compute_samples {
@@ -223,12 +224,9 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   tree.add_child("ze_mutable_command_list_exp_properties_t",
                  device_mutable_command_list_properties_to_json(
                      capabilities.mutable_command_list_properties));
-  tree.add_child("zet_metric_programmable_exp_properties_t",
-                 programmable_metrics_properties_to_json(
-                     capabilities.programmable_metrics_properties));
   tree.add_child("zet_metric_group_properties_t",
-                 tracer_metrics_properties_to_json(
-                     capabilities.tracer_metrics_properties));
+                 tracer_metrics_flags_count_to_json(
+                     capabilities.tracer_metrics_flags_count));
   tree.put("programmable_metrics_count",
            capabilities.programmable_metrics_count);
   tree.put("zes_engine_handle_t_count",
@@ -643,41 +641,18 @@ boost::property_tree::ptree device_mutable_command_list_properties_to_json(
   return tree;
 }
 
-boost::property_tree::ptree programmable_metrics_properties_to_json(
-    const std::vector<zet_metric_programmable_exp_properties_t> &properties) {
-  pt::ptree array;
-  for (const auto &p : properties) {
-    pt::ptree tree;
-    tree.put("name", p.name);
-    tree.put("description", p.description);
-    tree.put("component", p.component);
-    tree.put("tierNumber", p.tierNumber);
-    tree.put("domain", p.domain);
-    tree.put("parameterCount", p.parameterCount);
-    tree.put(
-        "samplingType",
-        flags_to_string<zet_metric_group_sampling_type_flag_t>(p.samplingType));
-    tree.put("sourceId", p.sourceId);
-    array.push_back(std::make_pair("", tree));
-  }
-  return array;
-}
-
-boost::property_tree::ptree tracer_metrics_properties_to_json(
-    const std::vector<zet_metric_group_properties_t> &properties) {
-  pt::ptree array;
-  for (const auto &p : properties) {
-    pt::ptree tree;
-    tree.put("name", p.name);
-    tree.put("description", p.description);
-    tree.put(
-        "samplingType",
-        flags_to_string<zet_metric_group_sampling_type_flag_t>(p.samplingType));
-    tree.put("domain", p.domain);
-    tree.put("metricCount", p.metricCount);
-    array.push_back(std::make_pair("", tree));
-  }
-  return array;
+boost::property_tree::ptree tracer_metrics_flags_count_to_json(
+    const std::map<zet_metric_group_sampling_type_flag_t, uint32_t>
+        &flags_count) {
+  pt::ptree tree;
+  tree.put("ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EVENT_BASED",
+           flags_count.at(ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EVENT_BASED));
+  tree.put("ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_TIME_BASED",
+           flags_count.at(ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_TIME_BASED));
+  tree.put(
+      "ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED",
+      flags_count.at(ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED));
+  return tree;
 }
 
 template <typename PROPERTIES>
@@ -786,23 +761,24 @@ std::string ptree_to_string(const pt::ptree tree) {
   }
   std::string output = ss.str();
 
-  std::regex reg;
+  boost::regex reg;
   // Boost.PropertyTree does not support empty arrays -
   // https://stackoverflow.com/a/44463046
-  reg = std::regex("\\[\n.*\"\"\n.*\\]");
-  output = std::regex_replace(output, reg, "[]");
+  reg = boost::regex("\\[\n.*\"\"\n.*\\]");
+  output =
+      boost::regex_replace(output, reg, "[]", boost::match_not_dot_newline);
 
   // Boost.PropertyTree does not support other JSON types than strings -
   // https://svn.boost.org/trac10/ticket/9721
-  reg = std::regex(R"(\"([0-9]+)\")");
-  output = std::regex_replace(output, reg, "$1");
-  reg = std::regex(R"(\"(true|false)\")");
-  output = std::regex_replace(output, reg, "$1");
+  reg = boost::regex(R"(\"([0-9]+)\")");
+  output = boost::regex_replace(output, reg, "$1");
+  reg = boost::regex(R"(\"(true|false)\")");
+  output = boost::regex_replace(output, reg, "$1");
 
   // Boost.PropertyTree adds a new line to the end of a string -
   // https://svn.boost.org/trac10/ticket/12149
-  reg = std::regex("\\\n$");
-  output = std::regex_replace(output, reg, "");
+  reg = boost::regex("\\\n$");
+  output = boost::regex_replace(output, reg, "");
 
   // Fix for indentation after calling write_json_helper
   const std::string pattern = "    ]";
