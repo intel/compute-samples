@@ -465,7 +465,8 @@ get_sysman_properties(const std::vector<HANDLES> &handles,
     if (result != ZE_RESULT_SUCCESS) {
       LOG_WARNING << type + " failed: " + to_string(result) +
                          " (get_sysman_handles template)";
-      return std::vector<PROPERTIES>(0);
+      return std::vector<PROPERTIES>(handles.size(),
+                                     {ZES_STRUCTURE_TYPE_FORCE_UINT32});
     }
   }
   LOG_DEBUG << "Device " + type +

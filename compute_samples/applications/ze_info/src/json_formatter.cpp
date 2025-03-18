@@ -684,14 +684,16 @@ template <typename PROPERTIES>
 boost::property_tree::ptree
 all_device_sysman_properties_to_json(const std::vector<PROPERTIES> &p) {
   pt::ptree tree;
-  if (p.empty()) {
+  for (const auto &properties : p) {
+    if (properties.stype == ZES_STRUCTURE_TYPE_FORCE_UINT32) {
+      continue;
+    }
+    tree.push_back(
+        std::make_pair("", device_sysman_properties_to_json(properties)));
+  }
+  if (tree.empty()) {
     pt::ptree node;
     tree.push_back(std::make_pair("", node));
-  } else {
-    for (const auto &properties : p) {
-      tree.push_back(
-          std::make_pair("", device_sysman_properties_to_json(properties)));
-    }
   }
   return tree;
 }

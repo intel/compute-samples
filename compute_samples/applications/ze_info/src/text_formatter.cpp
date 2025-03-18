@@ -544,6 +544,9 @@ all_device_sysman_properties_to_text(const std::vector<PROPERTIES> &p,
   ss << key_value_to_text("Number of " + lowercase + " properties",
                           std::to_string(p.size()), indentation_level);
   for (size_t i = 0; i < p.size(); ++i) {
+    if (p[i].stype == ZES_STRUCTURE_TYPE_FORCE_UINT32) {
+      continue;
+    }
     ss << key_value_to_text(capitalised + " properties", std::to_string(i),
                             indentation_level);
     ss << device_sysman_properties_to_text(p[i], indentation_level + 1);
