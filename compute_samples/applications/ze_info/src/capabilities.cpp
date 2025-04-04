@@ -373,16 +373,6 @@ get_mutable_command_list_exp_properties(ze_device_handle_t device) {
 
 std::map<zet_metric_group_sampling_type_flag_t, uint32_t>
 get_tracer_metrics_flags_count(ze_device_handle_t device) {
-  uint32_t count = 0;
-  auto result = zetMetricGroupGet(device, &count, nullptr);
-  throw_if_failed(result, "zetMetricGroupGet");
-  LOG_DEBUG << "Tracer metrics count retrieved";
-
-  std::vector<zet_metric_group_handle_t> metric_handles(count);
-  result = zetMetricGroupGet(device, &count, metric_handles.data());
-  throw_if_failed(result, "zetMetricGroupGet");
-  LOG_DEBUG << "Tracer metrics handles retrieved";
-
   auto flag_types = {ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EVENT_BASED,
                      ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_TIME_BASED,
                      ZET_METRIC_GROUP_SAMPLING_TYPE_FLAG_EXP_TRACER_BASED};
@@ -392,11 +382,30 @@ get_tracer_metrics_flags_count(ze_device_handle_t device) {
     flags_count[flag] = 0;
   }
 
+  uint32_t count = 0;
+  auto result = zetMetricGroupGet(device, &count, nullptr);
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << "zetMetricGroupGet failed: " + to_string(result);
+    return flags_count;
+  }
+  LOG_DEBUG << "Tracer metrics count retrieved";
+
+  std::vector<zet_metric_group_handle_t> metric_handles(count);
+  result = zetMetricGroupGet(device, &count, metric_handles.data());
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << "zetMetricGroupGet failed: " + to_string(result);
+    return flags_count;
+  }
+  LOG_DEBUG << "Tracer metrics handles retrieved";
+
   for (uint32_t i = 0; i < count; ++i) {
     zet_metric_group_properties_t properties{
         ZET_STRUCTURE_TYPE_METRIC_GROUP_PROPERTIES};
-    zetMetricGroupGetProperties(metric_handles[i], &properties);
-    throw_if_failed(result, "zetMetricGroupGetProperties");
+    result = zetMetricGroupGetProperties(metric_handles[i], &properties);
+    if (result != ZE_RESULT_SUCCESS) {
+      LOG_WARNING << "zetMetricGroupGetProperties failed: " + to_string(result);
+      return flags_count;
+    }
 
     for (auto flag : flag_types) {
       if ((properties.samplingType & flag) != 0) {
@@ -412,7 +421,10 @@ get_tracer_metrics_flags_count(ze_device_handle_t device) {
 uint32_t get_programmable_metrics_count(ze_device_handle_t device) {
   uint32_t count = 0;
   auto result = zetMetricProgrammableGetExp(device, &count, nullptr);
-  throw_if_failed(result, "zetMetricProgrammableGetExp");
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << "zetMetricProgrammableGetExp failed: " + to_string(result);
+    return 0;
+  }
   return count;
 }
 
