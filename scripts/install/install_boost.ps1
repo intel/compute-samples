@@ -6,7 +6,7 @@
 
 echo "Downloading Boost"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-wget -Uri https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.zip -OutFile boost_1_71_0.zip -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer
+wget -Uri https://archives.boost.io/release/1.71.0/source/boost_1_71_0.zip -OutFile boost_1_71_0.zip -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer
 
 echo "Extracting boost"
 . "C:\Program Files\7-Zip\7z.exe" x boost_1_71_0.zip

@@ -7,7 +7,7 @@
 #
 
 echo "Downloading Boost"
-wget https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz -O boost_1_71_0.tar.gz
+wget https://archives.boost.io/release/1.71.0/source/boost_1_71_0.tar.gz -O boost_1_71_0.tar.gz
 
 echo "Extracting Boost"
 tar xf boost_1_71_0.tar.gz
