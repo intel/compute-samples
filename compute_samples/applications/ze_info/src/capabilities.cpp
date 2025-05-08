@@ -36,12 +36,21 @@ std::vector<ze_driver_handle_t> get_drivers() {
 
   uint32_t count = 0;
   result = zeInitDrivers(&count, nullptr, &desc);
-  throw_if_failed(result, "zeInitDrivers");
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_DEBUG << "zeInitDrivers failed, trying zeInit/zeDriverGet...";
+    result = zeInit(0);
+    throw_if_failed(result, "zeInit");
+    result = zeDriverGet(&count, nullptr);
+    throw_if_failed(result, "zeDriverGet");
+  }
   LOG_DEBUG << "Driver count retrieved";
 
   std::vector<ze_driver_handle_t> drivers(count);
   result = zeInitDrivers(&count, drivers.data(), &desc);
-  throw_if_failed(result, "zeInitDrivers");
+  if (result != ZE_RESULT_SUCCESS) {
+    result = zeDriverGet(&count, drivers.data());
+    throw_if_failed(result, "zeDriverGet");
+  }
   LOG_DEBUG << "Driver handles retrieved";
 
   result = zesInit(0);
