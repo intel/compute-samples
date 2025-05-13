@@ -36,6 +36,16 @@ std::vector<ze_driver_handle_t> get_drivers() {
 
   uint32_t count = 0;
   result = zeInitDrivers(&count, nullptr, &desc);
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << "zeInitDrivers failed: " + to_string(result);
+    LOG_WARNING << "Disabling ZET_ENABLE_METRICS";
+#if defined(_WIN32) || defined(_WIN64)
+    _putenv_s("ZET_ENABLE_METRICS", "0");
+#else  // defined(_WIN32) || defined(_WIN64)
+    setenv("ZET_ENABLE_METRICS", "0", 1);
+#endif // defined(_WIN32) || defined(_WIN64)
+    result = zeInitDrivers(&count, nullptr, &desc);
+  }
   throw_if_failed(result, "zeInitDrivers");
   LOG_DEBUG << "Driver count retrieved";
 
