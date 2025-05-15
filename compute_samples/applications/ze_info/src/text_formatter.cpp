@@ -490,7 +490,7 @@ std::string device_external_memory_properties_to_text(
                           flags_to_string<ze_external_memory_type_flag_t>(
                               p.memoryAllocationImportTypes),
                           indentation_level);
-  ss << key_value_to_text("Memory allocation import types",
+  ss << key_value_to_text("Memory allocation export types",
                           flags_to_string<ze_external_memory_type_flag_t>(
                               p.memoryAllocationExportTypes),
                           indentation_level);
@@ -500,7 +500,7 @@ std::string device_external_memory_properties_to_text(
       indentation_level);
   ss << key_value_to_text(
       "Image export types",
-      flags_to_string<ze_external_memory_type_flag_t>(p.imageImportTypes),
+      flags_to_string<ze_external_memory_type_flag_t>(p.imageExportTypes),
       indentation_level);
   return ss.str();
 }

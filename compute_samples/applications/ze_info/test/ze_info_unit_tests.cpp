@@ -903,7 +903,7 @@ TEST_F(TextFormatterTests, DeviceExternalMemoryPropertiesToText) {
                               "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF | "
                               "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD",
                               indentation_level_);
-  ss << cs::key_value_to_text("Memory allocation import types",
+  ss << cs::key_value_to_text("Memory allocation export types",
                               "ZE_EXTERNAL_MEMORY_TYPE_FLAG_DMA_BUF | "
                               "ZE_EXTERNAL_MEMORY_TYPE_FLAG_OPAQUE_FD",
                               indentation_level_);
