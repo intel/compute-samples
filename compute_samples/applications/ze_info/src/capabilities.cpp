@@ -28,10 +28,8 @@ std::vector<ze_driver_handle_t> get_drivers() {
 // and enable metrics
 #if defined(_WIN32) || defined(_WIN64)
   _putenv_s("ZES_ENABLE_SYSMAN", "0");
-  _putenv_s("ZET_ENABLE_METRICS", "1");
 #else  // defined(_WIN32) || defined(_WIN64)
   setenv("ZES_ENABLE_SYSMAN", "0", 1);
-  setenv("ZET_ENABLE_METRICS", "1", 1);
 #endif // defined(_WIN32) || defined(_WIN64)
 
   uint32_t count = 0;
