@@ -73,7 +73,7 @@ public:
 private:
   boost::compute::context context_;
   T *data_ = nullptr;
-  size_t count_;
+  size_t count_ = 0;
 };
 
 template <typename T> class DeviceMemoryWrapper : public MemoryWrapper<T> {
@@ -150,7 +150,7 @@ private:
   boost::compute::context context_;
   boost::compute::device device_;
   T *data_ = nullptr;
-  size_t count_;
+  size_t count_ = 0;
 };
 
 template <typename T> class SharedMemoryWrapper : public MemoryWrapper<T> {
@@ -187,7 +187,7 @@ private:
   boost::compute::context context_;
   boost::compute::device device_;
   T *data_ = nullptr;
-  size_t count_;
+  size_t count_ = 0;
 };
 
 template <typename T> class SystemMemoryWrapper : public MemoryWrapper<T> {
@@ -217,7 +217,7 @@ public:
 
 private:
   T *data_ = nullptr;
-  size_t count_;
+  size_t count_ = 0;
 };
 
 template <typename T>
