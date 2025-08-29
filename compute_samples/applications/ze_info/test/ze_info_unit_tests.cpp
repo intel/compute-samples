@@ -234,6 +234,8 @@ zes_temp_properties_t fake_device_sysman_temperature_properties() {
 
 uint32_t fake_device_sysman_handles_count() { return 2; }
 
+ze_bool_t fake_device_sysman_bool_property() { return 1; }
+
 ze_scheduling_hint_exp_properties_t
 fake_device_kernel_schedule_hint_properties() {
   return ze_scheduling_hint_exp_properties_t{
@@ -303,12 +305,19 @@ cs::DeviceCapabilities fake_device_capabilities() {
   capabilities.sysman_temperature_properties = {
       fake_device_sysman_temperature_properties(),
       fake_device_sysman_temperature_properties()};
+  capabilities.sysman_ecc_available = fake_device_sysman_bool_property();
+  capabilities.sysman_ecc_configurable = fake_device_sysman_bool_property();
   capabilities.sysman_performance_handles_count =
       fake_device_sysman_handles_count();
   capabilities.sysman_firmware_handles_count =
       fake_device_sysman_handles_count();
   capabilities.sysman_ras_handles_count = fake_device_sysman_handles_count();
   capabilities.sysman_vf_handles_count = fake_device_sysman_handles_count();
+  capabilities.sysman_standby_handles_count =
+      fake_device_sysman_handles_count();
+  capabilities.sysman_scheduler_handles_count =
+      fake_device_sysman_handles_count();
+  capabilities.sysman_pci_bars_count = fake_device_sysman_handles_count();
   return capabilities;
 }
 
@@ -567,6 +576,8 @@ TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
   ss << cs::all_device_sysman_properties_to_text(
       capabilities.sysman_temperature_properties, "Temperature",
       indentation_level_);
+  ss << cs::key_value_to_text("Ecc available", "true", indentation_level_);
+  ss << cs::key_value_to_text("Ecc configurable", "true", indentation_level_);
   ss << cs::device_sysman_handles_count_to_text(
       capabilities.sysman_ras_handles_count, "Ras", indentation_level_);
   ss << cs::device_sysman_handles_count_to_text(
@@ -577,6 +588,12 @@ TEST_F(TextFormatterTests, DeviceCapabilitiesToText) {
   ss << cs::device_sysman_handles_count_to_text(
       capabilities.sysman_firmware_handles_count, "Firmware",
       indentation_level_);
+  ss << cs::device_sysman_handles_count_to_text(
+      capabilities.sysman_standby_handles_count, "Standby", indentation_level_);
+  ss << cs::device_sysman_handles_count_to_text(
+      capabilities.sysman_scheduler_handles_count, "Scheduler",
+      indentation_level_);
+  ss << cs::key_value_to_text("Number of pci bars", "2", indentation_level_);
   ss << cs::key_value_to_text("Number of sub-devices", "2", indentation_level_);
   ss << cs::key_value_to_text("Sub-device", "0", indentation_level_);
   ss << cs::device_capabilities_to_text(capabilities.sub_devices[0],
@@ -1740,10 +1757,15 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"subdeviceId\": 0\n"
       "                }\n"
       "            ],\n"
+      "            \"zes_ecc_available\": true,\n"
+      "            \"zes_ecc_configurable\": true,\n"
       "            \"zes_ras_handle_t_count\": 2,\n"
       "            \"zes_vf_handle_t_count\": 2,\n"
       "            \"zes_perf_handle_t_count\": 2,\n"
       "            \"zes_firmware_handle_t_count\": 2,\n"
+      "            \"zes_standby_handle_t_count\": 2,\n"
+      "            \"zes_sched_handle_t_count\": 2,\n"
+      "            \"pci_bars_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -2078,10 +2100,15 @@ TEST(JSONFormatterTests, DriverWithDevicesCapabilitiesToJSON) {
       "                    \"subdeviceId\": 0\n"
       "                }\n"
       "            ],\n"
+      "            \"zes_ecc_available\": true,\n"
+      "            \"zes_ecc_configurable\": true,\n"
       "            \"zes_ras_handle_t_count\": 2,\n"
       "            \"zes_vf_handle_t_count\": 2,\n"
       "            \"zes_perf_handle_t_count\": 2,\n"
       "            \"zes_firmware_handle_t_count\": 2,\n"
+      "            \"zes_standby_handle_t_count\": 2,\n"
+      "            \"zes_sched_handle_t_count\": 2,\n"
+      "            \"pci_bars_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        }\n"
@@ -2472,10 +2499,15 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "            \"subdeviceId\": 0\n"
       "        }\n"
       "    ],\n"
+      "    \"zes_ecc_available\": true,\n"
+      "    \"zes_ecc_configurable\": true,\n"
       "    \"zes_ras_handle_t_count\": 2,\n"
       "    \"zes_vf_handle_t_count\": 2,\n"
       "    \"zes_perf_handle_t_count\": 2,\n"
       "    \"zes_firmware_handle_t_count\": 2,\n"
+      "    \"zes_standby_handle_t_count\": 2,\n"
+      "    \"zes_sched_handle_t_count\": 2,\n"
+      "    \"pci_bars_count\": 2,\n"
       "    \"sub_devices_count\": 2,\n"
       "    \"sub_devices\": [\n"
       "        {\n"
@@ -2811,10 +2843,15 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"subdeviceId\": 0\n"
       "                }\n"
       "            ],\n"
+      "            \"zes_ecc_available\": true,\n"
+      "            \"zes_ecc_configurable\": true,\n"
       "            \"zes_ras_handle_t_count\": 2,\n"
       "            \"zes_vf_handle_t_count\": 2,\n"
       "            \"zes_perf_handle_t_count\": 2,\n"
       "            \"zes_firmware_handle_t_count\": 2,\n"
+      "            \"zes_standby_handle_t_count\": 2,\n"
+      "            \"zes_sched_handle_t_count\": 2,\n"
+      "            \"pci_bars_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        },\n"
@@ -3151,10 +3188,15 @@ TEST(JSONFormatterTests, DeviceCapabilitiesToJSON) {
       "                    \"subdeviceId\": 0\n"
       "                }\n"
       "            ],\n"
+      "            \"zes_ecc_available\": true,\n"
+      "            \"zes_ecc_configurable\": true,\n"
       "            \"zes_ras_handle_t_count\": 2,\n"
       "            \"zes_vf_handle_t_count\": 2,\n"
       "            \"zes_perf_handle_t_count\": 2,\n"
       "            \"zes_firmware_handle_t_count\": 2,\n"
+      "            \"zes_standby_handle_t_count\": 2,\n"
+      "            \"zes_sched_handle_t_count\": 2,\n"
+      "            \"pci_bars_count\": 2,\n"
       "            \"sub_devices_count\": 0,\n"
       "            \"sub_devices\": []\n"
       "        }\n"

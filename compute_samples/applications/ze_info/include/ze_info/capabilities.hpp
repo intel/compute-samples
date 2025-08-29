@@ -46,6 +46,11 @@ struct DeviceCapabilities {
   uint32_t sysman_vf_handles_count;
   uint32_t sysman_performance_handles_count;
   uint32_t sysman_firmware_handles_count;
+  uint32_t sysman_standby_handles_count;
+  uint32_t sysman_scheduler_handles_count;
+  uint32_t sysman_pci_bars_count;
+  ze_bool_t sysman_ecc_available;
+  ze_bool_t sysman_ecc_configurable;
 };
 
 struct DriverCapabilities {
@@ -138,6 +143,11 @@ std::vector<PROPERTIES>
 get_sysman_properties(const std::vector<HANDLES> &handles,
                       FN_PROPERTIES fn_properties, const std::string &type);
 
+template <typename FN_PROPERTY>
+ze_bool_t get_sysman_bool_property(ze_device_handle_t device,
+                                   FN_PROPERTY fn_property,
+                                   const std::string &type);
+
 std::vector<zes_engine_properties_t>
 get_device_sysman_engine_properties(ze_device_handle_t device);
 
@@ -166,6 +176,16 @@ uint32_t get_device_sysman_vf_handles_count(ze_device_handle_t device);
 uint32_t get_device_sysman_performance_handles_count(ze_device_handle_t device);
 
 uint32_t get_device_sysman_firmware_handles_count(ze_device_handle_t device);
+
+uint32_t get_device_sysman_standby_handles_count(ze_device_handle_t device);
+
+uint32_t get_device_sysman_scheduler_handles_count(ze_device_handle_t device);
+
+ze_bool_t get_device_ecc_available(ze_device_handle_t device);
+
+ze_bool_t get_device_ecc_configurable(ze_device_handle_t device);
+
+uint32_t get_device_pci_bars_count(ze_device_handle_t device);
 
 std::vector<DeviceCapabilities> get_device_sub_devices_capabilities(
     const std::vector<ze_device_handle_t> &sub_devices);

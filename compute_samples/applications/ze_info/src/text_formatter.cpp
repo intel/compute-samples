@@ -161,6 +161,12 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
   ss << all_device_sysman_properties_to_text(
       capabilities.sysman_temperature_properties, "Temperature",
       indentation_level);
+  ss << key_value_to_text("Ecc available",
+                          to_string(capabilities.sysman_ecc_available),
+                          indentation_level);
+  ss << key_value_to_text("Ecc configurable",
+                          to_string(capabilities.sysman_ecc_configurable),
+                          indentation_level);
   ss << device_sysman_handles_count_to_text(
       capabilities.sysman_ras_handles_count, "RAS", indentation_level);
   ss << device_sysman_handles_count_to_text(
@@ -171,6 +177,14 @@ std::string device_capabilities_to_text(const DeviceCapabilities &capabilities,
   ss << device_sysman_handles_count_to_text(
       capabilities.sysman_firmware_handles_count, "Firmware",
       indentation_level);
+  ss << device_sysman_handles_count_to_text(
+      capabilities.sysman_standby_handles_count, "Standby", indentation_level);
+  ss << device_sysman_handles_count_to_text(
+      capabilities.sysman_scheduler_handles_count, "Scheduler",
+      indentation_level);
+  ss << key_value_to_text("Number of pci bars",
+                          std::to_string(capabilities.sysman_pci_bars_count),
+                          indentation_level);
   ss << key_value_to_text("Number of sub-devices",
                           std::to_string(capabilities.sub_devices.size()),
                           indentation_level);

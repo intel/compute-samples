@@ -197,6 +197,11 @@ DeviceCapabilities get_device_capabilities(ze_device_handle_t device) {
       get_device_sysman_performance_handles_count(device);
   capabilities.sysman_firmware_handles_count =
       get_device_sysman_firmware_handles_count(device);
+  capabilities.sysman_standby_handles_count =
+      get_device_sysman_standby_handles_count(device);
+  capabilities.sysman_scheduler_handles_count =
+      get_device_sysman_scheduler_handles_count(device);
+  capabilities.sysman_pci_bars_count = get_device_pci_bars_count(device);
   return capabilities;
 }
 
@@ -485,6 +490,25 @@ get_sysman_properties(const std::vector<HANDLES> &handles,
   return properties;
 }
 
+template <typename FN_PROPERTY>
+ze_bool_t get_sysman_bool_property(ze_device_handle_t device,
+                                   FN_PROPERTY fn_property,
+                                   const std::string &type) {
+
+  zes_device_handle_t sysman_device =
+      get_sysman_device_from_core_device(device);
+  ze_bool_t property;
+  auto result = fn_property(sysman_device, &property);
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << type + " failed: " + to_string(result) +
+                       " (get_sysman_bool_property template)";
+    return 0;
+  }
+  LOG_DEBUG << "Device " + type +
+                   " property retrieved (get_sysman_bool_property template)";
+  return property;
+}
+
 std::vector<zes_engine_properties_t>
 get_device_sysman_engine_properties(ze_device_handle_t device) {
   auto handles = get_sysman_handles<zes_engine_handle_t>(
@@ -579,6 +603,40 @@ uint32_t get_device_sysman_firmware_handles_count(ze_device_handle_t device) {
       device, zesDeviceEnumFirmwares, "zesDeviceEnumFirmwares");
 
   return handles.size();
+}
+
+uint32_t get_device_sysman_standby_handles_count(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_standby_handle_t>(
+      device, zesDeviceEnumStandbyDomains, "zesDeviceEnumStandbyDomains");
+
+  return handles.size();
+}
+
+uint32_t get_device_sysman_scheduler_handles_count(ze_device_handle_t device) {
+  auto handles = get_sysman_handles<zes_sched_handle_t>(
+      device, zesDeviceEnumSchedulers, "zesDeviceEnumSchedulers");
+
+  return handles.size();
+}
+
+ze_bool_t get_device_ecc_available(ze_device_handle_t device) {
+  return get_sysman_bool_property(device, zesDeviceEccAvailable,
+                                  "zesDeviceEccAvailable");
+}
+
+ze_bool_t get_device_ecc_configurable(ze_device_handle_t device) {
+  return get_sysman_bool_property(device, zesDeviceEccConfigurable,
+                                  "zesDeviceEccConfigurable");
+}
+
+uint32_t get_device_pci_bars_count(ze_device_handle_t device) {
+  zes_device_handle_t sysman_device =
+      get_sysman_device_from_core_device(device);
+  uint32_t count = 0;
+  auto result = zesDevicePciGetBars(sysman_device, &count, nullptr);
+  throw_if_failed(result, "zesDevicePciGetBars");
+  LOG_DEBUG << "Device pci bar count retrieved";
+  return count;
 }
 
 std::vector<ze_device_handle_t>

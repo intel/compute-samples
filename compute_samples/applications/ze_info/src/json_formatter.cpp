@@ -259,6 +259,9 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
   tree.add_child("zes_temp_properties_t",
                  all_device_sysman_properties_to_json(
                      capabilities.sysman_temperature_properties));
+  tree.put("zes_ecc_available", to_string(capabilities.sysman_ecc_available));
+  tree.put("zes_ecc_configurable",
+           to_string(capabilities.sysman_ecc_configurable));
   tree.put("zes_ras_handle_t_count",
            std::to_string(capabilities.sysman_ras_handles_count));
   tree.put("zes_vf_handle_t_count",
@@ -267,6 +270,12 @@ device_capabilities_to_json(const DeviceCapabilities &capabilities) {
            std::to_string(capabilities.sysman_performance_handles_count));
   tree.put("zes_firmware_handle_t_count",
            std::to_string(capabilities.sysman_firmware_handles_count));
+  tree.put("zes_standby_handle_t_count",
+           std::to_string(capabilities.sysman_standby_handles_count));
+  tree.put("zes_sched_handle_t_count",
+           std::to_string(capabilities.sysman_scheduler_handles_count));
+  tree.put("pci_bars_count",
+           std::to_string(capabilities.sysman_pci_bars_count));
   pt::ptree sub_devices;
   tree.put("sub_devices_count",
            std::to_string(capabilities.sub_devices.size()));
