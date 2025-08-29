@@ -181,9 +181,9 @@ uint32_t get_device_sysman_standby_handles_count(ze_device_handle_t device);
 
 uint32_t get_device_sysman_scheduler_handles_count(ze_device_handle_t device);
 
-ze_bool_t get_device_ecc_available(ze_device_handle_t device);
+ze_bool_t get_device_sysman_ecc_available(ze_device_handle_t device);
 
-ze_bool_t get_device_ecc_configurable(ze_device_handle_t device);
+ze_bool_t get_device_sysman_ecc_configurable(ze_device_handle_t device);
 
 uint32_t get_device_pci_bars_count(ze_device_handle_t device);
 

@@ -189,6 +189,9 @@ DeviceCapabilities get_device_capabilities(ze_device_handle_t device) {
       get_device_sysman_frequency_properties(device);
   capabilities.sysman_temperature_properties =
       get_device_sysman_temperature_properties(device);
+  capabilities.sysman_ecc_available = get_device_sysman_ecc_available(device);
+  capabilities.sysman_ecc_configurable =
+      get_device_sysman_ecc_configurable(device);
   capabilities.sysman_ras_handles_count =
       get_device_sysman_ras_handles_count(device);
   capabilities.sysman_vf_handles_count =
@@ -619,12 +622,12 @@ uint32_t get_device_sysman_scheduler_handles_count(ze_device_handle_t device) {
   return handles.size();
 }
 
-ze_bool_t get_device_ecc_available(ze_device_handle_t device) {
+ze_bool_t get_device_sysman_ecc_available(ze_device_handle_t device) {
   return get_sysman_bool_property(device, zesDeviceEccAvailable,
                                   "zesDeviceEccAvailable");
 }
 
-ze_bool_t get_device_ecc_configurable(ze_device_handle_t device) {
+ze_bool_t get_device_sysman_ecc_configurable(ze_device_handle_t device) {
   return get_sysman_bool_property(device, zesDeviceEccConfigurable,
                                   "zesDeviceEccConfigurable");
 }
