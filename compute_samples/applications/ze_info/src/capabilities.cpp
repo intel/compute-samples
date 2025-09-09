@@ -635,9 +635,12 @@ ze_bool_t get_device_sysman_ecc_configurable(ze_device_handle_t device) {
 uint32_t get_device_pci_bars_count(ze_device_handle_t device) {
   zes_device_handle_t sysman_device =
       get_sysman_device_from_core_device(device);
-  uint32_t count = 0;
+  uint32_t count = 0u;
   auto result = zesDevicePciGetBars(sysman_device, &count, nullptr);
-  throw_if_failed(result, "zesDevicePciGetBars");
+  if (result != ZE_RESULT_SUCCESS) {
+    LOG_WARNING << "zesDevicePciGetBars failed: " + to_string(result);
+    return 0u;
+  }
   LOG_DEBUG << "Device pci bar count retrieved";
   return count;
 }
